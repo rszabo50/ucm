@@ -23,7 +23,7 @@
 
 PROGRAM_NAME = 'ucm'
 PROGRAM_TITLE = 'Urwid rendered Connection Manager'
-PROGRAM_VERSION = '0.0.8'
+PROGRAM_VERSION = '0.0.9'
 SCM_URL = 'https://github.com/rszabo50/ucm'
 
 MAIN_PALETTE = [
