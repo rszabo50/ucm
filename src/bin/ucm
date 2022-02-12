@@ -1,0 +1,191 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+#  Copyright (C) 2022 Robert Szabo.
+#
+#  This software can be used by anyone at no cost, however,
+#  if you like using my software and can support - please
+#  donate money to a children's hospital of your choice.
+#  This program is free software: you can redistribute it
+#  and/or modify it under the terms of the GNU General Public
+#  License as published by the Free Software Foundation:
+#  GNU GPLv3. You must include this entire text with your
+#  distribution.
+#  This program is distributed in the hope that it will be
+#  useful, but WITHOUT ANY WARRANTY; without even the implied
+#  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+#  PURPOSE.
+#  See the GNU General Public License for more details.
+#
+
+# Created by rszabo50 at 2022-01-28
+
+import getpass
+
+from urwid import CENTER, LEFT, RIGHT
+from urwid import Padding, LineBox, AttrWrap, Filler, RadioButton, Text, WidgetWrap, MainLoop, Frame, ExitMainLoop, Columns, raw_display, GridFlow
+
+from ucm.Dialogs import DialogDisplay, DialogButton
+from ucm.DockerWidgets import DockerListView
+from ucm.Registry import Registry
+from ucm.SshWidgets import SshListView
+from ucm.SwarmWidgets import SwarmListView
+from ucm.UserConfig import UserConfig
+from ucm.Widgets import Header, Footer, View, Clock, HelpBody
+from ucm.constants import PROGRAM_NAME, SCM_URL, PROGRAM_VERSION, MAIN_PALETTE, PROGRAM_TITLE
+
+
+class Actions(object):
+
+    @staticmethod
+    def show_or_exit(key):
+        if key in ['q', 'Q']:
+            Actions.popup_exit_dialog()
+        if key in ['?']:
+            Actions.popup_help_dialog()
+
+    @staticmethod
+    def action_button_cb(_button: any = None):
+        if _button.get_label() == "Quit":
+            Actions.popup_exit_dialog()
+        if _button.get_label() == "Help":
+            Actions.popup_help_dialog()
+
+    @staticmethod
+    def popup_exit_dialog(_button: any = None):
+        logger.error("Popping up exit dialog")
+        body = Filler(Text("Are you sure you want to exit?"))
+        d = DialogDisplay("Confirm", 50, 10, body=body,
+                          loop=Registry().main_loop,
+                          exit_cb=Actions.exit_cb,
+                          palette=MAIN_PALETTE)
+        d.add_buttons([("OK", 0), ("Cancel", 1)])
+        d.show()
+
+    @staticmethod
+    def exit_cb(button: any):
+        if button.exitcode == 0:
+            Actions.clear()
+            raise ExitMainLoop()
+
+    @staticmethod
+    def clear():
+        if Registry().get('main_loop') is not None:
+            Registry().main_loop.widget = Filler(Text(''))
+            Registry().main_loop.draw_screen()
+
+    @staticmethod
+    def popup_help_dialog(_button: any = None):
+        cols, rows = raw_display.Screen().get_cols_rows()
+        d = DialogDisplay("Help", cols - 20, rows - 6,
+                          body=HelpBody(),
+                          loop=Registry().main_loop,
+                          exit_cb=Actions.help_exit_cb,
+                          palette=MAIN_PALETTE)
+        d.add_buttons([("Cancel", 1)])
+        d.show()
+
+    @staticmethod
+    def help_exit_cb(button: any):
+        pass
+
+
+class Application(object):
+
+    def __init__(self):
+        self.header = None
+        self.footer = None
+        self.loop = None
+        self.body = None
+        self.view_holder = None
+        self.views = {}
+        self.filter_edit = None
+        self.filter_columns = None
+        self.clock = None
+
+    def build(self):
+        logger.debug("Building application ...")
+
+        self.views['SSH'] = View(SshListView())
+        if UserConfig().docker is not None:
+            self.views['Docker'] = View(DockerListView())
+        self.views['Swarm'] = View(SwarmListView())
+        self.view_holder = WidgetWrap(self.views['SSH'])
+
+        self.body = Padding(LineBox(self.view_holder), align=CENTER, left=1, right=2)
+
+        rb_group = []
+        view_columns = [
+            (7, AttrWrap(Text('View: '), 'header', 'header')),
+            (7, AttrWrap(RadioButton(rb_group, 'SSH', on_state_change=self.view_changed), 'header', 'header')),
+            (1, AttrWrap(Text(""), 'header', 'header'))]
+
+        if UserConfig().docker is not None:
+            view_columns.extend([
+                (10, AttrWrap(RadioButton(rb_group, 'Docker', on_state_change=self.view_changed), 'header', 'header')),
+                (1, AttrWrap(Text(""), 'header', 'header'))])
+
+        # view_columns.extend([
+        #     (3, AttrWrap(Text(" | "), 'header', 'header')),
+        #     (8, AttrWrap(DialogButton("Help", on_press=Actions.action_button_cb), 'reverse-hl', 'normal')),
+        #     (1, AttrWrap(Text(" | "), 'header', 'header')),
+        #     (8, AttrWrap(DialogButton("Quit", on_press=Actions.action_button_cb), 'reverse-hl', 'normal'))
+        # ])
+        # view_columns.extend([
+        #     (9, AttrWrap(RadioButton(rb_group, 'Swarm', on_state_change=self.view_changed), 'header', 'header')),
+        #     (1, AttrWrap(Text(""), 'header', 'header'))])
+
+        action_button_list = [
+            (8, AttrWrap(DialogButton("Help", on_press=Actions.action_button_cb), 'button normal', 'button select')),
+            (8, AttrWrap(DialogButton("Quit", on_press=Actions.action_button_cb), 'button normal', 'button select'))
+            ]
+        action_content = Columns(action_button_list)
+
+        self.header = Header(
+            name=f"{PROGRAM_NAME}:",
+            release=PROGRAM_VERSION,
+            left_content=Columns(view_columns),
+            right_content=Text(f"{SCM_URL}", align=RIGHT))
+
+        self.clock = Clock()
+        # connect_signal(self.filter_edit, "change", self.filter_action, user_args=[])
+        self.footer = Footer(left_content=action_content,
+                             right_content=self.clock)
+
+        Registry().main_loop = MainLoop(Frame(self.body, self.header, self.footer), palette=MAIN_PALETTE,
+                                        unhandled_input=Actions.show_or_exit)
+        return self
+
+    def start(self):
+        logger.debug(f"Starting clock ...")
+        self.clock.start()
+        logger.debug(f"Starting application loop  ...")
+        Registry().main_loop.run()
+
+    def view_changed(self, radio_button: RadioButton, state: bool):
+        if state:
+            view_key = radio_button.get_label()
+            logger.info(f'switching to view {view_key}')
+            self.view_holder._w = self.views[view_key]
+            self.view_holder._w.list_view.filters_clear()
+            Registry().main_loop.screen.clear()
+
+
+if __name__ == '__main__':
+    import logging
+
+    logging.basicConfig(filename="/tmp/ucm-{}.log".format(getpass.getuser()),
+                        filemode='w',
+                        format='%(asctime)s,%(msecs)d %(name)s {%(pathname)s:%(lineno)d} %(levelname)s %(message)s',
+                        datefmt='%H:%M:%S',
+                        level=logging.DEBUG)
+
+    logger = logging.getLogger('ucm')
+
+    logger.info("############# Program start running.")
+
+    Application().build().start()
+
+
+# vim: ts=4 sw=4 et
