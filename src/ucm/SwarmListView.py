@@ -55,7 +55,7 @@ def host_is_local(hostname, port=None):
 
 
 def build_ssh_command(host: str):
-    connections = list(filter(lambda k: k['hostname'] == host, UserConfig().ssh_connections))
+    connections = list(filter(lambda k: k['name'] == host, UserConfig().ssh_connections))
     if len(connections) == 1:
         data = connections[0]
         user_at_host = data['address'] if 'user' not in data else f"{data['user']}@{data['address']}"
@@ -105,9 +105,9 @@ class SwarmListView(ListView):
 
     def formatter(self, record: any):
 
-        display_host = record['host'] if len(record['host']) <= 50 else f'...{record["host"][-37:]}'
+        display_host = record['host'] if len(record['host']) <= 40 else f'...{record["host"][-37:]}'
         display_stack = record['stack'] if len(record['stack']) <= 20 else f'...{record["stack"][-17:]}'
-        display_container = record['container'] if len(record['container']) <= 20 else f'{record["container"][0:37]}...'
+        display_container = record['container'] if len(record['container']) <= 40 else f'{record["container"][0:37]}...'
 
         return f"{str(record['index']).ljust(3)}   {display_stack.ljust(20)}   {display_host.ljust(40)}   {display_container.ljust(40)}   {record['image']}"
 
