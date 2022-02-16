@@ -126,7 +126,7 @@ class Application(object):
                 (10, AttrWrap(RadioButton(rb_group, 'Docker', on_state_change=self.view_changed), 'header', 'header')),
                 (1, AttrWrap(Text(""), 'header', 'header'))])
 
-        if UserConfig().swarm_host is not None and UserConfig().swarm_host:
+        if UserConfig().docker is not None and UserConfig().swarm_host is not None and UserConfig().swarm_host:
             view_columns.extend([
                 (9, AttrWrap(RadioButton(rb_group, 'Swarm', on_state_change=self.view_changed), 'header', 'header')),
                 (1, AttrWrap(Text(""), 'header', 'header'))])
