@@ -25,6 +25,7 @@ import os
 import traceback
 import yaml
 import getpass
+import subprocess
 from shutil import which
 
 
@@ -47,11 +48,17 @@ class UserConfig(dict):
         self.set('config_folder', f"{Path.home()}/.ucm", overwrite=False)
         self.set('ssh_config_file', f"{Path.home()}/.ucm/ssh_connections.yml", overwrite=False)
         setattr(self, 'docker', which('docker'))
+        setattr(self, 'swarm_host', UserConfig.is_swarm_host())
         self.build_dot_ucm()
         self.load_ssh_config()
 
     def load_ssh_config(self):
         self.set('ssh_connections', UserConfig.load_yaml(self.get("ssh_config_file"), must_exist=True))
+
+    @staticmethod
+    def is_swarm_host():
+        result = subprocess.check_output(['docker', 'info', '--format', '{{.Swarm.ControlAvailable}}'], stderr=subprocess.STDOUT)
+        return result.splitlines()[0].decode("utf-8").strip().lower() == 'true'
 
     def build_dot_ucm(self):
         if not os.path.exists(self.get('config_folder')):

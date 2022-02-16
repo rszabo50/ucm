@@ -1,1 +1,2 @@
 include src/ucm/help.txt
+include src/ucm/ucm-swarmlisting.sh

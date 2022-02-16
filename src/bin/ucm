@@ -27,10 +27,10 @@ from urwid import CENTER, LEFT, RIGHT
 from urwid import Padding, LineBox, AttrWrap, Filler, RadioButton, Text, WidgetWrap, MainLoop, Frame, ExitMainLoop, Columns, raw_display, GridFlow
 
 from ucm.Dialogs import DialogDisplay, DialogButton
-from ucm.DockerWidgets import DockerListView
+from ucm.DockerListView import DockerListView
 from ucm.Registry import Registry
-from ucm.SshWidgets import SshListView
-from ucm.SwarmWidgets import SwarmListView
+from ucm.SshListView import SshListView
+from ucm.SwarmListView import SwarmListView
 from ucm.UserConfig import UserConfig
 from ucm.Widgets import Header, Footer, View, Clock, HelpBody
 from ucm.constants import PROGRAM_NAME, SCM_URL, PROGRAM_VERSION, MAIN_PALETTE, PROGRAM_TITLE
@@ -126,15 +126,10 @@ class Application(object):
                 (10, AttrWrap(RadioButton(rb_group, 'Docker', on_state_change=self.view_changed), 'header', 'header')),
                 (1, AttrWrap(Text(""), 'header', 'header'))])
 
-        # view_columns.extend([
-        #     (3, AttrWrap(Text(" | "), 'header', 'header')),
-        #     (8, AttrWrap(DialogButton("Help", on_press=Actions.action_button_cb), 'reverse-hl', 'normal')),
-        #     (1, AttrWrap(Text(" | "), 'header', 'header')),
-        #     (8, AttrWrap(DialogButton("Quit", on_press=Actions.action_button_cb), 'reverse-hl', 'normal'))
-        # ])
-        # view_columns.extend([
-        #     (9, AttrWrap(RadioButton(rb_group, 'Swarm', on_state_change=self.view_changed), 'header', 'header')),
-        #     (1, AttrWrap(Text(""), 'header', 'header'))])
+        if UserConfig().swarm_host is not None and UserConfig().swarm_host:
+            view_columns.extend([
+                (9, AttrWrap(RadioButton(rb_group, 'Swarm', on_state_change=self.view_changed), 'header', 'header')),
+                (1, AttrWrap(Text(""), 'header', 'header'))])
 
         action_button_list = [
             (8, AttrWrap(DialogButton("Help", on_press=Actions.action_button_cb), 'button normal', 'button select')),

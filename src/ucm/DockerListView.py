@@ -35,7 +35,7 @@ from ucm.constants import MAIN_PALETTE
 
 
 # noinspection PyStatementEffect
-def connect(data: any, shell: str = 'bash'):
+def docker_connect(data: any, shell: str = 'bash'):
     if Registry().get('main_loop'):
         Registry().main_loop.screen.stop()
         print(chr(27) + "[2J")
