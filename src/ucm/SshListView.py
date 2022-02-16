@@ -97,7 +97,7 @@ class SshListView(ListView):
         #     category: key to group  this buy, makes filtering easier
 
         user_at_host = data['address'] if 'user' not in data else f"{data['user']}@{data['address']}"
-        ident = f"-i {data['identity_file']}" if 'identity_file' in data else ''
+        ident = f"-i {data['identity']}" if 'identity' in data else ''
         port = f"-p {data['port']}" if 'port' in data else ''
         opts = f"{data['options']}" if 'options' in data else ''
         return f"ssh {ident} {port} {opts} {user_at_host}"

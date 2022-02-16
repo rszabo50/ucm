@@ -57,8 +57,11 @@ class UserConfig(dict):
 
     @staticmethod
     def is_swarm_host():
-        result = subprocess.check_output(['docker', 'info', '--format', '{{.Swarm.ControlAvailable}}'], stderr=subprocess.STDOUT)
-        return result.splitlines()[0].decode("utf-8").strip().lower() == 'true'
+        if which('docker') is not None:
+            result = subprocess.check_output(['docker', 'info', '--format', '{{.Swarm.ControlAvailable}}'], stderr=subprocess.STDOUT)
+            return result.splitlines()[0].decode("utf-8").strip().lower() == 'true'
+        else:
+            return False
 
     def build_dot_ucm(self):
         if not os.path.exists(self.get('config_folder')):
@@ -71,7 +74,7 @@ class UserConfig(dict):
                     "#   address: ip or dns resolvable name",
                     "#   user: username to connect with",
                     "#   port: tcp port to use: default: 22",
-                    "#   identity_file: <identity file to use if needed and its not your default key>",
+                    "#   identity: <identity file to use if needed and its not your default key>",
                     "#   options: <any other ssh options, supported by the command line",
                     "#   category: <identifier ; makes filtering easier>",
                     "# Note: Because UCM will use the address variable to connect, common options like the identity file, port etc",
