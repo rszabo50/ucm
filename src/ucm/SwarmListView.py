@@ -62,7 +62,7 @@ def build_ssh_command(host: str):
         ident = f"-i {data['identity_file']}" if 'identity_file' in data else ''
         port = f"-p {data['port']}" if 'port' in data else ''
         opts = f"{data['options']}" if 'options' in data else ''
-        return f"ssh {ident} {port} {opts} {user_at_host}"
+        return f"ssh -t {ident} {port} {opts} {user_at_host}"
 
 
 # noinspection PyStatementEffect
