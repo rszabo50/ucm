@@ -21,7 +21,8 @@
 
 # Created by rszabo50 at 2022-01-28
 
-from urwid import Frame, Button, Text, WidgetWrap, Divider, Pile, Padding, Filler, AttrWrap, LineBox, Columns, SolidFill, GridFlow, MainLoop, Overlay
+from urwid import Frame, Button, Text, WidgetWrap, Divider, Pile, Padding, Filler, AttrWrap, LineBox, Columns, \
+    SolidFill, GridFlow, MainLoop, Overlay
 from urwid import CENTER, MIDDLE
 from ucm.Registry import Registry
 
@@ -66,7 +67,7 @@ class DialogDisplay(WidgetWrap):
         height = int(height) if height > 0 else ('relative', 80)
         self.exit_cb = exit_cb
         self.buttons = []
-        self.loop=loop
+        self.loop = loop
         self.palette = palette if palette is not None else self.default_palette
 
         if body is None:

@@ -26,7 +26,8 @@ import time
 import re
 import os
 
-from urwid import AttrWrap, AttrMap, AttrSpec, Button, BoxAdapter, Columns, Divider, Edit, Filler, LineBox, ListBox, Padding, Pile, Text, WidgetWrap
+from urwid import AttrWrap, AttrMap, AttrSpec, Button, BoxAdapter, Columns, Divider, Edit, Filler, \
+    LineBox, ListBox, Padding, Pile, Text, WidgetWrap, BOX
 from urwid import connect_signal, disconnect_signal, emit_signal, register_signal
 from urwid import raw_display, SimpleFocusListWalker, SimpleListWalker
 from urwid import CENTER, LEFT, RIGHT
@@ -54,7 +55,6 @@ class IdWidget(AttrMap):
 
 
 class UCMScrollBar(ScrollBar):
-
     _thumb_char = ("light blue", "\u2588")
     _trough_char = ("dark blue", "\u2591")
     _thumb_indicator_top = ("white inverse", "\u234d")
@@ -96,10 +96,14 @@ class Header(IdWidget):
 
 class Footer(IdWidget):
 
-    def __init__(self, left_content: any = Text('', align=LEFT),
-                 right_content: any = Text('', align=RIGHT), widget_id: str = None):
+    def __init__(self,
+                 left_content: any = Text('', align=LEFT),
+                 center_content: any = Text('', align=LEFT),
+                 right_content: any = Text('', align=RIGHT),
+                 widget_id: str = None):
         super().__init__(Padding(LineBox(AttrMap(Columns([
             left_content,
+            center_content,
             right_content,
         ]), 'header')), align=CENTER, left=1, right=2), widget_id=widget_id)
 
@@ -282,7 +286,6 @@ class View(IdWidget):
 
 
 class HelpBody(IdWidget):
-
     heading_re = re.compile("^(#+)\s*(.*?)\s*$")
 
     bullet_re = re.compile("^(\s*)(\*)\s*(.*)$")
@@ -311,7 +314,8 @@ class HelpBody(IdWidget):
             if header_match:
                 try:
                     line_fmt.append(
-                        (self.palette['h'][len(header_match.group(1))], f"{header_match.group(2).replace('*','').replace('`','')}"))
+                        (self.palette['h'][len(header_match.group(1))],
+                         f"{header_match.group(2).replace('*', '').replace('`', '')}"))
                     self.w_list.append(Text(line_fmt))
                     continue
                 except IndexError as _e:
@@ -341,6 +345,5 @@ class HelpBody(IdWidget):
         with (open(f'{os.path.dirname(__file__)}/help.txt', "r")) as f:
             return f.readlines()
         return []
-
 
 # vim: ts=4 sw=4 et

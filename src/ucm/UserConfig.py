@@ -58,7 +58,8 @@ class UserConfig(dict):
     @staticmethod
     def is_swarm_host():
         if which('docker') is not None:
-            result = subprocess.check_output(['docker', 'info', '--format', '{{.Swarm.ControlAvailable}}'], stderr=subprocess.STDOUT)
+            result = subprocess.check_output(['docker', 'info', '--format', '{{.Swarm.ControlAvailable}}'],
+                                             stderr=subprocess.STDOUT)
             return result.splitlines()[0].decode("utf-8").strip().lower() == 'true'
         else:
             return False

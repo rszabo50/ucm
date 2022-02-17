@@ -37,5 +37,4 @@ class Registry(dict):
     def get(self, k):
         return getattr(self.__instance, k) if hasattr(self.__instance, k) else None
 
-
 # vim: ts=4 sw=4 et

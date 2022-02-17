@@ -53,7 +53,8 @@ def docker_connect(data: any, shell: str = 'bash'):
 
 # noinspection PyStatementEffect
 def docker_inspect(data: any):
-    proc = subprocess.Popen([f"{UserConfig().docker}", "inspect", f"{data['name']}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    proc = subprocess.Popen([f"{UserConfig().docker}", "inspect", f"{data['name']}"], stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
     return [Text(x.rstrip()) for x in proc.communicate()[0].splitlines()]
 
 

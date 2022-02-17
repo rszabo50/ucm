@@ -1,2 +1,4 @@
-PyYAML==6.0
-urwid==2.1.2
+PyYAML
+urwid
+panwid
+dataclasses

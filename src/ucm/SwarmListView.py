@@ -88,7 +88,6 @@ def swarm_connect(data: any, shell: str = 'bash'):
 
 # noinspection PyStatementEffect
 def swarm_inspect(data: any):
-
     command = f"{UserConfig().docker} inspect {data['container']}"
     if not host_is_local(data['host']):
         command = f"{build_ssh_command(data['host'])} {command}"
@@ -116,14 +115,16 @@ class SwarmListView(ListView):
         data = []
         # noinspection PyBroadException,PyPep8
         try:
-            proc = subprocess.Popen(['bash', os.path.join(os.path.dirname(__file__), 'ucm-swarmlisting.sh')], stdout=subprocess.PIPE)
+            proc = subprocess.Popen(['bash', os.path.join(os.path.dirname(__file__), 'ucm-swarmlisting.sh')],
+                                    stdout=subprocess.PIPE)
             while True:
                 line = proc.stdout.readline()
                 if not line:
                     break
                 parts = line.decode('UTF-8').split()
                 if 'CONTAINER' not in parts[0]:
-                    data.append({'stack': parts[0].strip(), 'container': parts[1].strip(), 'host': parts[2].strip(), 'image': parts[3].strip()})
+                    data.append({'stack': parts[0].strip(), 'container': parts[1].strip(), 'host': parts[2].strip(),
+                                 'image': parts[3].strip()})
         except Exception as _e:
             logging.error(traceback.format_exc())
 

@@ -24,7 +24,8 @@
 import getpass
 
 from urwid import CENTER, LEFT, RIGHT
-from urwid import Padding, LineBox, AttrWrap, Filler, RadioButton, Text, WidgetWrap, MainLoop, Frame, ExitMainLoop, Columns, raw_display, GridFlow
+from urwid import Padding, LineBox, AttrWrap, Filler, RadioButton, Text, WidgetWrap, MainLoop, \
+    Frame, ExitMainLoop, Columns, raw_display, set_encoding
 
 from ucm.Dialogs import DialogDisplay, DialogButton
 from ucm.DockerListView import DockerListView
@@ -107,6 +108,8 @@ class Application(object):
     def build(self):
         logger.debug("Building application ...")
 
+        set_encoding('utf8')
+
         self.views['SSH'] = View(SshListView())
         if UserConfig().docker is not None:
             self.views['Docker'] = View(DockerListView())
@@ -134,8 +137,8 @@ class Application(object):
         action_button_list = [
             (8, AttrWrap(DialogButton("Help", on_press=Actions.action_button_cb), 'button normal', 'button select')),
             (8, AttrWrap(DialogButton("Quit", on_press=Actions.action_button_cb), 'button normal', 'button select'))
-            ]
-        action_content = Columns(action_button_list)
+        ]
+        action_content = Columns(action_button_list, 1)
 
         self.header = Header(
             name=f"{PROGRAM_NAME}:",
@@ -181,6 +184,5 @@ if __name__ == '__main__':
     logger.info("############# Program start running.")
 
     Application().build().start()
-
 
 # vim: ts=4 sw=4 et

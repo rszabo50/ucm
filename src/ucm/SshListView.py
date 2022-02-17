@@ -65,7 +65,7 @@ class SshListView(ListView):
 
     @staticmethod
     def popup_info_dialog(data):
-        d = DialogDisplay(f"{data['name']}", 90, len(data.keys())+9,
+        d = DialogDisplay(f"{data['name']}", 90, len(data.keys()) + 9,
                           body=Pile([
                               ListBox(
                                   SimpleListWalker([Text(f'{k.ljust(25)} : {v}') for k, v in data.items()])
@@ -83,7 +83,8 @@ class SshListView(ListView):
     def get_filter_widgets(self):
         return Columns([
             super().get_filter_widgets(),
-            Columns([AttrWrap(Text("| On highlighted row: 'c' = connect, 'i' = info", align=RIGHT), 'header', 'header')])
+            Columns(
+                [AttrWrap(Text("| On highlighted row: 'c' = connect, 'i' = info", align=RIGHT), 'header', 'header')])
         ])
 
     @staticmethod
