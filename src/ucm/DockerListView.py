@@ -106,12 +106,12 @@ class DockerListView(ListView):
 
     def double_click_callback(self):
         logging.debug(f'{self.name}] {self.selected.item_data["name"]} double_click_callback')
-        connect(self.selected.item_data)
+        docker_connect(self.selected.item_data)
 
     def keypress_callback(self, size, key, data: any = None):
         logging.debug(f'ListViewHandler[{self.name}] {size} {key} pressed')
         if key == 'c':
-            connect(data, shell='bash')
+            docker_connect(data, shell='bash')
         if key == 'i':
             DockerListView.popup_info_dialog(data)
 
