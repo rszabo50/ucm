@@ -121,17 +121,17 @@ class Application(object):
         rb_group = []
         view_columns = [
             (7, AttrWrap(Text('View: '), 'header', 'header')),
-            (7, AttrWrap(RadioButton(rb_group, 'SSH', on_state_change=self.view_changed), 'header', 'header')),
+            (11, AttrWrap(RadioButton(rb_group, '🐧-SSH', on_state_change=self.view_changed), 'header', 'header')),
             (1, AttrWrap(Text(""), 'header', 'header'))]
 
         if UserConfig().docker is not None:
             view_columns.extend([
-                (10, AttrWrap(RadioButton(rb_group, 'Docker', on_state_change=self.view_changed), 'header', 'header')),
+                (14, AttrWrap(RadioButton(rb_group, '🐳-Docker', on_state_change=self.view_changed), 'header', 'header')),
                 (1, AttrWrap(Text(""), 'header', 'header'))])
 
         if UserConfig().docker is not None and UserConfig().swarm_host is not None and UserConfig().swarm_host:
             view_columns.extend([
-                (9, AttrWrap(RadioButton(rb_group, 'Swarm', on_state_change=self.view_changed), 'header', 'header')),
+                (14, AttrWrap(RadioButton(rb_group, '🐳-Swarm', on_state_change=self.view_changed), 'header', 'header')),
                 (1, AttrWrap(Text(""), 'header', 'header'))])
 
         action_button_list = [
@@ -163,7 +163,7 @@ class Application(object):
 
     def view_changed(self, radio_button: RadioButton, state: bool):
         if state:
-            view_key = radio_button.get_label()
+            view_key = radio_button.get_label().encode('ascii', 'ignore').decode().strip().replace('-','')
             logger.info(f'switching to view {view_key}')
             self.view_holder._w = self.views[view_key]
             self.view_holder._w.list_view.filters_clear()
