@@ -108,7 +108,7 @@ class SwarmListView(ListView):
         display_stack = record['stack'] if len(record['stack']) <= 20 else f'...{record["stack"][-17:]}'
         display_container = record['container'] if len(record['container']) <= 40 else f'{record["container"][0:37]}...'
 
-        return f"{str(record['index']).ljust(3)}   {display_stack.ljust(20)}   {display_host.ljust(40)}   {display_container.ljust(40)}   {record['image']}"
+        return f"{str(record['index']).rjust(4)}   {display_stack.ljust(20)}   {display_host.ljust(40)}   {display_container.ljust(40)}   {record['image']}"
 
     # noinspection PyMethodMayBeStatic
     def fetch_data(self):
@@ -159,6 +159,7 @@ class SwarmListView(ListView):
         elif key == 's':
             self.connect(list_item.item_data, shell='sh')
 
+    # noinspection PyRedeclaration
     def keypress_callback(self, size, key, data: any = None):
         logging.debug(f'ListViewHandler[{self.name}] {size} {key} pressed')
         if key == 'c':
@@ -167,6 +168,6 @@ class SwarmListView(ListView):
             SwarmListView.popup_info_dialog(data)
 
     def get_header(self):
-        return f"{'#'.ljust(3)}   {'Stack'.ljust(20)}   {'Host'.ljust(40)}   {'Container'.ljust(40)}   Image"
+        return f"{'#'.rjust(4)}   {'Stack'.ljust(20)}   {'Host'.ljust(40)}   {'Container'.ljust(40)}   Image"
 
 # vim: ts=4 sw=4 et

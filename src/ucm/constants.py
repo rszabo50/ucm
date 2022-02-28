@@ -23,11 +23,12 @@
 
 PROGRAM_NAME = 'ucm'
 PROGRAM_TITLE = 'Urwid rendered Connection Manager'
-PROGRAM_VERSION = '0.0.20'
+PROGRAM_VERSION = '0.0.22'
 SCM_URL = 'https://github.com/rszabo50/ucm'
 
 MAIN_PALETTE = [
     ('header', 'dark cyan', 'default', "default", "dark cyan", "default"),
+    ('table header', 'black', 'dark gray'),
     ("normal", "dark cyan", "default"),
     ("highlighted", "light green", "default"),
     ("reverse-hl", "default", "dark cyan"),

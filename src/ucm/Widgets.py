@@ -27,7 +27,7 @@ import re
 import os
 
 from urwid import AttrWrap, AttrMap, AttrSpec, Button, BoxAdapter, Columns, Divider, Edit, Filler, \
-    LineBox, ListBox, Padding, Pile, Text, WidgetWrap, BOX
+    LineBox, Padding, Pile, Text, WidgetWrap
 from urwid import connect_signal, disconnect_signal, emit_signal, register_signal
 from urwid import raw_display, SimpleFocusListWalker, SimpleListWalker
 from urwid import CENTER, LEFT, RIGHT
@@ -111,7 +111,7 @@ class Footer(IdWidget):
 class ListItem(IdWidget):
 
     def __init__(self, item_data: any, index: int = 0, formatter: any = None,
-                 unselected: str = 'normal', selected: str = 'highlighted', keypress_callback: any = None,
+                 unselected: str = 'normal', selected: str = 'dark red', keypress_callback: any = None,
                  widget_id: str = None):
         self.item_data = item_data
         self.item_data['index'] = index
@@ -153,7 +153,7 @@ class ListViewListBox(IdWidget):
         logging.info(f"{event} {button} {size} {focus}")
         if event == 'mouse release':
             now = time.time()
-            if self.last_time_clicked and (now - self.last_time_clicked < 0.5):
+            if self.last_time_clicked and (now - self.last_time_clicked < 0.3):
                 logging.info(f"Triggering mouse double click event")
                 if self.double_click_callback is not None:
                     self.double_click_callback()
@@ -162,6 +162,7 @@ class ListViewListBox(IdWidget):
             return super().mouse_event(size, event, button, col, row, focus)
 
 
+# noinspection PyRedeclaration
 class ListView(IdWidget):
 
     def __init__(self, name: str, filter_fields: list = None, widget_id: str = None):
@@ -272,7 +273,7 @@ class View(IdWidget):
         list_rows = (terminal_rows - 11)  # header:3 + footer: 3 + border:2 + tableHeader: 1 + filter: 2 = 11
 
         if type(list_view.get_header()) == str:
-            list_view.header_text_w = AttrWrap(Text(list_view.get_header()), 'header', 'header')
+            list_view.header_text_w = AttrMap(Text(list_view.get_header()), attr_map='table header', focus_map='table header')
         else:
             list_view.header_text_w = list_view.get_header()
 
@@ -341,9 +342,12 @@ class HelpBody(IdWidget):
                              with_scrollbar=UCMScrollBar)
         ]), widget_id=widget_id)
 
+    # noinspection PyMethodMayBeStatic,PyBroadException
     def load(self):
-        with (open(f'{os.path.dirname(__file__)}/help.txt', "r")) as f:
-            return f.readlines()
-        return []
+        try:
+            with (open(f'{os.path.dirname(__file__)}/help.txt', "r")) as f:
+                return f.readlines()
+        except:
+            return []
 
 # vim: ts=4 sw=4 et

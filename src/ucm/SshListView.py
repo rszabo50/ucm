@@ -46,7 +46,7 @@ class SshListView(ListView):
         display_category = record['category'] if len(record['category']) <= 20 else f'...{record["category"][-20:]}'
         connection = record['address'] if 'user' not in record else f"{record['user']}@{record['address']}"
 
-        return f"{str(record['index']).ljust(3)}   {display_category.ljust(20)}   {display_host.ljust(50)}   {connection}"
+        return f"{str(record['index']).rjust(4)}   {display_category.ljust(20)}   {display_host.ljust(50)}   {connection}"
 
     @staticmethod
     def fetch_data():
@@ -118,6 +118,6 @@ class SshListView(ListView):
             Registry().main_loop.screen.clear()
 
     def get_header(self):
-        return f"{'#'.ljust(3)}   {'Category'.ljust(20)}   {'Hostname'.ljust(50)}   Connection"
+        return f"{'#'.rjust(4)}   {'Category'.ljust(20)}   {'Hostname'.ljust(50)}   Connection"
 
 # vim: ts=4 sw=4 et

@@ -23,7 +23,7 @@
 
 import getpass
 
-from urwid import CENTER, LEFT, RIGHT
+from urwid import CENTER, RIGHT
 from urwid import Padding, LineBox, AttrWrap, Filler, RadioButton, Text, WidgetWrap, MainLoop, \
     Frame, ExitMainLoop, Columns, raw_display, set_encoding
 
@@ -34,7 +34,7 @@ from ucm.SshListView import SshListView
 from ucm.SwarmListView import SwarmListView
 from ucm.UserConfig import UserConfig
 from ucm.Widgets import Header, Footer, View, Clock, HelpBody
-from ucm.constants import PROGRAM_NAME, SCM_URL, PROGRAM_VERSION, MAIN_PALETTE, PROGRAM_TITLE
+from ucm.constants import PROGRAM_NAME, SCM_URL, PROGRAM_VERSION, MAIN_PALETTE
 
 
 class Actions(object):
@@ -108,7 +108,7 @@ class Application(object):
     def build(self):
         logger.debug("Building application ...")
 
-        set_encoding('utf8')
+        set_encoding("UTF-8")
 
         self.views['SSH'] = View(SshListView())
         if UserConfig().docker is not None:

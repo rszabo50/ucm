@@ -21,16 +21,18 @@
 
 # Created by rszabo50 at 2022-02-01
 
-import subprocess
-import traceback
-import os
-import time
 import logging
+import os
+import subprocess
+import time
+import traceback
+
 from urwid import Columns, AttrWrap, Text, RIGHT, raw_display, Pile, ListBox, SimpleListWalker
-from ucm.Widgets import ListView, ListItem
+
+from ucm.Dialogs import DialogDisplay
 from ucm.Registry import Registry
 from ucm.UserConfig import UserConfig
-from ucm.Dialogs import DialogDisplay
+from ucm.Widgets import ListView
 from ucm.constants import MAIN_PALETTE
 
 
@@ -64,7 +66,7 @@ class DockerListView(ListView):
         super().__init__('Docker', filter_fields=['containerId', 'name', 'image'])
 
     def formatter(self, record: any):
-        return f"{str(record['index']).ljust(3)} {record['containerId'].ljust(15)} {record['name'].ljust(20)} {record['image']}"
+        return f"{str(record['index']).rjust(4)} {record['containerId'].ljust(15)} {record['name'].ljust(20)} {record['image']}"
 
     # noinspection PyMethodMayBeStatic
     def fetch_data(self):
@@ -89,7 +91,7 @@ class DockerListView(ListView):
     @staticmethod
     def popup_info_dialog(data):
         cols, rows = raw_display.Screen().get_cols_rows()
-        d = DialogDisplay(f"Container Inpsection: {data['name']}", cols - 20, rows - 6,
+        d = DialogDisplay(f"Container Inspection: {data['name']}", cols - 20, rows - 6,
                           body=Pile([
                               ListBox(
                                   SimpleListWalker(docker_inspect(data))
@@ -122,6 +124,6 @@ class DockerListView(ListView):
         ])
 
     def get_header(self):
-        return f"{'#'.ljust(3)} {'ContainerId'.ljust(15)} {'Name'.ljust(20)} Image"
+        return f"{'#'.rjust(4)} {'ContainerId'.ljust(15)} {'Name'.ljust(20)} Image"
 
 # vim: ts=4 sw=4 et

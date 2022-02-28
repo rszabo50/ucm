@@ -24,9 +24,6 @@
 from urwid import Frame, Button, Text, WidgetWrap, Divider, Pile, Padding, Filler, AttrWrap, LineBox, Columns, \
     SolidFill, GridFlow, MainLoop, Overlay
 from urwid import CENTER, MIDDLE
-from ucm.Registry import Registry
-
-import time
 
 
 class DialogButton(Button):
