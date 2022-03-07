@@ -21,7 +21,7 @@
 
 # Created by rszabo50 at 2022-01-28
 
-from urwid import Frame, Button, Text, WidgetWrap, Divider, Pile, Padding, Filler, AttrWrap, LineBox, Columns, \
+from urwid import Frame, Button, Text, WidgetWrap, Divider, Pile, Padding, Filler, AttrMap, LineBox, Columns, \
     SolidFill, GridFlow, MainLoop, Overlay
 from urwid import CENTER, MIDDLE
 
@@ -82,22 +82,22 @@ class DialogDisplay(WidgetWrap):
         # pad area around listbox
         w = Padding(w, ('fixed left', 2), ('fixed right', 2))
         w = Filler(w, ('fixed top', 1), ('fixed bottom', 1))
-        w = AttrWrap(w, 'body')
+        w = AttrMap(w, 'body')
 
         w = LineBox(w)
 
         # "shadow" effect
-        w = Columns([w, ('fixed', 1, AttrWrap(
+        w = Columns([w, ('fixed', 1, AttrMap(
             Filler(Text(('border', ' ')), "top")
             , 'shadow'))])
 
-        w = Frame(w, footer=AttrWrap(Text(('border', ' ')), 'shadow'))
+        w = Frame(w, footer=AttrMap(Text(('border', ' ')), 'shadow'))
         if self.loop is None:
             # this dialog is the main window
             # create outermost border area
             w = Padding(w, CENTER, width)
             w = Filler(w, MIDDLE, height)
-            w = AttrWrap(w, 'border')
+            w = AttrMap(w, 'border')
         else:
             # this dialog is a child window
             # overlay it over the parent window
@@ -111,13 +111,17 @@ class DialogDisplay(WidgetWrap):
 
     def add_buttons(self, buttons):
         button_list = []
+        l = 0
         for name, exitcode in buttons:
-            b = DialogButton(name, self.button_press)
+            l = max(l, len(name)) + 2
+
+        for name, exitcode in buttons:
+            b = DialogButton(name.center(l), self.button_press)
             b.exitcode = exitcode
-            b = AttrWrap(b, 'button normal', 'button select')
+            b = AttrMap(b, 'button normal', 'button select')
             button_list.append(b)
-        self.buttons = GridFlow(button_list, 10, 3, 1, CENTER)
-        self.frame.footer = Pile([Divider(u'\u2500'), self.buttons], focus_item=1)
+        self.buttons = GridFlow(button_list, l+4, 3, 1, CENTER)
+        self.frame.footer = Pile([self.buttons], focus_item=0)
 
     def button_press(self, button):
         if self.parent is not None:

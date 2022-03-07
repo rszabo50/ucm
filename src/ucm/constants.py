@@ -28,7 +28,7 @@ SCM_URL = 'https://github.com/rszabo50/ucm'
 
 MAIN_PALETTE = [
     ('header', 'dark cyan', 'default', "default", "dark cyan", "default"),
-    ('table header', 'black', 'dark gray'),
+    ('table header', 'white', 'dark cyan'),
     ("normal", "dark cyan", "default"),
     ("highlighted", "light green", "default"),
     ("reverse-hl", "default", "dark cyan"),
@@ -54,7 +54,7 @@ MAIN_PALETTE = [
     ('selectable', 'default', 'dark cyan'),
     ('focus', 'default', 'dark cyan', 'bold'),
     ('focustext', 'light gray', 'dark blue'),
-    ('button normal', 'light gray', 'dark blue', 'standout'),
+    ('button normal', 'white', 'dark blue', 'standout'),
     ('button select', 'white', 'dark green')
 ]
 
