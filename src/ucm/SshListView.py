@@ -62,6 +62,7 @@ class SshListView(ListView):
             self.connect(data)
         if key == 'i':
             SshListView.popup_info_dialog(data)
+        super().keypress_callback(size, key, data)
 
     @staticmethod
     def popup_info_dialog(data):

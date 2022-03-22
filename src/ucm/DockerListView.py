@@ -116,6 +116,7 @@ class DockerListView(ListView):
             docker_connect(data, shell='bash')
         if key == 'i':
             DockerListView.popup_info_dialog(data)
+        super().keypress_callback(size, key, data)
 
     def get_filter_widgets(self):
         return Columns([

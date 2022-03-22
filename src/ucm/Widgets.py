@@ -26,14 +26,14 @@ import time
 import re
 import os
 
-from urwid import AttrWrap, AttrMap, AttrSpec, Button, BoxAdapter, Columns, Divider, Edit, Filler, \
+from urwid import AttrWrap, AttrMap, AttrSpec, Button, BoxAdapter, Columns, Divider, Filler, \
     LineBox, Padding, Pile, Text, WidgetWrap
 from urwid import connect_signal, disconnect_signal, emit_signal, register_signal
 from urwid import raw_display, SimpleFocusListWalker, SimpleListWalker
 from urwid import CENTER, LEFT, RIGHT
 from panwid.listbox import ScrollingListBox
 from panwid.scroll import ScrollBar
-
+from ucm.TabGroup import TabGroupEdit, TabGroupNode
 from ucm.Registry import Registry
 
 
@@ -50,7 +50,7 @@ class IdWidget(AttrMap):
                     if not hasattr(Registry(), widget_id):
                         break
                     counter += 1
-            logging.info(f"Registering widget with id={widget_id}")
+            logging.debug(f"Registering widget with id={widget_id}")
             setattr(Registry(), widget_id, self)
 
 
@@ -132,9 +132,13 @@ class ListItem(IdWidget):
         return True
 
     def keypress(self, size, key):
-        logging.info(f"{key} key pressed")
+        logging.debug(f"{key} key pressed")
+        if key in ['j', 'down']:
+            return 'down'
+        if key in ['k', 'up']:
+            return 'up'
         if self.keypress_callback:
-            self.keypress_callback(size, key, data=self.item_data)
+            return self.keypress_callback(size, key, data=self.item_data)
         return key
 
 
@@ -150,11 +154,11 @@ class ListViewListBox(IdWidget):
         return self
 
     def mouse_event(self, size, event, button, col, row, focus):
-        logging.info(f"{event} {button} {size} {focus}")
+        logging.debug(f"{event} {button} {size} {focus}")
         if event == 'mouse release':
             now = time.time()
             if self.last_time_clicked and (now - self.last_time_clicked < 0.3):
-                logging.info(f"Triggering mouse double click event")
+                logging.debug(f"Triggering mouse double click event")
                 if self.double_click_callback is not None:
                     self.double_click_callback()
             self.last_time_clicked = now
@@ -163,7 +167,7 @@ class ListViewListBox(IdWidget):
 
 
 # noinspection PyRedeclaration
-class ListView(IdWidget):
+class ListView(IdWidget, TabGroupNode):
 
     def __init__(self, name: str, filter_fields: list = None, widget_id: str = None):
         self.name = name
@@ -171,6 +175,7 @@ class ListView(IdWidget):
         self.column_length = []
         self.filter_edit = None
         self.filter_columns = None
+        self.view = None
         self.filter_fields = [] if filter_fields is None else filter_fields
         register_signal(self.__class__, ['record_selected'])
         self.walker = SimpleFocusListWalker([])
@@ -185,7 +190,7 @@ class ListView(IdWidget):
             emit_signal(self, 'record_selected', list_item)
 
     def record_selected(self, list_item: ListItem):
-        logging.info(f"Record selected : {list_item} {list_item.item_data}")
+        logging.debug(f"Record selected : {list_item} {list_item.item_data}")
         self.selected = list_item
         self.selected_callback(list_item)
 
@@ -233,7 +238,12 @@ class ListView(IdWidget):
         self._set_data(self.filter_data(filter_string))
 
     def keypress_callback(self, size, key, item_data: any = None):
-        logging.debug(f'ListViewHandler[{self.name}] {key} pressed')
+        logging.debug(f'********************** keypress_callback[{self.name}] {key} pressed')
+        if key == 'tab':
+            logging.debug("Tab hit attempting to move focus to filter_columns")
+            if self.view is not None:
+                self.view.pile.set_focus(self.view.filter_pile_pos)
+                self.filter_columns.set_focus(1)
 
     def _evaluate(self, filter_string: str, record: dict):
         for key in self.filter_fields:
@@ -252,7 +262,7 @@ class ListView(IdWidget):
         self.filter_columns.set_focus(1)
 
     def get_filter_widgets(self):
-        self.filter_edit = Edit(align=LEFT)
+        self.filter_edit = TabGroupEdit(align=LEFT)
         connect_signal(self.filter_edit, "change", self.filter_action, user_args=[])
 
         self.filter_columns = Columns([
@@ -263,7 +273,7 @@ class ListView(IdWidget):
     def filter_action(self, _edit_widget, text_input):
         # noinspection PyProtectedMember
         self.filter_and_set(text_input)
-        self.filter_columns.set_focus(1)
+        # self.filter_columns.set_focus(1) ## this needs to be disabled for tab group support
 
 
 class View(IdWidget):
@@ -277,13 +287,15 @@ class View(IdWidget):
         else:
             list_view.header_text_w = list_view.get_header()
 
-        master_pile = Pile([
+        self.pile = Pile([
             list_view.header_text_w,
             BoxAdapter(self.list_view, list_rows),
             Divider(u'\u2500'),
             self.list_view.get_filter_widgets(),
         ])
-        super().__init__(Filler(master_pile, 'top'), widget_id=widget_id)
+        self.filter_pile_pos = 3
+        self.list_view.view = self
+        super().__init__(Filler(self.pile, 'top'), widget_id=widget_id)
 
 
 class HelpBody(IdWidget):

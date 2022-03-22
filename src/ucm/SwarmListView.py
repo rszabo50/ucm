@@ -153,19 +153,21 @@ class SwarmListView(ListView):
         pass
 
     def keypress_callback(self, size, key, list_item: ListItem = None):
-        logging.debug(f'ListViewHandler[{self.name}] {size} {key} pressed')
+        logging.debug(f'a ListViewHandler[{self.name}] {size} {key} pressed')
         if key in ['c', 'b']:
             self.connect(list_item.item_data)
         elif key == 's':
             self.connect(list_item.item_data, shell='sh')
+        super().keypress_callback(size, key, list_item)
 
     # noinspection PyRedeclaration
     def keypress_callback(self, size, key, data: any = None):
-        logging.debug(f'ListViewHandler[{self.name}] {size} {key} pressed')
+        logging.debug(f'b ListViewHandler[{self.name}] {size} {key} pressed')
         if key == 'c':
             swarm_connect(data, shell='bash')
         if key == 'i':
             SwarmListView.popup_info_dialog(data)
+        super().keypress_callback(size, key, data)
 
     def get_header(self):
         return f"{'#'.rjust(4)}   {'Stack'.ljust(20)}   {'Host'.ljust(40)}   {'Container'.ljust(40)}   Image"

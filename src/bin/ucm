@@ -27,11 +27,12 @@ from urwid import CENTER, RIGHT
 from urwid import Padding, LineBox, AttrWrap, Filler, RadioButton, Text, WidgetWrap, MainLoop, \
     Frame, ExitMainLoop, Columns, raw_display, set_encoding
 
-from ucm.Dialogs import DialogDisplay, DialogButton
+from ucm.Dialogs import DialogDisplay
 from ucm.DockerListView import DockerListView
 from ucm.Registry import Registry
 from ucm.SshListView import SshListView
 from ucm.SwarmListView import SwarmListView
+from ucm.TabGroup import TabGroupRadioButton, TabGroupButton, TabGroupManager
 from ucm.UserConfig import UserConfig
 from ucm.Widgets import Header, Footer, View, Clock, HelpBody
 from ucm.constants import PROGRAM_NAME, SCM_URL, PROGRAM_VERSION, MAIN_PALETTE
@@ -102,8 +103,12 @@ class Application(object):
         self.view_holder = None
         self.views = {}
         self.filter_edit = None
+        view_columns = None
         self.filter_columns = None
         self.clock = None
+        self.rb_group = []
+        self.frame = None
+        self.tab_group_manager = TabGroupManager()
 
     def build(self):
         logger.debug("Building application ...")
@@ -118,32 +123,38 @@ class Application(object):
 
         self.body = Padding(LineBox(self.view_holder), align=CENTER, left=1, right=2)
 
-        rb_group = []
-        view_columns = [
+        view_column_array = [
             (7, AttrWrap(Text('View: '), 'header', 'header')),
-            (11, AttrWrap(RadioButton(rb_group, '🐧-SSH', on_state_change=self.view_changed), 'header', 'header')),
-            (1, AttrWrap(Text(""), 'header', 'header'))]
+            (11, AttrWrap(TabGroupRadioButton(self.rb_group, '🐧-SSH', on_state_change=self.view_changed), 'header', 'header'))
+            # ,(1, AttrWrap(Text(""), 'header', 'header'))
+        ]
 
         if UserConfig().docker is not None:
-            view_columns.extend([
-                (14, AttrWrap(RadioButton(rb_group, '🐳-Docker', on_state_change=self.view_changed), 'header', 'header')),
-                (1, AttrWrap(Text(""), 'header', 'header'))])
+            view_column_array.extend([
+                (14, AttrWrap(TabGroupRadioButton(self.rb_group, '🐳-Docker', on_state_change=self.view_changed), 'header', 'header'))
+                # ,(1, AttrWrap(Text(""), 'header', 'header'))
+            ])
 
         if UserConfig().docker is not None and UserConfig().swarm_host is not None and UserConfig().swarm_host:
-            view_columns.extend([
-                (14, AttrWrap(RadioButton(rb_group, '🐳-Swarm', on_state_change=self.view_changed), 'header', 'header')),
-                (1, AttrWrap(Text(""), 'header', 'header'))])
+            view_column_array.extend([
+                (14, AttrWrap(TabGroupRadioButton(self.rb_group, '🐳-Swarm', on_state_change=self.view_changed), 'header', 'header'))
+                # ,(1, AttrWrap(Text(""), 'header', 'header'))
+            ])
 
         action_button_list = [
-            (8, AttrWrap(DialogButton("Help", on_press=Actions.action_button_cb), 'button normal', 'button select')),
-            (8, AttrWrap(DialogButton("Quit", on_press=Actions.action_button_cb), 'button normal', 'button select'))
+            (8, AttrWrap(TabGroupButton("Help", on_press=Actions.action_button_cb), 'button normal', 'button select')),
+            (8, AttrWrap(TabGroupButton("Quit", on_press=Actions.action_button_cb), 'button normal', 'button select'))
         ]
+
+        view_columns = Columns(view_column_array, 1)
+
+
         action_content = Columns(action_button_list, 1)
 
         self.header = Header(
             name=f"{PROGRAM_NAME}:",
             release=PROGRAM_VERSION,
-            left_content=Columns(view_columns),
+            left_content=view_columns,
             right_content=Text(f"{SCM_URL}", align=RIGHT))
 
         self.clock = Clock()
@@ -151,7 +162,14 @@ class Application(object):
         self.footer = Footer(left_content=action_content,
                              right_content=self.clock)
 
-        Registry().main_loop = MainLoop(Frame(self.body, self.header, self.footer), palette=MAIN_PALETTE,
+        self.frame = Frame(self.body, self.header, self.footer)
+
+        self.tab_group_manager.add('view_select', self.frame, 'header', view_columns)
+        self.tab_group_manager.add('list', self.frame, 'body', self.views['SSH'].list_view, pile=self.views['SSH'].pile, pile_pos=1)
+        self.tab_group_manager.add('filters_select', self.frame, 'body', self.views['SSH'].list_view.filter_columns)
+        self.tab_group_manager.add('action_buttons', self.frame, 'footer', action_content)
+
+        Registry().main_loop = MainLoop(self.frame, palette=MAIN_PALETTE,
                                         unhandled_input=Actions.show_or_exit)
         return self
 
@@ -163,10 +181,11 @@ class Application(object):
 
     def view_changed(self, radio_button: RadioButton, state: bool):
         if state:
-            view_key = radio_button.get_label().encode('ascii', 'ignore').decode().strip().replace('-','')
+            view_key = radio_button.get_label().encode('ascii', 'ignore').decode().strip().replace('-', '')
             logger.info(f'switching to view {view_key}')
             self.view_holder._w = self.views[view_key]
             self.view_holder._w.list_view.filters_clear()
+            self.tab_group_manager.add('filters_select', self.frame, 'body', self.views[view_key].list_view.filter_columns)
             Registry().main_loop.screen.clear()
 
 
@@ -177,7 +196,7 @@ if __name__ == '__main__':
                         filemode='w',
                         format='%(asctime)s,%(msecs)d %(name)s {%(pathname)s:%(lineno)d} %(levelname)s %(message)s',
                         datefmt='%H:%M:%S',
-                        level=logging.DEBUG)
+                        level=logging.INFO)
 
     logger = logging.getLogger('ucm')
 

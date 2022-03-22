@@ -111,16 +111,16 @@ class DialogDisplay(WidgetWrap):
 
     def add_buttons(self, buttons):
         button_list = []
-        l = 0
+        label_w = 0
         for name, exitcode in buttons:
-            l = max(l, len(name)) + 2
+            label_w = max(label_w, len(name)) + 2
 
         for name, exitcode in buttons:
-            b = DialogButton(name.center(l), self.button_press)
+            b = DialogButton(name.center(label_w), self.button_press)
             b.exitcode = exitcode
             b = AttrMap(b, 'button normal', 'button select')
             button_list.append(b)
-        self.buttons = GridFlow(button_list, l+4, 3, 1, CENTER)
+        self.buttons = GridFlow(button_list, label_w+4, 3, 1, CENTER)
         self.frame.footer = Pile([self.buttons], focus_item=0)
 
     def button_press(self, button):
