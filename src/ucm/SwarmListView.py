@@ -104,11 +104,11 @@ class SwarmListView(ListView):
 
     def formatter(self, record: any):
 
-        display_host = record['host'] if len(record['host']) <= 40 else f'...{record["host"][-37:]}'
+        display_host = record['host'] if len(record['host']) <= 60 else f'...{record["host"][-57:]}'
         display_stack = record['stack'] if len(record['stack']) <= 20 else f'...{record["stack"][-17:]}'
         display_container = record['container'] if len(record['container']) <= 40 else f'{record["container"][0:37]}...'
 
-        return f"{str(record['index']).rjust(4)}   {display_stack.ljust(20)}   {display_host.ljust(40)}   {display_container.ljust(40)}   {record['image']}"
+        return f"{str(record['index']).rjust(4)}   {display_stack.ljust(20)}   {display_host.ljust(60)}   {display_container.ljust(40)}   {record['image']}"
 
     # noinspection PyMethodMayBeStatic
     def fetch_data(self):
@@ -170,6 +170,6 @@ class SwarmListView(ListView):
         super().keypress_callback(size, key, data)
 
     def get_header(self):
-        return f"{'#'.rjust(4)}   {'Stack'.ljust(20)}   {'Host'.ljust(40)}   {'Container'.ljust(40)}   Image"
+        return f"{'#'.rjust(4)}   {'Stack'.ljust(20)}   {'Host'.ljust(60)}   {'Container'.ljust(40)}   Image"
 
 # vim: ts=4 sw=4 et
