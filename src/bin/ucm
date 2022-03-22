@@ -185,6 +185,8 @@ class Application(object):
             logger.info(f'switching to view {view_key}')
             self.view_holder._w = self.views[view_key]
             self.view_holder._w.list_view.filters_clear()
+
+            self.tab_group_manager.add('list', self.frame, 'body', self.views[view_key].list_view, pile=self.views[view_key].pile, pile_pos=1)
             self.tab_group_manager.add('filters_select', self.frame, 'body', self.views[view_key].list_view.filter_columns)
             Registry().main_loop.screen.clear()
 
