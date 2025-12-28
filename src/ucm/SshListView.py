@@ -27,6 +27,7 @@ from typing import Any, Dict, List, Optional
 
 from urwid import RIGHT, AttrWrap, Columns, ListBox, Pile, SimpleListWalker, Text
 
+from ucm.connection_manager import get_connection_manager
 from ucm.constants import MAIN_PALETTE
 from ucm.Dialogs import DialogDisplay
 from ucm.Registry import Registry
@@ -37,18 +38,21 @@ from ucm.Widgets import ListView
 class SshListView(ListView):
     def __init__(self) -> None:
         super().__init__("SSH", filter_fields=["category", "name", "user", "address"])
+        self.conn_manager = get_connection_manager()
 
     def formatter(self, record: Dict[str, Any]) -> str:
         if "category" not in record:
             record["category"] = "---"
 
-        display_host = record["name"] if len(record["name"]) <= 60 else f"...{record['name'][-57:]}"
+        # Check if this is a favorite
+        is_fav = self.conn_manager.is_favorite(record)
+        fav_marker = "★" if is_fav else " "
+
+        display_host = record["name"] if len(record["name"]) <= 58 else f"...{record['name'][-55:]}"
         display_category = record["category"] if len(record["category"]) <= 20 else f"...{record['category'][-20:]}"
         connection = record["address"] if "user" not in record else f"{record['user']}@{record['address']}"
 
-        return (
-            f"{str(record['index']).rjust(4)}   {display_category.ljust(20)}   {display_host.ljust(60)}   {connection}"
-        )
+        return f"{fav_marker} {str(record['index']).rjust(4)}   {display_category.ljust(20)}   {display_host.ljust(58)}   {connection}"
 
     @staticmethod
     def fetch_data() -> Optional[List[Dict[str, Any]]]:
@@ -62,8 +66,16 @@ class SshListView(ListView):
         logging.debug(f"ListViewHandler[{self.name}] {size} {key} pressed")
         if key == "c":
             self.connect(data)
-        if key == "i":
+        elif key == "i":
             SshListView.popup_info_dialog(data)
+        elif key == "f":
+            # Toggle favorite status
+            if data:
+                is_fav = self.conn_manager.toggle_favorite(data)
+                status = "added to" if is_fav else "removed from"
+                logging.info(f"{data.get('name', 'Connection')} {status} favorites")
+                # Refresh the list to update the star indicator
+                self.filter_and_set(self.filter_edit.edit_text if hasattr(self, "filter_edit") else "")
         super().keypress_callback(size, key, data)
 
     @staticmethod
@@ -89,7 +101,13 @@ class SshListView(ListView):
             [
                 super().get_filter_widgets(),
                 Columns(
-                    [AttrWrap(Text("| On highlighted row: 'c' = connect, 'i' = info", align=RIGHT), "header", "header")]
+                    [
+                        AttrWrap(
+                            Text("| 'c' = connect, 'i' = info, 'f' = toggle favorite ★", align=RIGHT),
+                            "header",
+                            "header",
+                        )
+                    ]
                 ),
             ]
         )
@@ -124,6 +142,9 @@ class SshListView(ListView):
             logging.error(f"Missing 'address' field in connection data: {data}")
             return
 
+        # Record this connection in history
+        self.conn_manager.record_connection(data)
+
         main_loop = Registry().get("main_loop")
         if main_loop:
             try:
@@ -145,7 +166,7 @@ class SshListView(ListView):
                 main_loop.screen.clear()
 
     def get_header(self) -> str:
-        return f"{'#'.rjust(4)}   {'Category'.ljust(20)}   {'Hostname'.ljust(60)}   Connection"
+        return f"  {'#'.rjust(4)}   {'Category'.ljust(20)}   {'Hostname'.ljust(58)}   Connection"
 
 
 # vim: ts=4 sw=4 et

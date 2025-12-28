@@ -34,6 +34,9 @@ Switch views using the radio buttons in the header or Tab + arrow keys.
 
 #### SSH View
 * `Enter` - Connect to selected SSH host
+* `c` - Connect to selected SSH host
+* `f` - Toggle favorite status (marked with ★)
+* `i` - Show connection info
 * `Double-click` - Quick connect (mouse)
 
 #### Docker View
@@ -94,6 +97,27 @@ Edit `~/.ucm/ssh_connections.yml` to add SSH connections.
   options: -X
   category: production
 ```
+
+## Connection History and Favorites
+
+UCM automatically tracks your connection usage and allows marking favorites.
+
+### History Tracking
+* All connections are recorded with timestamps and use counts
+* History is limited to the last 100 connections
+* Most frequently used connections are tracked
+* View stats and history in `~/.ucm/history.yml`
+
+### Favorites
+* Press `f` to toggle favorite status on any SSH connection
+* Favorites are marked with a ★ symbol in the list
+* Favorites persist across sessions
+* Stored in `~/.ucm/favorites.yml`
+
+### Benefits
+* Quickly identify your most-used connections
+* Mark important servers as favorites for easy identification
+* Track connection patterns and usage
 
 ## Docker Integration
 
