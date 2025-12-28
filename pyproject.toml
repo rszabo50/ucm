@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=64.0", "setuptools_scm>=8.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -53,8 +53,11 @@ package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[tool.setuptools.dynamic]
-version = {attr = "ucm.constants.PROGRAM_VERSION"}
+[tool.setuptools_scm]
+# Automatically derive version from git tags
+# Tags should be in format: v0.1.2 or 0.1.2
+version_scheme = "python-simplified-semver"
+local_scheme = "no-local-version"
 
 [project.optional-dependencies]
 dev = [

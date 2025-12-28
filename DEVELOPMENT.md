@@ -222,6 +222,114 @@ make check-all         # Run all checks manually
 make pre-commit-run    # Run pre-commit on all files
 ```
 
+## Version Management
+
+UCM uses **setuptools_scm** for automatic version management from git tags. You never need to manually edit version numbers!
+
+### How It Works
+
+The version is automatically derived from your git tags:
+
+- **Tagged release**: `v0.1.2` → version is `0.1.2`
+- **Development version**: After changes since last tag → `0.1.3.dev0` (automatically increments)
+- **No tags**: Falls back to `0.0.0.dev0`
+
+### Creating a New Release
+
+**1. Commit all your changes:**
+```bash
+git add .
+git commit -m "Your changes"
+```
+
+**2. Create a git tag:**
+```bash
+# For version 0.2.0
+git tag -a v0.2.0 -m "Version 0.2.0 - Feature description"
+```
+
+**3. Reinstall to pick up the new version:**
+```bash
+pip3 install -e .
+```
+
+**4. Verify the version:**
+```bash
+ucm --version        # Should show: ucm 0.2.0
+python3 -c "from ucm.constants import PROGRAM_VERSION; print(PROGRAM_VERSION)"
+```
+
+**5. Push the tag to GitHub:**
+```bash
+git push origin v0.2.0
+```
+
+### Version Naming Convention
+
+Use semantic versioning: `vMAJOR.MINOR.PATCH`
+
+- **MAJOR**: Breaking changes (v2.0.0)
+- **MINOR**: New features, backwards compatible (v0.2.0)
+- **PATCH**: Bug fixes (v0.1.3)
+
+Examples:
+```bash
+git tag -a v0.1.3 -m "Version 0.1.3 - Bug fixes"
+git tag -a v0.2.0 -m "Version 0.2.0 - New Docker features"
+git tag -a v1.0.0 -m "Version 1.0.0 - First stable release"
+```
+
+### Development Versions
+
+When you have uncommitted changes or commits after a tag, setuptools_scm automatically creates a development version:
+
+```bash
+# Latest tag: v0.1.2
+# You make changes and commit
+# Version becomes: 0.1.3.dev0
+
+ucm --version  # Shows: ucm 0.1.3.dev0
+```
+
+This helps identify development builds vs. official releases.
+
+### GitHub Integration
+
+On GitHub, tags automatically create releases:
+
+1. Push your tag: `git push origin v0.2.0`
+2. Go to GitHub → Releases → You'll see v0.2.0
+3. Edit the release to add release notes
+
+### Checking Current Version
+
+```bash
+# From command line
+ucm --version
+
+# From Python code
+python3 -c "from ucm.constants import PROGRAM_VERSION; print(PROGRAM_VERSION)"
+
+# From git
+git describe --tags  # Shows: v0.1.2 or v0.1.2-1-g1a2b3c4
+```
+
+### Troubleshooting
+
+**Version shows 0.0.0.dev0:**
+- You don't have any git tags yet
+- Create one: `git tag -a v0.1.0 -m "Initial version"`
+- Reinstall: `pip3 install -e .`
+
+**Version not updating:**
+- Reinstall the package: `pip3 install -e .`
+- Check git tags exist: `git tag -l`
+
+**Want to see what version will be assigned:**
+```bash
+python3 -m setuptools_scm
+```
+
 ## Troubleshooting
 
 ### Import Errors

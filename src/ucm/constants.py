@@ -20,10 +20,18 @@
 
 # Created by rszabo50 at 2022-01-28
 
+from importlib.metadata import PackageNotFoundError, version
+
 PROGRAM_NAME = "ucm"
 PROGRAM_TITLE = "Urwid rendered Connection Manager"
-PROGRAM_VERSION = "0.1.2"
 SCM_URL = "https://github.com/rszabo50/ucm"
+
+# Get version from package metadata (set by setuptools_scm from git tags)
+try:
+    PROGRAM_VERSION = version("ucm")
+except PackageNotFoundError:
+    # Package not installed, likely running from source without git tags
+    PROGRAM_VERSION = "0.0.0.dev0"
 
 MAIN_PALETTE = [
     ("header", "dark cyan", "default", "default", "dark cyan", "default"),
