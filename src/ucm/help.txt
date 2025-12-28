@@ -1,85 +1,199 @@
-# **U**rwid rendered **C**onnection **M**anager (**ucm**)
+# UCM - Urwid Connection Manager
 
+## Quick Start
+
+UCM provides a terminal-based interface for managing SSH connections and Docker containers.
+
+### Views
+
+* **SSH View** - Manage and connect to SSH hosts
+* **Docker View** - Access running Docker containers
+* **Swarm View** - Docker Swarm services (if configured)
+
+Switch views using the radio buttons in the header or Tab + arrow keys.
+
+## Keyboard Shortcuts
+
+### Global Shortcuts (All Views)
+
+* `q` - Quit UCM
+* `?` - Show this help dialog
+* `Tab` - Cycle between UI elements
+* `Esc` - Close dialogs
+
+### Navigation
+
+* `↑` or `k` - Move up one row
+* `↓` or `j` - Move down one row
+* `Page Up` - Scroll up one page
+* `Page Down` - Scroll down one page
+* `Home` - Jump to first item
+* `End` - Jump to last item
+
+### Actions
+
+#### SSH View
+* `Enter` - Connect to selected SSH host
+* `Double-click` - Quick connect (mouse)
+
+#### Docker View
+* `Enter` - Connect to container
+* `c` - Connect to selected container
+* `i` - Inspect container details
+* `Double-click` - Quick connect (mouse)
+
+#### Docker Swarm View
+* `c` or `b` - Connect with bash
+* `s` - Connect with sh
+* `i` - Inspect service/container
+
+### Filtering
+
+* Type text in filter box to search connections
+* Filter works on: name, address, user, category (SSH)
+* Filter works on: container ID, name, image (Docker)
+* `Backspace` - Remove filter characters
+* `Ctrl+U` - Clear entire filter
+
+## Mouse Controls
+
+* **Click** - Select a connection/container
+* **Double-click** - Connect immediately
+* **Click buttons** - Activate buttons (Help, Quit)
+* **Click radio buttons** - Switch between views
+* **Scroll wheel** - Scroll through lists
+
+## SSH Configuration
+
+Edit `~/.ucm/ssh_connections.yml` to add SSH connections.
+
+### Required Fields
+* `name` - Unique identifier
+* `address` - Hostname or IP address
+
+### Optional Fields
+* `user` - SSH username (default: current user)
+* `port` - SSH port (default: 22)
+* `identity` - Path to SSH key file
+* `options` - Additional SSH options
+* `category` - Grouping label
+
+### Example Configuration
+
+```yaml
+# Minimal connection
+- name: webserver
+  address: web.example.com
+
+# Full configuration
+- name: production-db
+  address: db.example.com
+  user: admin
+  port: 2222
+  identity: ~/.ssh/prod-key.pem
+  options: -X
+  category: production
+```
+
+## Docker Integration
+
+UCM automatically detects running Docker containers.
+
+### Requirements
+* Docker installed and running
+* User has permission to run `docker ps`
+
+### Container Actions
+* `c` - Connect with bash/sh
+* `i` - View container details
+* `Enter` - Quick connect
+
+UCM tries `bash` first, then falls back to `sh` if bash isn't available.
+
+## Tips and Tricks
+
+### Faster Navigation
+* Use `j`/`k` (Vim-style) instead of arrow keys
+* Filter to narrow down the list quickly
+* Use `Tab` to move between UI sections
+
+### Efficient Filtering
+* Type partial names: "web" finds "webserver1", "webserver2"
+* Use categories to group connections
+* Clear filter with `Ctrl+U`
+
+### SSH Config Integration
+* UCM respects `~/.ssh/config` settings
+* Set common options there to avoid repetition
+* Identity files, ports, and options can be configured globally
+
+### Command-Line Options
+
+```bash
+# Show version
+ucm --version
+
+# Use custom config directory
+ucm --config-dir ~/my-configs
+
+# Enable debug logging
+ucm --log-level DEBUG
+
+# Custom log file
+ucm --log-file ~/ucm.log
+```
+
+## Common Workflows
+
+### Quick Connect
+1. Launch UCM
+2. Type filter to find host
+3. Press Enter when filtered to one result
+
+### Container Access
+1. Switch to Docker view (click or Tab)
+2. Find container (filter if needed)
+3. Press `c` or `Enter` to connect
+
+### Multiple Environments
+* Use `--config-dir` for separate configs
+* Create aliases: `alias ucm-prod='ucm --config-dir ~/.ucm-prod'`
+
+## Troubleshooting
+
+### Configuration Errors
+* Check error message on startup
+* Verify required fields (name, address)
+* Validate port range (1-65535)
+
+### Connection Issues
+* Test SSH manually: `ssh user@host`
+* Check SSH key permissions: `chmod 600 ~/.ssh/key.pem`
+* Enable debug logging: `ucm --log-level DEBUG`
+
+### Docker Not Showing
+* Verify Docker is running: `docker ps`
+* Check user permissions: add user to docker group
+* Ensure Docker is in PATH
+
+## Documentation
+
+* **Full User Guide**: See USER_GUIDE.md in repository
+* **Development**: See DEVELOPMENT.md for contributing
+* **Issues**: https://github.com/rszabo50/ucm/issues
+
+## License
 
 Released under GNU GPLv3.
 
-https://www.gnu.org/licenses/gpl-3.0.en.html
+If you find UCM useful, please donate to your local charities!
 
-This software can be used by anyone at no cost, however, if you like using this software and can support
+## About
 
-- please donate to any of your local charities (childrens hospitals, food banks, shelters, spca,  etc).
+UCM is inspired by nccm (NCurses ssh Connection Manager) but built with urwid for enhanced mouse support and modern terminal UI.
 
-This program is free software: you can redistribute it and/or modify it under the terms of the
-GNU General Public License as published by the Free Software Foundation: GNU GPLv3.
-You must include this entire text with your distribution.
+**Repository**: https://github.com/rszabo50/ucm
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the GNU General Public License for more details.
+---
 
-## About ucm
-
-ucm is modeled after nccm (NCurses ssh Connection Manager), but built using urwid which provides a similar interface with
-added mouse support. see: https://github.com/flyingrhinonz/nccm for details.
-
-### UCM provides:
-
-* a simple TUI for managing and connecting to ssh endpoints
-* a simple TUI for attaching to Docker Containers that are present on your system
-
-### UCM intended users
-
-* You have dozens or more of hosts to manage via ssh.
-* Your ssh requirements (identities, ports, users etc) differ from host to host, and you want to simplify things
-* You want a simple interfaces to get console access to your docker containers
-* You want View all your hosts/containers at once and filter easily so that you know who to connect to.
-* Have a need to use command line, don't have a GUI, or simply prefer to work more efficiently?
-
-## UCM Configuration
-
-Personal configurations are stored in ~/.ucm where
-
-config.yml:  is used to information about common runtime items:
-    logfile - location of the log file
-    loglevel - log level can be one of: debug, info, warning, error, critical
-
-ssh_connnections.yml - used to provide a list of all your managed connections
-
-```
-    # Each ssh connection is defined as:
-    # - name: hostname or identifier
-    #   address: ip or dns resolvable name
-    #   user: username to connect with
-    #   port: tcp port to use: default: 22
-    #   identity_file: identity file to use if needed and its not your default key
-    #   options: any other ssh options#
-    #   category: identifier
-    #
-    # Note: Because UCM will use the address variable to connect, common options like the identity file, port etc
-    #       can be done via your ~/.ssh/config e.g.
-    #         Host: 192.168.0.*
-    #             GSSAPIAuthentication no
-    #             StrictHostKeyChecking no
-    #             UserKnownHostsFile /dev/null
-    #             IdentityFile  ~/.ssh/MyIdentifyFile.pem
-
-- name: test
-  address: 192.168.0.4
-  user: root
-  port: 22
-  options: -X
-
-```
-
-## UCM UI Controls
-
-The UI controls are quite simple, The main interactions can all be done via the mouse.
-
-* Clicking on buttons, RadioButtons etc all work as you would expect via the mouse
-* Clicking on a list will mark the row selected, and double clicking will trigger the connect action.
-
-
-If your not using the mouse to control things:
-
-* page-up, page-down will move up/down a page in the list views, and the help screen
-* up/down arrows will scroll up/down one row at a time in the list views, and the help screen
+Press `Esc` or click `Cancel` to close this help dialog
