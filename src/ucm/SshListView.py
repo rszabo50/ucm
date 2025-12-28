@@ -42,8 +42,8 @@ class SshListView(ListView):
         if "category" not in record:
             record["category"] = "---"
 
-        display_host = record["name"] if len(record["name"]) <= 60 else f'...{record["name"][-57:]}'
-        display_category = record["category"] if len(record["category"]) <= 20 else f'...{record["category"][-20:]}'
+        display_host = record["name"] if len(record["name"]) <= 60 else f"...{record['name'][-57:]}"
+        display_category = record["category"] if len(record["category"]) <= 20 else f"...{record['category'][-20:]}"
         connection = record["address"] if "user" not in record else f"{record['user']}@{record['address']}"
 
         return (
@@ -55,7 +55,7 @@ class SshListView(ListView):
         return UserConfig().get("ssh_connections")
 
     def double_click_callback(self) -> None:
-        logging.debug(f'{self.name}] {self.selected.item_data["name"]} double_click_callback')
+        logging.debug(f"{self.name}] {self.selected.item_data['name']} double_click_callback")
         self.connect(self.selected.item_data)
 
     def keypress_callback(self, size, key, data: Optional[Dict[str, Any]] = None) -> None:
