@@ -399,7 +399,7 @@ class HelpBody(IdWidget):
                     logging.error(f"{header_match.group(2)}")
                     pass
             elif bullet_match:
-                line_fmt.append((self.palette["bullet"], "\u25c6 %s" % (bullet_match.group(3))))
+                line_fmt.append((self.palette["bullet"], f"\u25c6 {bullet_match.group(3)}"))
                 self.w_list.append(Text(line_fmt))
                 continue
 
@@ -407,7 +407,7 @@ class HelpBody(IdWidget):
                 line_fmt.append((self.palette["normal"], line.rstrip()))
             else:
                 for token in line.split("```"):
-                    if "```%s```" % token in line:
+                    if f"```{token}```" in line:
                         line_fmt.append((self.palette["bold"], token))
                     elif len(token) > 0:
                         line_fmt.append((self.palette["normal"], token))
