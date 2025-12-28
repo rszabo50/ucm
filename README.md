@@ -1,5 +1,10 @@
 # **U**rwid rendered **C**onnection **M**anager (**ucm**)
 
+[![CI](https://github.com/rszabo50/ucm/actions/workflows/ci.yml/badge.svg)](https://github.com/rszabo50/ucm/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/rszabo50/ucm/branch/main/graph/badge.svg)](https://codecov.io/gh/rszabo50/ucm)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
 Released under GNU GPLv3.
 
