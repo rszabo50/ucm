@@ -24,17 +24,18 @@ import logging
 import os
 import socket
 import subprocess
-import traceback
 import time
+import traceback
 from shlex import split
 from typing import Any
 
-from urwid import Text, raw_display, Pile, ListBox, SimpleListWalker
-from ucm.Widgets import ListView, ListItem
+from urwid import ListBox, Pile, SimpleListWalker, Text, raw_display
+
+from ucm.constants import MAIN_PALETTE
+from ucm.Dialogs import DialogDisplay
 from ucm.Registry import Registry
 from ucm.UserConfig import UserConfig
-from ucm.Dialogs import DialogDisplay
-from ucm.constants import MAIN_PALETTE
+from ucm.Widgets import ListView
 
 
 def host_is_local(hostname, port=None):
@@ -47,31 +48,31 @@ def host_is_local(hostname, port=None):
     localhost = socket.gethostname()
     localaddrs = socket.getaddrinfo(localhost, port)
     targetaddrs = socket.getaddrinfo(hostname, port)
-    for (family, socktype, proto, canonname, sockaddr) in localaddrs:
-        for (rfamily, rsocktype, rproto, rcanonname, rsockaddr) in targetaddrs:
+    for family, socktype, proto, canonname, sockaddr in localaddrs:
+        for rfamily, rsocktype, rproto, rcanonname, rsockaddr in targetaddrs:
             if rsockaddr[0] == sockaddr[0]:
                 return True
     return False
 
 
 def build_ssh_command(host: str):
-    connections = list(filter(lambda k: k['name'] == host, UserConfig().ssh_connections))
+    connections = list(filter(lambda k: k["name"] == host, UserConfig().ssh_connections))
     if len(connections) == 1:
         data = connections[0]
-        user_at_host = data['address'] if 'user' not in data else f"{data['user']}@{data['address']}"
-        ident = f"-i {data['identity']}" if 'identity' in data else ''
-        port = f"-p {data['port']}" if 'port' in data else ''
-        opts = f"{data['options']}" if 'options' in data else ''
+        user_at_host = data["address"] if "user" not in data else f"{data['user']}@{data['address']}"
+        ident = f"-i {data['identity']}" if "identity" in data else ""
+        port = f"-p {data['port']}" if "port" in data else ""
+        opts = f"{data['options']}" if "options" in data else ""
         return f"ssh -t {ident} {port} {opts} {user_at_host}"
 
 
 # noinspection PyStatementEffect
-def swarm_connect(data: Any, shell: str = 'bash'):
+def swarm_connect(data: Any, shell: str = "bash"):
     command = f"docker exec -it  {data['container']} {shell}"
-    if not host_is_local(data['host']):
+    if not host_is_local(data["host"]):
         command = f"{build_ssh_command(data['host'])} {command}"
 
-    if Registry().get('main_loop'):
+    if Registry().get("main_loop"):
         Registry().main_loop.screen.stop()
         print(chr(27) + "[2J")
         print(command)
@@ -89,7 +90,7 @@ def swarm_connect(data: Any, shell: str = 'bash'):
 # noinspection PyStatementEffect
 def swarm_inspect(data: Any):
     command = f"{UserConfig().docker} inspect {data['container']}"
-    if not host_is_local(data['host']):
+    if not host_is_local(data["host"]):
         command = f"{build_ssh_command(data['host'])} {command}"
 
     proc = subprocess.Popen(split(command), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -98,15 +99,13 @@ def swarm_inspect(data: Any):
 
 # noinspection PyStatementEffect
 class SwarmListView(ListView):
-
     def __init__(self):
-        super().__init__('Swarm', filter_fields=['stack', 'host', 'container'])
+        super().__init__("Swarm", filter_fields=["stack", "host", "container"])
 
     def formatter(self, record: Any):
-
-        display_host = record['host'] if len(record['host']) <= 60 else f'...{record["host"][-57:]}'
-        display_stack = record['stack'] if len(record['stack']) <= 20 else f'...{record["stack"][-17:]}'
-        display_container = record['container'] if len(record['container']) <= 40 else f'{record["container"][0:37]}...'
+        display_host = record["host"] if len(record["host"]) <= 60 else f'...{record["host"][-57:]}'
+        display_stack = record["stack"] if len(record["stack"]) <= 20 else f'...{record["stack"][-17:]}'
+        display_container = record["container"] if len(record["container"]) <= 40 else f'{record["container"][0:37]}...'
 
         return f"{str(record['index']).rjust(4)}   {display_stack.ljust(20)}   {display_host.ljust(60)}   {display_container.ljust(40)}   {record['image']}"
 
@@ -115,16 +114,23 @@ class SwarmListView(ListView):
         data = []
         # noinspection PyBroadException,PyPep8
         try:
-            proc = subprocess.Popen(['bash', os.path.join(os.path.dirname(__file__), 'ucm-swarmlisting.sh')],
-                                    stdout=subprocess.PIPE)
+            proc = subprocess.Popen(
+                ["bash", os.path.join(os.path.dirname(__file__), "ucm-swarmlisting.sh")], stdout=subprocess.PIPE
+            )
             while True:
                 line = proc.stdout.readline()
                 if not line:
                     break
-                parts = line.decode('UTF-8').split()
-                if 'CONTAINER' not in parts[0]:
-                    data.append({'stack': parts[0].strip(), 'container': parts[1].strip(), 'host': parts[2].strip(),
-                                 'image': parts[3].strip()})
+                parts = line.decode("UTF-8").split()
+                if "CONTAINER" not in parts[0]:
+                    data.append(
+                        {
+                            "stack": parts[0].strip(),
+                            "container": parts[1].strip(),
+                            "host": parts[2].strip(),
+                            "image": parts[3].strip(),
+                        }
+                    )
         except Exception as _e:
             logging.error(traceback.format_exc())
 
@@ -137,14 +143,15 @@ class SwarmListView(ListView):
     @staticmethod
     def popup_info_dialog(data):
         cols, rows = raw_display.Screen().get_cols_rows()
-        d = DialogDisplay(f"Container Inpsection: {data['name']}", cols - 20, rows - 6,
-                          body=Pile([
-                              ListBox(
-                                  SimpleListWalker(swarm_inspect(data))
-                              )]),
-                          loop=Registry().main_loop,
-                          exit_cb=SwarmListView.close_cb,
-                          palette=MAIN_PALETTE)
+        d = DialogDisplay(
+            f"Container Inpsection: {data['name']}",
+            cols - 20,
+            rows - 6,
+            body=Pile([ListBox(SimpleListWalker(swarm_inspect(data)))]),
+            loop=Registry().main_loop,
+            exit_cb=SwarmListView.close_cb,
+            palette=MAIN_PALETTE,
+        )
         d.add_buttons([("Cancel", 1)])
         d.show()
 
@@ -152,24 +159,18 @@ class SwarmListView(ListView):
     def close_cb(button: Any):
         pass
 
-    def keypress_callback(self, size, key, list_item: ListItem = None):
-        logging.debug(f'a ListViewHandler[{self.name}] {size} {key} pressed')
-        if key in ['c', 'b']:
-            self.connect(list_item.item_data)
-        elif key == 's':
-            self.connect(list_item.item_data, shell='sh')
-        super().keypress_callback(size, key, list_item)
-
-    # noinspection PyRedeclaration
     def keypress_callback(self, size, key, data: Any = None):
-        logging.debug(f'b ListViewHandler[{self.name}] {size} {key} pressed')
-        if key == 'c':
-            swarm_connect(data, shell='bash')
-        if key == 'i':
+        logging.debug(f"ListViewHandler[{self.name}] {size} {key} pressed")
+        if key in ["c", "b"]:
+            swarm_connect(data, shell="bash")
+        elif key == "s":
+            swarm_connect(data, shell="sh")
+        elif key == "i":
             SwarmListView.popup_info_dialog(data)
         super().keypress_callback(size, key, data)
 
     def get_header(self):
         return f"{'#'.rjust(4)}   {'Stack'.ljust(20)}   {'Host'.ljust(60)}   {'Container'.ljust(40)}   Image"
+
 
 # vim: ts=4 sw=4 et

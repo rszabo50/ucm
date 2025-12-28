@@ -5,16 +5,16 @@ Released under GNU GPLv3.
 
 https://www.gnu.org/licenses/gpl-3.0.en.html
 
-This software can be used by anyone at no cost, however, if you like using this software and can support 
+This software can be used by anyone at no cost, however, if you like using this software and can support
 
 - please donate to any of your local charities (childrens hospitals, food banks, shelters, spca,  etc).
 
-This program is free software: you can redistribute it and/or modify it under the terms of the 
-GNU General Public License as published by the Free Software Foundation: GNU GPLv3. 
+This program is free software: you can redistribute it and/or modify it under the terms of the
+GNU General Public License as published by the Free Software Foundation: GNU GPLv3.
 You must include this entire text with your distribution.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even 
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License for more details.
 
 ## About ucm
@@ -30,14 +30,14 @@ added mouse support. see: https://github.com/flyingrhinonz/nccm for details.
 ### UCM intended users
 
 * You have dozens or more of hosts to manage via ssh.
-* Your ssh requirements (identities, ports, users etc) differ from host to host, and you want to simplify things 
+* Your ssh requirements (identities, ports, users etc) differ from host to host, and you want to simplify things
 * You want a simple interfaces to get console access to your docker containers
 * You want View all your hosts/containers at once and filter easily so that you know who to connect to.
 * Have a need to use command line, don't have a GUI, or simply prefer to work more efficiently?
 
 ## UCM Configuration
 
-Personal configurations are stored in ~/.ucm where 
+Personal configurations are stored in ~/.ucm where
 
 config.yml:  is used to information about common runtime items:
     logfile - location of the log file
@@ -52,8 +52,8 @@ ssh_connnections.yml - used to provide a list of all your managed connections
     #   user: username to connect with
     #   port: tcp port to use: default: 22
     #   identity_file: identity file to use if needed and its not your default key
-    #   options: any other ssh options#   
-    #   category: identifier    
+    #   options: any other ssh options#
+    #   category: identifier
     #
     # Note: Because UCM will use the address variable to connect, common options like the identity file, port etc
     #       can be done via your ~/.ssh/config e.g.
@@ -73,7 +73,7 @@ ssh_connnections.yml - used to provide a list of all your managed connections
 
 ## UCM UI Controls
 
-The UI controls are quite simple, The main interactions can all be done via the mouse. 
+The UI controls are quite simple, The main interactions can all be done via the mouse.
 
 * Clicking on buttons, RadioButtons etc all work as you would expect via the mouse
 * Clicking on a list will mark the row selected, and double clicking will trigger the connect action.

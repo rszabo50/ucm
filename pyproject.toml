@@ -36,8 +36,8 @@ classifiers = [
 ]
 dependencies = [
     "PyYAML>=6.0.3",
-    "urwid",
-    "panwid",
+    "urwid>=2.1.0,<4.0.0",
+    "panwid>=0.3.5",
 ]
 
 [project.urls]
@@ -55,3 +55,74 @@ where = ["src"]
 
 [tool.setuptools.dynamic]
 version = {attr = "ucm.constants.PROGRAM_VERSION"}
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "mypy>=1.0",
+    "ruff>=0.1.0",
+    "pre-commit>=3.0",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "C4",  # flake8-comprehensions
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "E722",  # bare except (legacy code)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # unused imports
+"tests/*" = ["SIM117"]    # multiple with statements
+"src/ucm/*.py" = ["N999"]  # module naming (intentional PascalCase)
+"src/bin/ucm" = ["F841"]   # unused variable in legacy code
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = false
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
+no_implicit_optional = false
+warn_redundant_casts = false
+warn_unused_ignores = false
+warn_no_return = false
+strict_equality = false
+# Legacy codebase - focus on catching critical errors only
+ignore_errors = false
+allow_untyped_calls = true
+allow_untyped_defs = true
+allow_incomplete_defs = true
+
+[[tool.mypy.overrides]]
+module = ["urwid.*", "panwid.*", "yaml.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["ucm.*"]
+# Be lenient with legacy code
+disable_error_code = ["override", "attr-defined", "name-defined", "union-attr", "arg-type", "call-arg", "assignment", "var-annotated"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+]

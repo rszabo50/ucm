@@ -18,32 +18,53 @@
 #  See the GNU General Public License for more details.
 #
 
+import argparse
 import getpass
 import logging
-
-from urwid import CENTER, RIGHT
-from urwid import Padding, LineBox, AttrWrap, Filler, RadioButton, Text, WidgetWrap, MainLoop, \
-    Frame, ExitMainLoop, Columns, raw_display, set_encoding
+import sys
+import warnings
+from pathlib import Path
 from typing import Any
 
+from urwid import (
+    CENTER,
+    RIGHT,
+    AttrWrap,
+    Columns,
+    ExitMainLoop,
+    Filler,
+    Frame,
+    LineBox,
+    MainLoop,
+    Padding,
+    RadioButton,
+    Text,
+    WidgetWrap,
+    raw_display,
+    set_encoding,
+)
+
+from ucm.constants import MAIN_PALETTE, PROGRAM_NAME, PROGRAM_VERSION, SCM_URL
 from ucm.Dialogs import DialogDisplay
 from ucm.DockerListView import DockerListView
 from ucm.Registry import Registry
 from ucm.SshListView import SshListView
 from ucm.SwarmListView import SwarmListView
-from ucm.TabGroup import TabGroupRadioButton, TabGroupButton, TabGroupManager
+from ucm.TabGroup import TabGroupButton, TabGroupManager, TabGroupRadioButton
 from ucm.UserConfig import UserConfig
-from ucm.Widgets import Header, Footer, View, Clock, HelpBody
-from ucm.constants import PROGRAM_NAME, SCM_URL, PROGRAM_VERSION, MAIN_PALETTE
+from ucm.Widgets import Clock, Footer, Header, HelpBody, View
+
+# Suppress panwid deprecation warnings with urwid 3.x
+# See: https://github.com/tonycpsu/panwid/issues
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="panwid")
 
 
 class Actions:
-
     @staticmethod
     def show_or_exit(key):
-        if key in ['q', 'Q']:
+        if key in ["q", "Q"]:
             Actions.popup_exit_dialog()
-        if key in ['?']:
+        if key in ["?"]:
             Actions.popup_help_dialog()
 
     @staticmethod
@@ -57,10 +78,9 @@ class Actions:
     def popup_exit_dialog(_button: Any = None):
         logger.error("Popping up exit dialog")
         body = Filler(Text("Are you sure you want to exit?"))
-        d = DialogDisplay("Confirm", 50, 10, body=body,
-                          loop=Registry().main_loop,
-                          exit_cb=Actions.exit_cb,
-                          palette=MAIN_PALETTE)
+        d = DialogDisplay(
+            "Confirm", 50, 10, body=body, loop=Registry().main_loop, exit_cb=Actions.exit_cb, palette=MAIN_PALETTE
+        )
         d.add_buttons([("OK", 0), ("Cancel", 1)])
         d.show()
 
@@ -72,18 +92,22 @@ class Actions:
 
     @staticmethod
     def clear():
-        if Registry().get('main_loop') is not None:
-            Registry().main_loop.widget = Filler(Text(''))
+        if Registry().get("main_loop") is not None:
+            Registry().main_loop.widget = Filler(Text(""))
             Registry().main_loop.draw_screen()
 
     @staticmethod
     def popup_help_dialog(_button: Any = None):
         cols, rows = raw_display.Screen().get_cols_rows()
-        d = DialogDisplay("Help", cols - 20, rows - 6,
-                          body=HelpBody(),
-                          loop=Registry().main_loop,
-                          exit_cb=Actions.help_exit_cb,
-                          palette=MAIN_PALETTE)
+        d = DialogDisplay(
+            "Help",
+            cols - 20,
+            rows - 6,
+            body=HelpBody(),
+            loop=Registry().main_loop,
+            exit_cb=Actions.help_exit_cb,
+            palette=MAIN_PALETTE,
+        )
         d.add_buttons([("Cancel", 1)])
         d.show()
 
@@ -93,7 +117,6 @@ class Actions:
 
 
 class Application:
-
     def __init__(self):
         self.header = None
         self.footer = None
@@ -102,7 +125,6 @@ class Application:
         self.view_holder = None
         self.views = {}
         self.filter_edit = None
-        view_columns = None
         self.filter_columns = None
         self.clock = None
         self.rb_group = []
@@ -114,32 +136,55 @@ class Application:
 
         set_encoding("UTF-8")
 
-        self.views['SSH'] = View(SshListView())
+        self.views["SSH"] = View(SshListView())
         if UserConfig().docker is not None:
-            self.views['Docker'] = View(DockerListView())
-        self.views['Swarm'] = View(SwarmListView())
-        self.view_holder = WidgetWrap(self.views['SSH'])
+            self.views["Docker"] = View(DockerListView())
+        self.views["Swarm"] = View(SwarmListView())
+        self.view_holder = WidgetWrap(self.views["SSH"])
 
         self.body = Padding(LineBox(self.view_holder), align=CENTER, left=1, right=2)
 
         view_column_array = [
-            (7, AttrWrap(Text('View: '), 'header', 'header')),
-            (11, AttrWrap(TabGroupRadioButton(self.rb_group, '🐧-SSH', on_state_change=self.view_changed), 'header', 'header'))
+            (7, AttrWrap(Text("View: "), "header", "header")),
+            (
+                11,
+                AttrWrap(
+                    TabGroupRadioButton(self.rb_group, "🐧-SSH", on_state_change=self.view_changed), "header", "header"
+                ),
+            ),
         ]
 
         if UserConfig().docker is not None:
-            view_column_array.extend([
-                (14, AttrWrap(TabGroupRadioButton(self.rb_group, '🐳-Docker', on_state_change=self.view_changed), 'header', 'header'))
-            ])
+            view_column_array.extend(
+                [
+                    (
+                        14,
+                        AttrWrap(
+                            TabGroupRadioButton(self.rb_group, "🐳-Docker", on_state_change=self.view_changed),
+                            "header",
+                            "header",
+                        ),
+                    )
+                ]
+            )
 
         if UserConfig().docker is not None and UserConfig().swarm_host is not None and UserConfig().swarm_host:
-            view_column_array.extend([
-                (14, AttrWrap(TabGroupRadioButton(self.rb_group, '🐳-Swarm', on_state_change=self.view_changed), 'header', 'header'))
-            ])
+            view_column_array.extend(
+                [
+                    (
+                        14,
+                        AttrWrap(
+                            TabGroupRadioButton(self.rb_group, "🐳-Swarm", on_state_change=self.view_changed),
+                            "header",
+                            "header",
+                        ),
+                    )
+                ]
+            )
 
         action_button_list = [
-            (8, AttrWrap(TabGroupButton("Help", on_press=Actions.action_button_cb), 'button normal', 'button select')),
-            (8, AttrWrap(TabGroupButton("Quit", on_press=Actions.action_button_cb), 'button normal', 'button select'))
+            (8, AttrWrap(TabGroupButton("Help", on_press=Actions.action_button_cb), "button normal", "button select")),
+            (8, AttrWrap(TabGroupButton("Quit", on_press=Actions.action_button_cb), "button normal", "button select")),
         ]
 
         view_columns = Columns(view_column_array, 1)
@@ -150,21 +195,22 @@ class Application:
             name=f"{PROGRAM_NAME}:",
             release=PROGRAM_VERSION,
             left_content=view_columns,
-            right_content=Text(f"{SCM_URL}", align=RIGHT))
+            right_content=Text(f"{SCM_URL}", align=RIGHT),
+        )
 
         self.clock = Clock()
-        self.footer = Footer(left_content=action_content,
-                             right_content=self.clock)
+        self.footer = Footer(left_content=action_content, right_content=self.clock)
 
         self.frame = Frame(self.body, self.header, self.footer)
 
-        self.tab_group_manager.add('view_select', self.frame, 'header', view_columns)
-        self.tab_group_manager.add('list', self.frame, 'body', self.views['SSH'].list_view, pile=self.views['SSH'].pile, pile_pos=1)
-        self.tab_group_manager.add('filters_select', self.frame, 'body', self.views['SSH'].list_view.filter_columns)
-        self.tab_group_manager.add('action_buttons', self.frame, 'footer', action_content)
+        self.tab_group_manager.add("view_select", self.frame, "header", view_columns)
+        self.tab_group_manager.add(
+            "list", self.frame, "body", self.views["SSH"].list_view, pile=self.views["SSH"].pile, pile_pos=1
+        )
+        self.tab_group_manager.add("filters_select", self.frame, "body", self.views["SSH"].list_view.filter_columns)
+        self.tab_group_manager.add("action_buttons", self.frame, "footer", action_content)
 
-        Registry().main_loop = MainLoop(self.frame, palette=MAIN_PALETTE,
-                                        unhandled_input=Actions.show_or_exit)
+        Registry().main_loop = MainLoop(self.frame, palette=MAIN_PALETTE, unhandled_input=Actions.show_or_exit)
         return self
 
     def start(self):
@@ -175,32 +221,123 @@ class Application:
 
     def view_changed(self, radio_button: RadioButton, state: bool):
         if state:
-            view_key = radio_button.get_label().encode('ascii', 'ignore').decode().strip().replace('-', '')
-            logger.info(f'switching to view {view_key}')
+            view_key = radio_button.get_label().encode("ascii", "ignore").decode().strip().replace("-", "")
+            logger.info(f"switching to view {view_key}")
             self.view_holder._w = self.views[view_key]
             self.view_holder._w.list_view.filters_clear()
 
-            self.tab_group_manager.add('list', self.frame, 'body', self.views[view_key].list_view, pile=self.views[view_key].pile, pile_pos=1)
-            self.tab_group_manager.add('filters_select', self.frame, 'body', self.views[view_key].list_view.filter_columns)
+            self.tab_group_manager.add(
+                "list", self.frame, "body", self.views[view_key].list_view, pile=self.views[view_key].pile, pile_pos=1
+            )
+            self.tab_group_manager.add(
+                "filters_select", self.frame, "body", self.views[view_key].list_view.filter_columns
+            )
             Registry().main_loop.screen.clear()
 
 
-def main():
-    logging.basicConfig(filename="/tmp/ucm-{}.log".format(getpass.getuser()),
-                        filemode='w',
-                        format='%(asctime)s,%(msecs)d %(name)s {%(pathname)s:%(lineno)d} %(levelname)s %(message)s',
-                        datefmt='%H:%M:%S',
-                        level=logging.INFO)
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments.
 
-    global logger
-    logger = logging.getLogger('ucm')
+    Returns:
+        Parsed arguments namespace
+    """
+    parser = argparse.ArgumentParser(
+        prog="ucm",
+        description=f"{PROGRAM_NAME} - Terminal UI for managing SSH and Docker connections",
+        epilog=f"Version {PROGRAM_VERSION} - {SCM_URL}",
+    )
 
-    logger.info("############# Program start running.")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {PROGRAM_VERSION}")
 
-    Application().build().start()
+    parser.add_argument(
+        "--config-dir", type=str, default=None, metavar="DIR", help="Configuration directory (default: ~/.ucm)"
+    )
+
+    parser.add_argument(
+        "--log-level",
+        type=str,
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="INFO",
+        help="Set logging level (default: INFO)",
+    )
+
+    parser.add_argument(
+        "--log-file", type=str, default=None, metavar="FILE", help="Log file path (default: /tmp/ucm-{user}.log)"
+    )
+
+    return parser.parse_args()
 
 
-if __name__ == '__main__':
-    main()
+def setup_logging(log_level: str, log_file: str = None) -> logging.Logger:
+    """Configure logging with specified level and file.
+
+    Args:
+        log_level: Logging level string (DEBUG, INFO, etc.)
+        log_file: Optional log file path
+
+    Returns:
+        Configured logger instance
+    """
+    if log_file is None:
+        log_file = f"/tmp/ucm-{getpass.getuser()}.log"
+
+    # Ensure log directory exists
+    log_path = Path(log_file)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    logging.basicConfig(
+        filename=log_file,
+        filemode="w",
+        format="%(asctime)s,%(msecs)d %(name)s {%(pathname)s:%(lineno)d} %(levelname)s %(message)s",
+        datefmt="%H:%M:%S",
+        level=getattr(logging, log_level),
+    )
+
+    logger = logging.getLogger("ucm")
+    logger.info(f"############# {PROGRAM_NAME} v{PROGRAM_VERSION} starting")
+    logger.info(f"Log level: {log_level}")
+    logger.info(f"Log file: {log_file}")
+
+    return logger
+
+
+def main() -> int:
+    """Main entry point for UCM application.
+
+    Returns:
+        Exit code (0 for success)
+    """
+    try:
+        args = parse_args()
+
+        # Setup logging
+        global logger
+        logger = setup_logging(args.log_level, args.log_file)
+
+        # Override config directory if specified
+        if args.config_dir:
+            config_dir = Path(args.config_dir).expanduser().absolute()
+            logger.info(f"Using custom config directory: {config_dir}")
+            UserConfig().set("config_folder", str(config_dir))
+            UserConfig().set("ssh_config_file", str(config_dir / "ssh_connections.yml"))
+
+        # Start application
+        Application().build().start()
+
+        return 0
+
+    except KeyboardInterrupt:
+        if "logger" in globals():
+            logger.info("Application interrupted by user")
+        return 130
+    except Exception as e:
+        if "logger" in globals():
+            logger.exception(f"Fatal error: {e}")
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
 
 # vim: ts=4 sw=4 et

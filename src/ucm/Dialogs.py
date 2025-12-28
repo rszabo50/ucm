@@ -21,9 +21,26 @@
 # Created by rszabo50 at 2022-01-28
 
 from typing import Any
-from urwid import Frame, Button, Text, WidgetWrap, Divider, Pile, Padding, Filler, AttrMap, LineBox, Columns, \
-    SolidFill, GridFlow, MainLoop, Overlay
-from urwid import CENTER, MIDDLE
+
+from urwid import (
+    CENTER,
+    MIDDLE,
+    AttrMap,
+    Button,
+    Columns,
+    Divider,
+    Filler,
+    Frame,
+    GridFlow,
+    LineBox,
+    MainLoop,
+    Overlay,
+    Padding,
+    Pile,
+    SolidFill,
+    Text,
+    WidgetWrap,
+)
 
 
 class DialogButton(Button):
@@ -33,71 +50,69 @@ class DialogButton(Button):
 
 # noinspection PyArgumentList
 class DialogFrame(Frame):
-
     def keypress(self, size, key):
-        if key == 'tab':
-            if self.focus_part == 'body':
-                self.set_focus('footer')
+        if key == "tab":
+            if self.focus_part == "body":
+                self.set_focus("footer")
                 return
-            elif self.focus_part == 'footer':
-                self.set_focus('body')
+            elif self.focus_part == "footer":
+                self.set_focus("body")
                 return
         super().keypress(size, key)
 
 
 class DialogDisplay(WidgetWrap):
     default_palette = [
-        ('body', 'black', 'white'),
-        ('border', 'black', 'white'),
-        ('shadow', 'white', 'black'),
-        ('selectable', 'black', 'dark cyan'),
-        ('focus', 'black', 'dark cyan', 'bold'),
-        ('focustext', 'light gray', 'dark blue'),
-        ('button normal', 'light gray', 'dark blue', 'standout'),
-        ('button select', 'white', 'dark green'),
+        ("body", "black", "white"),
+        ("border", "black", "white"),
+        ("shadow", "white", "black"),
+        ("selectable", "black", "dark cyan"),
+        ("focus", "black", "dark cyan", "bold"),
+        ("focustext", "light gray", "dark blue"),
+        ("button normal", "light gray", "dark blue", "standout"),
+        ("button select", "white", "dark green"),
     ]
     parent = None
 
-    def __init__(self, text, width, height, body: Any = None, loop: Any = None, exit_cb: Any = None,
-                 palette: list = None):
-        width = int(width) if width > 0 else ('relative', 80)
-        height = int(height) if height > 0 else ('relative', 80)
+    def __init__(
+        self, text, width, height, body: Any = None, loop: Any = None, exit_cb: Any = None, palette: list = None
+    ):
+        width = int(width) if width > 0 else ("relative", 80)
+        height = int(height) if height > 0 else ("relative", 80)
         self.exit_cb = exit_cb
         self.buttons = []
         self.loop = loop
         self.palette = palette if palette is not None else self.default_palette
 
         if body is None:
-            self.body = SolidFill(' ')
-            fp = 'footer'
+            self.body = SolidFill(" ")
+            fp = "footer"
         else:
             self.body = body
-            fp = 'body'
+            fp = "body"
 
         self.frame = DialogFrame(self.body, focus_part=fp)
         if text is not None:
-            self.frame.header = Pile([Text(text), Divider(u'\u2550')])
+            self.frame.header = Pile([Text(text), Divider("\u2550")])
         w = self.frame
 
         # pad area around listbox
-        w = Padding(w, ('fixed left', 2), ('fixed right', 2))
-        w = Filler(w, ('fixed top', 1), ('fixed bottom', 1))
-        w = AttrMap(w, 'body')
+        w = Padding(w, ("fixed left", 2), ("fixed right", 2))
+        w = Filler(w, ("fixed top", 1), ("fixed bottom", 1))
+        w = AttrMap(w, "body")
 
         w = LineBox(w)
 
         # "shadow" effect
-        w = Columns([w, ('fixed', 1, AttrMap(
-            Filler(Text(('border', ' ')), "top")
-            , 'shadow'))])
+        w = Columns([w, ("fixed", 1, AttrMap(Filler(Text(("border", " ")), "top"), "shadow"))])
 
-        w = Frame(w, footer=AttrMap(Text(('border', ' ')), 'shadow'))
+        w = Frame(w, footer=AttrMap(Text(("border", " ")), "shadow"))
         if self.loop is None:
             # this dialog is the main window
             # create outermost border area
             w = Padding(w, CENTER, width)
             w = Filler(w, MIDDLE, height)
-            w = AttrMap(w, 'border')
+            w = AttrMap(w, "border")
         else:
             # this dialog is a child window
             # overlay it over the parent window
@@ -118,9 +133,9 @@ class DialogDisplay(WidgetWrap):
         for name, exitcode in buttons:
             b = DialogButton(name.center(label_w), self.button_press)
             b.exitcode = exitcode
-            b = AttrMap(b, 'button normal', 'button select')
+            b = AttrMap(b, "button normal", "button select")
             button_list.append(b)
-        self.buttons = GridFlow(button_list, label_w+4, 3, 1, CENTER)
+        self.buttons = GridFlow(button_list, label_w + 4, 3, 1, CENTER)
         self.frame.footer = Pile([self.buttons], focus_item=0)
 
     def button_press(self, button):
@@ -136,5 +151,6 @@ class DialogDisplay(WidgetWrap):
                 self.loop.run()
         else:
             self.loop.widget = self.view
+
 
 # vim: ts=4 sw=4 et

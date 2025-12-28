@@ -5,16 +5,16 @@ Released under GNU GPLv3.
 
 https://www.gnu.org/licenses/gpl-3.0.en.html
 
-This software can be used by anyone at no cost, however, if you like using this software and can support 
+This software can be used by anyone at no cost, however, if you like using this software and can support
 
 - please donate to any of your local charities (childrens hospitals, food banks, shelters, spca,  etc).
 
-This program is free software: you can redistribute it and/or modify it under the terms of the 
-GNU General Public License as published by the Free Software Foundation: GNU GPLv3. 
+This program is free software: you can redistribute it and/or modify it under the terms of the
+GNU General Public License as published by the Free Software Foundation: GNU GPLv3.
 You must include this entire text with your distribution.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even 
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License for more details.
 
 ## About ucm
@@ -30,50 +30,69 @@ added mouse support. see: https://github.com/flyingrhinonz/nccm for details.
 ### UCM intended users
 
 * You have dozens or more of hosts to manage via ssh.
-* Your ssh requirements (identities, ports, users etc) differ from host to host, and you want to simplify things 
+* Your ssh requirements (identities, ports, users etc) differ from host to host, and you want to simplify things
 * You want a simple interfaces to get console access to your docker containers
 * You want View all your hosts/containers at once and filter easily so that you know who to connect to.
 * Have a need to use command line, don't have a GUI, or simply prefer to work more efficiently?
 
 ## UCM Configuration
 
-Personal configurations are stored in ~/.ucm where 
+Configuration is stored in `~/.ucm/ssh_connections.yml` by default.
 
-config.yml:  is used to information about common runtime items:
-    logfile - location of the log file
-    loglevel - log level can be one of: debug, info, warning, error, critical
+### SSH Connections Configuration
 
-ssh_connnections.yml - used to provide a list of all your managed connections
+Each SSH connection **requires**:
+- `name`: Unique identifier for the connection
+- `address`: IP address or hostname
+
+**Optional fields**:
+- `user`: Username for SSH (default: current user)
+- `port`: TCP port (default: 22, valid range: 1-65535)
+- `identity`: Path to SSH identity file
+- `options`: Additional SSH command-line options
+- `category`: Grouping label for filtering
+
+### Example Configuration
+
+```yaml
+# Minimal connection
+- name: webserver
+  address: web.example.com
+
+# Connection with all options
+- name: production-db
+  address: db.example.com
+  user: admin
+  port: 2222
+  identity: ~/.ssh/prod-key.pem
+  options: -X
+  category: production
+```
+
+See `examples/ssh_connections.yml` for more examples.
+
+### Configuration Validation
+
+UCM automatically validates your configuration on startup and will show helpful error messages if there are issues:
 
 ```
-    # Each ssh connection is defined as:
-    # - name: hostname or identifier
-    #   address: ip or dns resolvable name
-    #   user: username to connect with
-    #   port: tcp port to use: default: 22
-    #   identity_file: identity file to use if needed and its not your default key
-    #   options: any other ssh options#   
-    #   category: identifier    
-    #
-    # Note: Because UCM will use the address variable to connect, common options like the identity file, port etc
-    #       can be done via your ~/.ssh/config e.g.
-    #         Host: 192.168.0.*
-    #             GSSAPIAuthentication no
-    #             StrictHostKeyChecking no
-    #             UserKnownHostsFile /dev/null
-    #             IdentityFile  ~/.ssh/MyIdentifyFile.pem
+❌ Configuration Error:
+SSH connection configuration has 2 error(s):
+  - Connection #1 ('server1'): Missing required field(s): address
+  - Connection #2: 'port' must be between 1 and 65535, got 99999
+```
 
-- name: test
-  address: 192.168.0.4
-  user: root
-  port: 22
-  options: -X
+### Custom Configuration Directory
 
+You can specify a custom configuration directory:
+
+```bash
+ucm --config-dir ~/my-configs
 ```
 
 ## UCM UI Controls
 
-The UI controls are quite simple, The main interactions can all be done via the mouse. 
+The UI controls are quite simple, The main interactions can all be done via the mouse.
 
 * Clicking on buttons, RadioButtons etc all work as you would expect via the mouse
 * Clicking on a list will mark the row selected, and double clicking will trigger the connect action.

@@ -1,0 +1,56 @@
+# UCM SSH Connections Configuration Example
+#
+# Each SSH connection requires:
+#   - name: Unique identifier for the connection
+#   - address: IP address or hostname
+#
+# Optional fields:
+#   - user: Username for SSH (default: current user)
+#   - port: TCP port (default: 22)
+#   - identity: Path to SSH identity file
+#   - options: Additional SSH options
+#   - category: Grouping label for filtering
+
+# Minimal connection (only required fields)
+- name: localhost
+  address: 127.0.0.1
+
+# Connection with user
+- name: webserver
+  address: web.example.com
+  user: deploy
+  category: production
+
+# Connection with custom port
+- name: dev-server
+  address: dev.example.com
+  user: developer
+  port: 2222
+  category: development
+
+# Connection with identity file
+- name: aws-instance
+  address: ec2-12-34-56-78.compute-1.amazonaws.com
+  user: ubuntu
+  identity: ~/.ssh/aws-key.pem
+  category: cloud
+
+# Connection with all options
+- name: secure-server
+  address: 192.168.1.100
+  user: admin
+  port: 22
+  identity: ~/.ssh/id_rsa
+  options: -X -o StrictHostKeyChecking=no
+  category: infrastructure
+
+# Multiple servers in same category
+- name: db-primary
+  address: db1.example.com
+  user: postgres
+  category: database
+
+- name: db-replica
+  address: db2.example.com
+  user: postgres
+  category: database

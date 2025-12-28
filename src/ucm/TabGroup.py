@@ -21,9 +21,9 @@
 # Created by szabor at 2022-03-17
 
 import logging
-
-from urwid import Button, RadioButton, Edit, Text, AttrWrap
 from collections import OrderedDict
+
+from urwid import AttrWrap, Button, Edit, RadioButton, Text
 
 
 class TabGroupFocus:
@@ -65,10 +65,10 @@ class TabGroupNode:
             self.next.pile.focus_position = self.next.pile_pos
 
         if self.next.container is not None and self.next.container_pos >= 0:
-            if hasattr(self.next.container, 'set_focus'):
+            if hasattr(self.next.container, "set_focus"):
                 logging.info("moving to next container position")
                 self.next.container.set_focus(self.next.container_pos)
-            elif hasattr(self.next.container, 'walker'):
+            elif hasattr(self.next.container, "walker"):
                 logging.info("moving to walker")
                 self.next.container.walker.set_focus(self.next.container_pos)
             else:
@@ -83,7 +83,7 @@ class TabGroupButton(Button, TabGroupNode):
 
     def keypress(self, size, key):
         logging.debug(f"TabGroupButton.keypress({size},{key}")
-        if key == 'tab':
+        if key == "tab":
             super().focus_next()
         super().keypress(size, key)
 
@@ -91,7 +91,7 @@ class TabGroupButton(Button, TabGroupNode):
 class TabGroupRadioButton(RadioButton, TabGroupNode):
     def keypress(self, size, key):
         logging.debug(f"TabGroupRadioButton.keypress({size},{key})")
-        if key == 'tab':
+        if key == "tab":
             super().focus_next()
         super().keypress(size, key)
 
@@ -99,28 +99,28 @@ class TabGroupRadioButton(RadioButton, TabGroupNode):
 class TabGroupEdit(Edit, TabGroupNode):
     def keypress(self, size, key):
         logging.debug(f"TabGroupEdit.keypress({size},{key}")
-        if key == 'tab':
+        if key == "tab":
             super().focus_next()
         super().keypress(size, key)
 
 
-class TabGroupManager(object):
+class TabGroupManager:
     def __init__(self):
         self.groups = OrderedDict()
 
     def add(self, name, frame, frame_position, base_widget, pile=None, pile_pos=-1):
-        if hasattr(base_widget, 'contents'):
+        if hasattr(base_widget, "contents"):
             nodes = []
             for idx, item in enumerate(base_widget.contents):
                 w = item[0].original_widget if type(item[0]) == AttrWrap else item[0]
-                if hasattr(w, 'set_current'):
+                if hasattr(w, "set_current"):
                     w.set_current(frame, frame_position, base_widget, idx, pile=pile, pile_pos=pile_pos)
                     nodes.append(w)
             self.groups[name] = nodes
             self.relink()
         else:
-            logging.debug(f' TYPE: {type(base_widget)}')
-            if hasattr(base_widget, 'set_current'):
+            logging.debug(f" TYPE: {type(base_widget)}")
+            if hasattr(base_widget, "set_current"):
                 base_widget.set_current(frame, frame_position, base_widget, 0, pile=pile, pile_pos=pile_pos)
                 self.groups[name] = [base_widget]
                 self.relink()
@@ -132,7 +132,7 @@ class TabGroupManager(object):
             nodes.extend(arr)
         for idx, node in enumerate(nodes):
             try:
-                nodes[idx].next = nodes[idx+1].current
+                nodes[idx].next = nodes[idx + 1].current
             except:
                 pass
         nodes[-1].next = nodes[0].current

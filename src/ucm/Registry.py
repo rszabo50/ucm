@@ -20,20 +20,23 @@
 
 # Created by rszabo50 at 2022-02-07
 
+from typing import Any, Optional
+
 
 class Registry(dict):
-    __instance = None
+    __instance: Optional["Registry"] = None
 
-    def __new__(cls, *args):
+    def __new__(cls, *args) -> "Registry":
         if cls.__instance is None:
             cls.__instance = dict.__new__(cls)
         return cls.__instance
 
-    def set(self, k, v, overwrite=True):
+    def set(self, k: str, v: Any, overwrite: bool = True) -> None:
         if overwrite or self.get(k) is None:
             setattr(self.__instance, k, v)
 
-    def get(self, k):
+    def get(self, k: str) -> Optional[Any]:
         return getattr(self.__instance, k) if hasattr(self.__instance, k) else None
+
 
 # vim: ts=4 sw=4 et
