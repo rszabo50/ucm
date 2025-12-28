@@ -112,7 +112,7 @@ class TabGroupManager:
         if hasattr(base_widget, "contents"):
             nodes = []
             for idx, item in enumerate(base_widget.contents):
-                w = item[0].original_widget if type(item[0]) == AttrWrap else item[0]
+                w = item[0].original_widget if isinstance(item[0], AttrWrap) else item[0]
                 if hasattr(w, "set_current"):
                     w.set_current(frame, frame_position, base_widget, idx, pile=pile, pile_pos=pile_pos)
                     nodes.append(w)

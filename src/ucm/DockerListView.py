@@ -167,7 +167,7 @@ class DockerListView(ListView):
         pass
 
     def double_click_callback(self) -> None:
-        logging.debug(f'{self.name}] {self.selected.item_data["name"]} double_click_callback')
+        logging.debug(f"{self.name}] {self.selected.item_data['name']} double_click_callback")
         docker_connect(self.selected.item_data)
 
     def keypress_callback(self, size, key, data: Optional[Dict[str, Any]] = None) -> None:

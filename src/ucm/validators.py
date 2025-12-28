@@ -91,8 +91,7 @@ class SshConnectionValidator:
             if isinstance(port, int):
                 if not 1 <= port <= 65535:
                     return False, (
-                        f"Connection #{index + 1} ('{conn['name']}'): "
-                        f"'port' must be between 1 and 65535, got {port}"
+                        f"Connection #{index + 1} ('{conn['name']}'): 'port' must be between 1 and 65535, got {port}"
                     )
             elif isinstance(port, str):
                 try:
@@ -103,9 +102,7 @@ class SshConnectionValidator:
                             f"'port' must be between 1 and 65535, got {port}"
                         )
                 except ValueError:
-                    return False, (
-                        f"Connection #{index + 1} ('{conn['name']}'): " f"'port' must be a number, got '{port}'"
-                    )
+                    return False, (f"Connection #{index + 1} ('{conn['name']}'): 'port' must be a number, got '{port}'")
             else:
                 return False, (
                     f"Connection #{index + 1} ('{conn['name']}'): "
@@ -141,7 +138,7 @@ class SshConnectionValidator:
 
         if len(connections) == 0:
             raise ConfigValidationError(
-                "SSH connections list is empty. " "Please add at least one connection to ~/.ucm/ssh_connections.yml"
+                "SSH connections list is empty. Please add at least one connection to ~/.ucm/ssh_connections.yml"
             )
 
         errors = []

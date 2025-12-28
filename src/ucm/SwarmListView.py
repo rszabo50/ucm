@@ -103,9 +103,9 @@ class SwarmListView(ListView):
         super().__init__("Swarm", filter_fields=["stack", "host", "container"])
 
     def formatter(self, record: Any):
-        display_host = record["host"] if len(record["host"]) <= 60 else f'...{record["host"][-57:]}'
-        display_stack = record["stack"] if len(record["stack"]) <= 20 else f'...{record["stack"][-17:]}'
-        display_container = record["container"] if len(record["container"]) <= 40 else f'{record["container"][0:37]}...'
+        display_host = record["host"] if len(record["host"]) <= 60 else f"...{record['host'][-57:]}"
+        display_stack = record["stack"] if len(record["stack"]) <= 20 else f"...{record['stack'][-17:]}"
+        display_container = record["container"] if len(record["container"]) <= 40 else f"{record['container'][0:37]}..."
 
         return f"{str(record['index']).rjust(4)}   {display_stack.ljust(20)}   {display_host.ljust(60)}   {display_container.ljust(40)}   {record['image']}"
 
@@ -137,7 +137,7 @@ class SwarmListView(ListView):
         return data
 
     def double_click_callback(self):
-        logging.debug(f'{self.name}] {self.selected.item_data["container"]} double_click_callback')
+        logging.debug(f"{self.name}] {self.selected.item_data['container']} double_click_callback")
         swarm_connect(self.selected.item_data)
 
     @staticmethod
