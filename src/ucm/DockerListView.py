@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 #
 #  Copyright (C) 2022 Robert Szabo.
@@ -26,6 +25,7 @@ import os
 import subprocess
 import time
 import traceback
+from typing import Any
 
 from urwid import Columns, AttrWrap, Text, RIGHT, raw_display, Pile, ListBox, SimpleListWalker
 
@@ -37,7 +37,7 @@ from ucm.constants import MAIN_PALETTE
 
 
 # noinspection PyStatementEffect
-def docker_connect(data: any, shell: str = 'bash'):
+def docker_connect(data: Any, shell: str = 'bash'):
     if Registry().get('main_loop'):
         Registry().main_loop.screen.stop()
         print(chr(27) + "[2J")
@@ -54,7 +54,7 @@ def docker_connect(data: any, shell: str = 'bash'):
 
 
 # noinspection PyStatementEffect
-def docker_inspect(data: any):
+def docker_inspect(data: Any):
     proc = subprocess.Popen([f"{UserConfig().docker}", "inspect", f"{data['name']}"], stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
     return [Text(x.rstrip()) for x in proc.communicate()[0].splitlines()]
@@ -65,7 +65,7 @@ class DockerListView(ListView):
     def __init__(self):
         super().__init__('Docker', filter_fields=['containerId', 'name', 'image'])
 
-    def formatter(self, record: any):
+    def formatter(self, record: Any):
         return f"{str(record['index']).rjust(4)} {record['containerId'].ljust(15)} {record['name'].ljust(20)} {record['image']}"
 
     # noinspection PyMethodMayBeStatic
@@ -103,14 +103,14 @@ class DockerListView(ListView):
         d.show()
 
     @staticmethod
-    def close_cb(button: any):
+    def close_cb(button: Any):
         pass
 
     def double_click_callback(self):
         logging.debug(f'{self.name}] {self.selected.item_data["name"]} double_click_callback')
         docker_connect(self.selected.item_data)
 
-    def keypress_callback(self, size, key, data: any = None):
+    def keypress_callback(self, size, key, data: Any = None):
         logging.debug(f'ListViewHandler[{self.name}] {size} {key} pressed')
         if key == 'c':
             docker_connect(data, shell='bash')

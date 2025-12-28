@@ -1,0 +1,206 @@
+#!/usr/bin/env python3
+
+#
+#  Copyright (C) 2022 Robert Szabo.
+#
+#  This software can be used by anyone at no cost, however,
+#  if you like using my software and can support - please
+#  donate money to a children's hospital of your choice.
+#  This program is free software: you can redistribute it
+#  and/or modify it under the terms of the GNU General Public
+#  License as published by the Free Software Foundation:
+#  GNU GPLv3. You must include this entire text with your
+#  distribution.
+#  This program is distributed in the hope that it will be
+#  useful, but WITHOUT ANY WARRANTY; without even the implied
+#  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+#  PURPOSE.
+#  See the GNU General Public License for more details.
+#
+
+import getpass
+import logging
+
+from urwid import CENTER, RIGHT
+from urwid import Padding, LineBox, AttrWrap, Filler, RadioButton, Text, WidgetWrap, MainLoop, \
+    Frame, ExitMainLoop, Columns, raw_display, set_encoding
+from typing import Any
+
+from ucm.Dialogs import DialogDisplay
+from ucm.DockerListView import DockerListView
+from ucm.Registry import Registry
+from ucm.SshListView import SshListView
+from ucm.SwarmListView import SwarmListView
+from ucm.TabGroup import TabGroupRadioButton, TabGroupButton, TabGroupManager
+from ucm.UserConfig import UserConfig
+from ucm.Widgets import Header, Footer, View, Clock, HelpBody
+from ucm.constants import PROGRAM_NAME, SCM_URL, PROGRAM_VERSION, MAIN_PALETTE
+
+
+class Actions:
+
+    @staticmethod
+    def show_or_exit(key):
+        if key in ['q', 'Q']:
+            Actions.popup_exit_dialog()
+        if key in ['?']:
+            Actions.popup_help_dialog()
+
+    @staticmethod
+    def action_button_cb(_button: Any = None):
+        if _button.get_label() == "Quit":
+            Actions.popup_exit_dialog()
+        if _button.get_label() == "Help":
+            Actions.popup_help_dialog()
+
+    @staticmethod
+    def popup_exit_dialog(_button: Any = None):
+        logger.error("Popping up exit dialog")
+        body = Filler(Text("Are you sure you want to exit?"))
+        d = DialogDisplay("Confirm", 50, 10, body=body,
+                          loop=Registry().main_loop,
+                          exit_cb=Actions.exit_cb,
+                          palette=MAIN_PALETTE)
+        d.add_buttons([("OK", 0), ("Cancel", 1)])
+        d.show()
+
+    @staticmethod
+    def exit_cb(button: Any):
+        if button.exitcode == 0:
+            Actions.clear()
+            raise ExitMainLoop()
+
+    @staticmethod
+    def clear():
+        if Registry().get('main_loop') is not None:
+            Registry().main_loop.widget = Filler(Text(''))
+            Registry().main_loop.draw_screen()
+
+    @staticmethod
+    def popup_help_dialog(_button: Any = None):
+        cols, rows = raw_display.Screen().get_cols_rows()
+        d = DialogDisplay("Help", cols - 20, rows - 6,
+                          body=HelpBody(),
+                          loop=Registry().main_loop,
+                          exit_cb=Actions.help_exit_cb,
+                          palette=MAIN_PALETTE)
+        d.add_buttons([("Cancel", 1)])
+        d.show()
+
+    @staticmethod
+    def help_exit_cb(button: Any):
+        pass
+
+
+class Application:
+
+    def __init__(self):
+        self.header = None
+        self.footer = None
+        self.loop = None
+        self.body = None
+        self.view_holder = None
+        self.views = {}
+        self.filter_edit = None
+        view_columns = None
+        self.filter_columns = None
+        self.clock = None
+        self.rb_group = []
+        self.frame = None
+        self.tab_group_manager = TabGroupManager()
+
+    def build(self):
+        logger.debug("Building application ...")
+
+        set_encoding("UTF-8")
+
+        self.views['SSH'] = View(SshListView())
+        if UserConfig().docker is not None:
+            self.views['Docker'] = View(DockerListView())
+        self.views['Swarm'] = View(SwarmListView())
+        self.view_holder = WidgetWrap(self.views['SSH'])
+
+        self.body = Padding(LineBox(self.view_holder), align=CENTER, left=1, right=2)
+
+        view_column_array = [
+            (7, AttrWrap(Text('View: '), 'header', 'header')),
+            (11, AttrWrap(TabGroupRadioButton(self.rb_group, '🐧-SSH', on_state_change=self.view_changed), 'header', 'header'))
+        ]
+
+        if UserConfig().docker is not None:
+            view_column_array.extend([
+                (14, AttrWrap(TabGroupRadioButton(self.rb_group, '🐳-Docker', on_state_change=self.view_changed), 'header', 'header'))
+            ])
+
+        if UserConfig().docker is not None and UserConfig().swarm_host is not None and UserConfig().swarm_host:
+            view_column_array.extend([
+                (14, AttrWrap(TabGroupRadioButton(self.rb_group, '🐳-Swarm', on_state_change=self.view_changed), 'header', 'header'))
+            ])
+
+        action_button_list = [
+            (8, AttrWrap(TabGroupButton("Help", on_press=Actions.action_button_cb), 'button normal', 'button select')),
+            (8, AttrWrap(TabGroupButton("Quit", on_press=Actions.action_button_cb), 'button normal', 'button select'))
+        ]
+
+        view_columns = Columns(view_column_array, 1)
+
+        action_content = Columns(action_button_list, 1)
+
+        self.header = Header(
+            name=f"{PROGRAM_NAME}:",
+            release=PROGRAM_VERSION,
+            left_content=view_columns,
+            right_content=Text(f"{SCM_URL}", align=RIGHT))
+
+        self.clock = Clock()
+        self.footer = Footer(left_content=action_content,
+                             right_content=self.clock)
+
+        self.frame = Frame(self.body, self.header, self.footer)
+
+        self.tab_group_manager.add('view_select', self.frame, 'header', view_columns)
+        self.tab_group_manager.add('list', self.frame, 'body', self.views['SSH'].list_view, pile=self.views['SSH'].pile, pile_pos=1)
+        self.tab_group_manager.add('filters_select', self.frame, 'body', self.views['SSH'].list_view.filter_columns)
+        self.tab_group_manager.add('action_buttons', self.frame, 'footer', action_content)
+
+        Registry().main_loop = MainLoop(self.frame, palette=MAIN_PALETTE,
+                                        unhandled_input=Actions.show_or_exit)
+        return self
+
+    def start(self):
+        logger.debug("Starting clock ...")
+        self.clock.start()
+        logger.debug("Starting application loop  ...")
+        Registry().main_loop.run()
+
+    def view_changed(self, radio_button: RadioButton, state: bool):
+        if state:
+            view_key = radio_button.get_label().encode('ascii', 'ignore').decode().strip().replace('-', '')
+            logger.info(f'switching to view {view_key}')
+            self.view_holder._w = self.views[view_key]
+            self.view_holder._w.list_view.filters_clear()
+
+            self.tab_group_manager.add('list', self.frame, 'body', self.views[view_key].list_view, pile=self.views[view_key].pile, pile_pos=1)
+            self.tab_group_manager.add('filters_select', self.frame, 'body', self.views[view_key].list_view.filter_columns)
+            Registry().main_loop.screen.clear()
+
+
+def main():
+    logging.basicConfig(filename="/tmp/ucm-{}.log".format(getpass.getuser()),
+                        filemode='w',
+                        format='%(asctime)s,%(msecs)d %(name)s {%(pathname)s:%(lineno)d} %(levelname)s %(message)s',
+                        datefmt='%H:%M:%S',
+                        level=logging.INFO)
+
+    global logger
+    logger = logging.getLogger('ucm')
+
+    logger.info("############# Program start running.")
+
+    Application().build().start()
+
+
+if __name__ == '__main__':
+    main()
+
+# vim: ts=4 sw=4 et

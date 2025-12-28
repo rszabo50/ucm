@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 #
 #  Copyright (C) 2022 Robert Szabo.
@@ -28,6 +27,7 @@ import subprocess
 import traceback
 import time
 from shlex import split
+from typing import Any
 
 from urwid import Text, raw_display, Pile, ListBox, SimpleListWalker
 from ucm.Widgets import ListView, ListItem
@@ -66,7 +66,7 @@ def build_ssh_command(host: str):
 
 
 # noinspection PyStatementEffect
-def swarm_connect(data: any, shell: str = 'bash'):
+def swarm_connect(data: Any, shell: str = 'bash'):
     command = f"docker exec -it  {data['container']} {shell}"
     if not host_is_local(data['host']):
         command = f"{build_ssh_command(data['host'])} {command}"
@@ -87,7 +87,7 @@ def swarm_connect(data: any, shell: str = 'bash'):
 
 
 # noinspection PyStatementEffect
-def swarm_inspect(data: any):
+def swarm_inspect(data: Any):
     command = f"{UserConfig().docker} inspect {data['container']}"
     if not host_is_local(data['host']):
         command = f"{build_ssh_command(data['host'])} {command}"
@@ -102,7 +102,7 @@ class SwarmListView(ListView):
     def __init__(self):
         super().__init__('Swarm', filter_fields=['stack', 'host', 'container'])
 
-    def formatter(self, record: any):
+    def formatter(self, record: Any):
 
         display_host = record['host'] if len(record['host']) <= 60 else f'...{record["host"][-57:]}'
         display_stack = record['stack'] if len(record['stack']) <= 20 else f'...{record["stack"][-17:]}'
@@ -149,7 +149,7 @@ class SwarmListView(ListView):
         d.show()
 
     @staticmethod
-    def close_cb(button: any):
+    def close_cb(button: Any):
         pass
 
     def keypress_callback(self, size, key, list_item: ListItem = None):
@@ -161,7 +161,7 @@ class SwarmListView(ListView):
         super().keypress_callback(size, key, list_item)
 
     # noinspection PyRedeclaration
-    def keypress_callback(self, size, key, data: any = None):
+    def keypress_callback(self, size, key, data: Any = None):
         logging.debug(f'b ListViewHandler[{self.name}] {size} {key} pressed')
         if key == 'c':
             swarm_connect(data, shell='bash')

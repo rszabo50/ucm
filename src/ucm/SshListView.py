@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 #
 #  Copyright (C) 2022 Robert Szabo.
@@ -24,6 +23,7 @@
 import os
 import time
 import logging
+from typing import Any
 from urwid import Columns, AttrWrap, Text, RIGHT, Pile, ListBox, SimpleListWalker
 from ucm.Widgets import ListView
 from ucm.UserConfig import UserConfig
@@ -37,7 +37,7 @@ class SshListView(ListView):
     def __init__(self):
         super().__init__('SSH', filter_fields=['category', 'name', 'user', 'address'])
 
-    def formatter(self, record: any):
+    def formatter(self, record: Any):
 
         if 'category' not in record:
             record['category'] = '---'
@@ -56,7 +56,7 @@ class SshListView(ListView):
         logging.debug(f'{self.name}] {self.selected.item_data["name"]} double_click_callback')
         self.connect(self.selected.item_data)
 
-    def keypress_callback(self, size, key, data: any = None):
+    def keypress_callback(self, size, key, data: Any = None):
         logging.debug(f'ListViewHandler[{self.name}] {size} {key} pressed')
         if key == 'c':
             self.connect(data)
@@ -78,7 +78,7 @@ class SshListView(ListView):
         d.show()
 
     @staticmethod
-    def close_cb(button: any):
+    def close_cb(button: Any):
         pass
 
     def get_filter_widgets(self):
@@ -104,7 +104,7 @@ class SshListView(ListView):
         opts = f"{data['options']}" if 'options' in data else ''
         return f"ssh {ident} {port} {opts} {user_at_host}"
 
-    def connect(self, data: any):
+    def connect(self, data: Any):
         if Registry().get('main_loop'):
             Registry().main_loop.screen.stop()
             print(chr(27) + "[2J")

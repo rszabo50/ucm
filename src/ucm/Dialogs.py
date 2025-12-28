@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 #
 #  Copyright (C) 2022 Robert Szabo.
@@ -21,6 +20,7 @@
 
 # Created by rszabo50 at 2022-01-28
 
+from typing import Any
 from urwid import Frame, Button, Text, WidgetWrap, Divider, Pile, Padding, Filler, AttrMap, LineBox, Columns, \
     SolidFill, GridFlow, MainLoop, Overlay
 from urwid import CENTER, MIDDLE
@@ -58,7 +58,7 @@ class DialogDisplay(WidgetWrap):
     ]
     parent = None
 
-    def __init__(self, text, width, height, body: any = None, loop: any = None, exit_cb: any = None,
+    def __init__(self, text, width, height, body: Any = None, loop: Any = None, exit_cb: Any = None,
                  palette: list = None):
         width = int(width) if width > 0 else ('relative', 80)
         height = int(height) if height > 0 else ('relative', 80)

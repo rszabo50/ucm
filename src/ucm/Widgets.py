@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 #
 #  Copyright (C) 2022 Robert Szabo.
@@ -25,6 +24,7 @@ import logging
 import time
 import re
 import os
+from typing import Any
 
 from urwid import AttrWrap, AttrMap, AttrSpec, Button, BoxAdapter, Columns, Divider, Filler, \
     LineBox, Padding, Pile, Text, WidgetWrap
@@ -38,7 +38,7 @@ from ucm.Registry import Registry
 
 
 class IdWidget(AttrMap):
-    def __init__(self, w: any, attr_map: any = None, focus_map: any = None, widget_id: str = None):
+    def __init__(self, w: Any, attr_map: Any = None, focus_map: Any = None, widget_id: str = None):
         super().__init__(w, attr_map, focus_map)
         base_id = widget_id
         if widget_id is not None:
@@ -110,8 +110,8 @@ class Footer(IdWidget):
 
 class ListItem(IdWidget):
 
-    def __init__(self, item_data: any, index: int = 0, formatter: any = None,
-                 unselected: str = 'normal', selected: str = 'dark red', keypress_callback: any = None,
+    def __init__(self, item_data: Any, index: int = 0, formatter: Any = None,
+                 unselected: str = 'normal', selected: str = 'dark red', keypress_callback: Any = None,
                  widget_id: str = None):
         self.item_data = item_data
         self.item_data['index'] = index
@@ -144,12 +144,12 @@ class ListItem(IdWidget):
 
 class ListViewListBox(IdWidget):
 
-    def __init__(self, body: any, double_click_callback: any = None, widget_id: str = None):
+    def __init__(self, body: Any, double_click_callback: Any = None, widget_id: str = None):
         self.double_click_callback = double_click_callback
         self.last_time_clicked = time.time()
         super().__init__(ScrollingListBox(body, with_scrollbar=UCMScrollBar), widget_id)
 
-    def set_double_click_callback(self, double_click_callback: any = None):
+    def set_double_click_callback(self, double_click_callback: Any = None):
         self.double_click_callback = double_click_callback
         return self
 
@@ -227,7 +227,7 @@ class ListView(IdWidget, TabGroupNode):
     def filters_clear(self):
         pass
 
-    def formatter(self, record: any):
+    def formatter(self, record: Any):
         return f'{record}'
 
     def filter_data(self, filter_string: str):
@@ -299,9 +299,9 @@ class View(IdWidget):
 
 
 class HelpBody(IdWidget):
-    heading_re = re.compile("^(#+)\s*(.*?)\s*$")
+    heading_re = re.compile(r"^(#+)\s*(.*?)\s*$")
 
-    bullet_re = re.compile("^(\s*)(\*)\s*(.*)$")
+    bullet_re = re.compile(r"^(\s*)(\*)\s*(.*)$")
 
     palette = {'h': [
         None,

@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+
 #
 #  Copyright (C) 2022 Robert Szabo.
 #
@@ -26,7 +26,7 @@ from urwid import Button, RadioButton, Edit, Text, AttrWrap
 from collections import OrderedDict
 
 
-class TabGroupFocus(object):
+class TabGroupFocus:
     def __init__(self):
         self.frame = None
         self.frame_pos = None
@@ -39,7 +39,7 @@ class TabGroupFocus(object):
         return f"TabGroupFocus({self.frame}:{self.frame_pos} {self.container}:{self.container_pos})"
 
 
-class TabGroupNode(object):
+class TabGroupNode:
     def __init__(self):
         self.current = None
         self.next = None
