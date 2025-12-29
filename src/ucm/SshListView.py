@@ -222,7 +222,6 @@ class SshListView(ListView):
         elif terminal_integration == "iterm2" and self.iterm2_service.is_iterm2_available():
             # Use iTerm2 integration - keep UCM running
             iterm2_settings = self.settings_manager.get_iterm2_settings()
-            new_tab = iterm2_settings.get("new_tab", True)
             profile = iterm2_settings.get("profile", "Default")
 
             ssh_command = self.ssh_service.build_ssh_command(data)
@@ -232,7 +231,6 @@ class SshListView(ListView):
             rc = self.iterm2_service.launch_ssh_connection(
                 ssh_command=ssh_command,
                 connection_name=connection_name,
-                new_tab=new_tab,
                 profile=profile,
             )
 

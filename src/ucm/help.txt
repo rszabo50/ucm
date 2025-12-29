@@ -152,7 +152,7 @@ Press `,` (comma) to open the Settings dialog where you can configure:
 * Auto-name windows with connection info
 
 ### iTerm2 Settings
-* Open connections in new tabs
+* Connection mode: New Tab (each connection in separate tab)
 * Specify iTerm2 profile to use
 
 Settings are saved to `~/.ucm/config.yml` and take effect immediately.

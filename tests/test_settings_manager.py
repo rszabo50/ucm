@@ -59,7 +59,6 @@ class TestSettingsManager:
         assert "auto_name" in settings["terminal"]["tmux"]
 
         # Check iTerm2 settings
-        assert "new_tab" in settings["terminal"]["iterm2"]
         assert "profile" in settings["terminal"]["iterm2"]
 
     def test_get_with_dot_notation(self, settings_manager):
@@ -67,7 +66,6 @@ class TestSettingsManager:
         assert settings_manager.get("terminal.integration") == "none"
         assert settings_manager.get("terminal.tmux.mode") == "window"
         assert settings_manager.get("terminal.tmux.auto_name") is True
-        assert settings_manager.get("terminal.iterm2.new_tab") is True
         assert settings_manager.get("terminal.iterm2.profile") == "Default"
 
     def test_get_with_default(self, settings_manager):
@@ -134,9 +132,7 @@ class TestSettingsManager:
         iterm2_settings = settings_manager.get_iterm2_settings()
 
         assert isinstance(iterm2_settings, dict)
-        assert "new_tab" in iterm2_settings
         assert "profile" in iterm2_settings
-        assert iterm2_settings["new_tab"] is True
         assert iterm2_settings["profile"] == "Default"
 
     def test_reset_to_defaults(self, settings_manager):
@@ -170,7 +166,7 @@ class TestSettingsManager:
 
         # Verify missing keys are filled with defaults
         assert sm.get("terminal.tmux.mode") == "window"
-        assert sm.get("terminal.iterm2.new_tab") is True
+        assert sm.get("terminal.iterm2.profile") == "Default"
 
     def test_config_directory_creation(self, temp_config_dir):
         """Test config directory is created if it doesn't exist."""

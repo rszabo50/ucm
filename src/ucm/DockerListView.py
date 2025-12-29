@@ -131,7 +131,6 @@ class DockerListView(ListView):
         elif terminal_integration == "iterm2" and self.iterm2_service.is_iterm2_available():
             # Use iTerm2 integration - keep UCM running
             iterm2_settings = self.settings_manager.get_iterm2_settings()
-            new_tab = iterm2_settings.get("new_tab", True)
             profile = iterm2_settings.get("profile", "Default")
 
             # Build docker exec command
@@ -144,7 +143,6 @@ class DockerListView(ListView):
             rc = self.iterm2_service.launch_docker_connection(
                 docker_command=docker_command,
                 container_name=container_name,
-                new_tab=new_tab,
                 profile=profile,
             )
 

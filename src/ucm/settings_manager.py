@@ -39,7 +39,6 @@ class SettingsManager:
                 "auto_name": True,  # Auto-name windows with connection info
             },
             "iterm2": {
-                "new_tab": True,  # Open connections in new tabs
                 "profile": "Default",  # iTerm2 profile to use
             },
         }

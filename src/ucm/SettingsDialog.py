@@ -58,7 +58,6 @@ class SettingsDialog:
 
         # Checkboxes
         self.tmux_auto_name_cb: CheckBox = None
-        self.iterm2_new_tab_cb: CheckBox = None
 
         # Edit fields
         self.iterm2_profile_edit: Edit = None
@@ -130,12 +129,10 @@ class SettingsDialog:
 
         # Get current iTerm2 settings
         iterm2_settings = self.settings_manager.get_iterm2_settings()
-        new_tab = iterm2_settings.get("new_tab", True)
         profile = iterm2_settings.get("profile", "Default")
 
-        # iTerm2 new tab checkbox
-        self.iterm2_new_tab_cb = CheckBox("  Open connections in new tabs", state=new_tab)
-        widgets.append(AttrWrap(self.iterm2_new_tab_cb, "button normal", "button select"))
+        # Connections always open in new tabs (only supported mode)
+        widgets.append(Text("  Connection Mode: New Tab (each connection in separate tab)"))
         widgets.append(Text(""))
 
         # iTerm2 profile edit
@@ -175,7 +172,6 @@ class SettingsDialog:
         self.settings_manager.set("terminal.tmux.auto_name", self.tmux_auto_name_cb.get_state())
 
         # Save iTerm2 settings
-        self.settings_manager.set("terminal.iterm2.new_tab", self.iterm2_new_tab_cb.get_state())
         self.settings_manager.set("terminal.iterm2.profile", self.iterm2_profile_edit.get_edit_text())
 
         logging.info(f"Settings saved: terminal integration = {integration_mode}")

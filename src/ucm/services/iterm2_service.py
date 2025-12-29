@@ -116,7 +116,6 @@ class ITerm2Service:
         self,
         ssh_command: str,
         connection_name: str,
-        new_tab: bool = True,
         profile: str = "Default",
     ) -> int:
         """Launch SSH connection in iTerm2 tab.
@@ -124,26 +123,18 @@ class ITerm2Service:
         Args:
             ssh_command: Full SSH command to execute
             connection_name: Name of the connection (for tab naming)
-            new_tab: Whether to open in new tab (currently always True)
             profile: iTerm2 profile to use
 
         Returns:
             Exit code (0 = success)
         """
         tab_name = f"🐧 {connection_name}"
-
-        if new_tab:
-            return self.create_tab(ssh_command, name=tab_name, profile=profile)
-        else:
-            # Not currently supported - would need to use current session
-            logging.warning("iTerm2 new_tab=False not currently supported, using new tab")
-            return self.create_tab(ssh_command, name=tab_name, profile=profile)
+        return self.create_tab(ssh_command, name=tab_name, profile=profile)
 
     def launch_docker_connection(
         self,
         docker_command: str,
         container_name: str,
-        new_tab: bool = True,
         profile: str = "Default",
     ) -> int:
         """Launch Docker connection in iTerm2 tab.
@@ -151,20 +142,13 @@ class ITerm2Service:
         Args:
             docker_command: Full docker exec command to execute
             container_name: Name of the container (for tab naming)
-            new_tab: Whether to open in new tab (currently always True)
             profile: iTerm2 profile to use
 
         Returns:
             Exit code (0 = success)
         """
         tab_name = f"🐳 {container_name}"
-
-        if new_tab:
-            return self.create_tab(docker_command, name=tab_name, profile=profile)
-        else:
-            # Not currently supported - would need to use current session
-            logging.warning("iTerm2 new_tab=False not currently supported, using new tab")
-            return self.create_tab(docker_command, name=tab_name, profile=profile)
+        return self.create_tab(docker_command, name=tab_name, profile=profile)
 
 
 # vim: ts=4 sw=4 et

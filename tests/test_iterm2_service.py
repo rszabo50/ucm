@@ -91,13 +91,12 @@ class TestITerm2Service:
                 rc = iterm2_service.create_tab("ssh user@host")
                 assert rc == 1
 
-    def test_launch_ssh_connection_with_new_tab(self, iterm2_service):
+    def test_launch_ssh_connection(self, iterm2_service):
         """Test launching SSH connection in new tab."""
         with patch.object(iterm2_service, "create_tab", return_value=0) as mock_create:
             rc = iterm2_service.launch_ssh_connection(
                 ssh_command="ssh user@host",
                 connection_name="test-host",
-                new_tab=True,
                 profile="Default",
             )
             assert rc == 0
@@ -105,45 +104,18 @@ class TestITerm2Service:
             assert "ssh user@host" in mock_create.call_args[0]
             assert "🐧 test-host" == mock_create.call_args[1]["name"]
 
-    def test_launch_ssh_connection_without_new_tab(self, iterm2_service):
-        """Test launching SSH connection without new tab (fallback to new tab)."""
-        with patch.object(iterm2_service, "create_tab", return_value=0) as mock_create:
-            rc = iterm2_service.launch_ssh_connection(
-                ssh_command="ssh user@host",
-                connection_name="test-host",
-                new_tab=False,
-                profile="Default",
-            )
-            assert rc == 0
-            # Should still create tab as fallback
-            mock_create.assert_called_once()
-
-    def test_launch_docker_connection_with_new_tab(self, iterm2_service):
+    def test_launch_docker_connection(self, iterm2_service):
         """Test launching Docker connection in new tab."""
         with patch.object(iterm2_service, "create_tab", return_value=0) as mock_create:
             rc = iterm2_service.launch_docker_connection(
                 docker_command="docker exec -it container bash",
                 container_name="test-container",
-                new_tab=True,
                 profile="Default",
             )
             assert rc == 0
             mock_create.assert_called_once()
             assert "docker exec -it container bash" in mock_create.call_args[0]
             assert "🐳 test-container" == mock_create.call_args[1]["name"]
-
-    def test_launch_docker_connection_without_new_tab(self, iterm2_service):
-        """Test launching Docker connection without new tab (fallback to new tab)."""
-        with patch.object(iterm2_service, "create_tab", return_value=0) as mock_create:
-            rc = iterm2_service.launch_docker_connection(
-                docker_command="docker exec -it container bash",
-                container_name="test-container",
-                new_tab=False,
-                profile="Default",
-            )
-            assert rc == 0
-            # Should still create tab as fallback
-            mock_create.assert_called_once()
 
 
 # vim: ts=4 sw=4 et
