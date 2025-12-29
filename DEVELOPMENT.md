@@ -113,6 +113,12 @@ ucm/
 │       ├── constants.py       # Constants and version
 │       ├── Registry.py        # Global registry singleton
 │       ├── UserConfig.py      # Configuration management
+│       ├── connection_manager.py  # Connection history/favorites
+│       ├── validators.py      # Data validation
+│       ├── services/          # Business logic layer
+│       │   ├── protocols.py   # Service interface protocols
+│       │   ├── ssh_service.py # SSH operations
+│       │   └── docker_service.py # Docker operations
 │       ├── SshListView.py     # SSH connections view
 │       ├── DockerListView.py  # Docker containers view
 │       ├── SwarmListView.py   # Docker Swarm view
@@ -122,12 +128,34 @@ ucm/
 ├── tests/
 │   ├── test_ssh_commands.py  # SSH command tests
 │   ├── test_config.py         # Configuration tests
-│   └── test_registry.py       # Registry tests
+│   ├── test_registry.py       # Registry tests
+│   ├── test_services.py       # Service layer tests
+│   ├── test_connection_manager.py # Connection management tests
+│   └── test_validators.py     # Validation tests
 ├── pyproject.toml             # Project metadata and config
 ├── requirements.txt           # Dependencies
 ├── Makefile                   # Development commands
 └── README.md                  # User documentation
 ```
+
+### Architecture
+
+UCM follows a layered architecture:
+
+**Service Layer** (`src/ucm/services/`)
+- Business logic for SSH and Docker operations
+- Protocol-based interfaces for dependency injection
+- Fully testable without UI dependencies
+
+**View Layer** (`*ListView.py`)
+- Presentation logic only
+- Delegates business logic to services
+- Handles UI interactions and screen management
+
+**Core Layer** (`connection_manager.py`, `validators.py`)
+- Connection history and favorites tracking
+- Configuration validation
+- Data management
 
 ## Code Standards
 
