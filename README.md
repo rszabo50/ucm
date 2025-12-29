@@ -14,6 +14,7 @@ A terminal-based connection manager for SSH and Docker with a powerful, mouse-fr
 
 - 🖥️ **SSH Connection Management** - Organize and connect to SSH hosts with ease
 - 🐳 **Docker Container Access** - Quick console access to running containers
+- ⭐ **Connection History & Favorites** - Track usage and mark favorite connections
 - 🔍 **Real-time Filtering** - Instantly search through hundreds of connections
 - 🖱️ **Mouse Support** - Full mouse and keyboard navigation
 - ⚙️ **Configuration Validation** - Automatic config checking with helpful error messages
@@ -123,6 +124,21 @@ Configuration is stored in `~/.ucm/ssh_connections.yml` by default.
 
 See [`examples/ssh_connections.yml`](examples/ssh_connections.yml) for more examples.
 
+### Connection History and Favorites
+
+UCM automatically tracks your SSH connection usage and allows you to mark favorites.
+
+**Features:**
+- ⭐ **Favorites** - Press `f` to toggle favorite status (marked with ★)
+- 📊 **Usage Tracking** - Automatically records connection timestamps and use counts
+- 💾 **Persistence** - History and favorites saved to `~/.ucm/history.yml` and `~/.ucm/favorites.yml`
+- 📈 **Statistics** - Track most-used connections and usage patterns
+
+**Benefits:**
+- Quickly identify frequently-used servers
+- Mark critical servers as favorites for easy identification
+- Track connection patterns across your infrastructure
+
 ### Configuration Validation
 
 UCM automatically validates your configuration and provides helpful error messages:
@@ -158,8 +174,9 @@ ucm --log-file /var/log/ucm.log
 - `Enter` - Connect to selected host/container
 
 #### Actions
-- `c` - Connect to selected Docker container (Docker view)
-- `i` - Inspect Docker container (Docker view)
+- `c` - Connect to selected host/container
+- `f` - Toggle favorite status (SSH view) - marked with ★
+- `i` - Show info/inspect (both SSH and Docker views)
 - `q` - Quit UCM
 - `?` - Show help
 
