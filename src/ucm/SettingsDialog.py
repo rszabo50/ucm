@@ -55,7 +55,6 @@ class SettingsDialog:
 
         # Radio button groups
         self.integration_group: List[RadioButton] = []
-        self.tmux_mode_group: List[RadioButton] = []
 
         # Checkboxes
         self.tmux_auto_name_cb: CheckBox = None
@@ -112,22 +111,10 @@ class SettingsDialog:
 
         # Get current tmux settings
         tmux_settings = self.settings_manager.get_tmux_settings()
-        current_tmux_mode = tmux_settings.get("mode", "window")
         auto_name = tmux_settings.get("auto_name", True)
 
-        # Tmux mode radio buttons
-        widgets.append(Text("  Connection Mode:"))
-        tmux_window_rb = RadioButton(
-            self.tmux_mode_group,
-            "    New Window - Each connection in separate window",
-            state=(current_tmux_mode == "window"),
-        )
-        tmux_pane_rb = RadioButton(
-            self.tmux_mode_group, "    New Pane - Split current window into panes", state=(current_tmux_mode == "pane")
-        )
-
-        widgets.append(AttrWrap(tmux_window_rb, "button normal", "button select"))
-        widgets.append(AttrWrap(tmux_pane_rb, "button normal", "button select"))
+        # Tmux mode is always "window" (pane mode not supported)
+        widgets.append(Text("  Connection Mode: New Window (each connection in separate window)"))
         widgets.append(Text(""))
 
         # Tmux auto-name checkbox
@@ -183,18 +170,8 @@ class SettingsDialog:
 
         self.settings_manager.set_terminal_integration(integration_mode)
 
-        # Save tmux settings
-        tmux_mode = "window"
-        for rb in self.tmux_mode_group:
-            if rb.get_state():
-                label = rb.get_label()
-                if "Window" in label:
-                    tmux_mode = "window"
-                elif "Pane" in label:
-                    tmux_mode = "pane"
-                break
-
-        self.settings_manager.set("terminal.tmux.mode", tmux_mode)
+        # Save tmux settings (mode is always "window")
+        self.settings_manager.set("terminal.tmux.mode", "window")
         self.settings_manager.set("terminal.tmux.auto_name", self.tmux_auto_name_cb.get_state())
 
         # Save iTerm2 settings

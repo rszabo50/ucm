@@ -80,8 +80,8 @@ class TestSettingsManager:
         settings_manager.set("terminal.integration", "tmux")
         assert settings_manager.get("terminal.integration") == "tmux"
 
-        settings_manager.set("terminal.tmux.mode", "pane")
-        assert settings_manager.get("terminal.tmux.mode") == "pane"
+        settings_manager.set("terminal.tmux.mode", "window")
+        assert settings_manager.get("terminal.tmux.mode") == "window"
 
     def test_set_creates_nested_keys(self, settings_manager):
         """Test setting creates nested keys if they don't exist."""
@@ -92,12 +92,12 @@ class TestSettingsManager:
         """Test settings are persisted to file."""
         sm1 = SettingsManager(temp_config_dir)
         sm1.set("terminal.integration", "tmux")
-        sm1.set("terminal.tmux.mode", "pane")
+        sm1.set("terminal.tmux.mode", "window")
 
         # Create new instance - should load from file
         sm2 = SettingsManager(temp_config_dir)
         assert sm2.get("terminal.integration") == "tmux"
-        assert sm2.get("terminal.tmux.mode") == "pane"
+        assert sm2.get("terminal.tmux.mode") == "window"
 
     def test_terminal_integration_getter(self, settings_manager):
         """Test terminal integration getter."""
@@ -143,7 +143,7 @@ class TestSettingsManager:
         """Test resetting to default settings."""
         # Modify settings
         settings_manager.set("terminal.integration", "tmux")
-        settings_manager.set("terminal.tmux.mode", "pane")
+        settings_manager.set("terminal.tmux.auto_name", False)
 
         # Reset
         settings_manager.reset_to_defaults()
@@ -151,6 +151,7 @@ class TestSettingsManager:
         # Verify defaults are restored
         assert settings_manager.get("terminal.integration") == "none"
         assert settings_manager.get("terminal.tmux.mode") == "window"
+        assert settings_manager.get("terminal.tmux.auto_name") is True
 
     def test_merge_with_defaults(self, temp_config_dir):
         """Test loading settings merges with defaults for missing keys."""

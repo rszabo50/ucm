@@ -207,7 +207,7 @@ class SshListView(ListView):
             ssh_command = self.ssh_service.build_ssh_command(data)
             connection_name = data.get("name", data.get("address", "unknown"))
 
-            logging.info(f"Launching SSH connection in tmux {mode}: {connection_name}")
+            logging.debug(f"Launching SSH connection in tmux {mode}: {connection_name}")
             rc = self.tmux_service.launch_ssh_connection(
                 ssh_command=ssh_command,
                 connection_name=connection_name,

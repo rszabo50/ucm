@@ -50,10 +50,12 @@ from ucm.constants import MAIN_PALETTE, PROGRAM_NAME, PROGRAM_VERSION, SCM_URL
 from ucm.Dialogs import DialogDisplay
 from ucm.DockerListView import DockerListView
 from ucm.Registry import Registry
+from ucm.services import TmuxService
 from ucm.SettingsDialog import SettingsDialog
 from ucm.SshListView import SshListView
 from ucm.SwarmListView import SwarmListView
 from ucm.TabGroup import TabGroupButton, TabGroupManager, TabGroupRadioButton
+from ucm.TmuxListView import TmuxListView
 from ucm.UserConfig import UserConfig
 from ucm.Widgets import Clock, Footer, Header, HelpBody, View
 
@@ -104,6 +106,10 @@ class Actions:
             Actions.popup_help_dialog()
         if key in [","]:
             Actions.popup_settings_dialog()
+        if key == "ctrl l":
+            # Ctrl+L to refresh/clear screen (standard terminal convention)
+            if Registry().get("main_loop") is not None:
+                Registry().main_loop.screen.clear()
 
     @staticmethod
     def action_button_cb(_button: Any = None):
@@ -186,6 +192,8 @@ class Application:
         self.views["SSH"] = View(SshListView())
         if UserConfig().docker is not None:
             self.views["Docker"] = View(DockerListView())
+        if TmuxService.is_inside_tmux():
+            self.views["Tmux"] = View(TmuxListView())
         self.views["Swarm"] = View(SwarmListView())
         self.view_holder = WidgetWrap(self.views["SSH"])
 
@@ -208,6 +216,20 @@ class Application:
                         14,
                         AttrWrap(
                             TabGroupRadioButton(self.rb_group, "🐳-Docker", on_state_change=self.view_changed),
+                            "header",
+                            "header",
+                        ),
+                    )
+                ]
+            )
+
+        if TmuxService.is_inside_tmux():
+            view_column_array.extend(
+                [
+                    (
+                        13,
+                        AttrWrap(
+                            TabGroupRadioButton(self.rb_group, "📟-Tmux", on_state_change=self.view_changed),
                             "header",
                             "header",
                         ),

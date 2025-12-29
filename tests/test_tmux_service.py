@@ -180,5 +180,56 @@ class TestTmuxService:
             assert rc == 0
             mock_create.assert_called_once_with("docker exec -it container bash")
 
+    def test_get_current_window_index_inside_tmux(self, tmux_service):
+        """Test getting current window index when inside tmux."""
+        with patch.dict("os.environ", {"TMUX": "/tmp/tmux-1000/default,12345,0"}):
+            with patch("subprocess.run") as mock_run:
+                mock_run.return_value = MagicMock(stdout="3\n", returncode=0)
+                window_index = tmux_service.get_current_window_index()
+                assert window_index == 3
+
+    def test_get_current_window_index_not_inside_tmux(self, tmux_service):
+        """Test getting current window index when not inside tmux."""
+        with patch.dict("os.environ", {}, clear=True):
+            window_index = tmux_service.get_current_window_index()
+            assert window_index is None
+
+    def test_get_current_window_index_on_exception(self, tmux_service):
+        """Test getting current window index handles exceptions."""
+        with patch.dict("os.environ", {"TMUX": "/tmp/tmux-1000/default,12345,0"}):
+            with patch("subprocess.run", side_effect=Exception("Test error")):
+                window_index = tmux_service.get_current_window_index()
+                assert window_index is None
+
+    def test_setup_ucm_return_key_inside_tmux(self, tmux_service):
+        """Test setting up UCM return key when inside tmux."""
+        with patch.dict("os.environ", {"TMUX": "/tmp/tmux-1000/default,12345,0"}):
+            with patch("subprocess.run") as mock_run:
+                with patch("os.getpid", return_value=12345):
+                    mock_run.return_value = MagicMock(returncode=0)
+                    rc = tmux_service.setup_ucm_return_key(2, key="u")
+                    assert rc == 0
+                    mock_run.assert_called_once()
+                    args = mock_run.call_args[0][0]
+                    assert args[0] == "tmux"
+                    assert args[1] == "bind-key"
+                    assert args[2] == "u"
+                    assert args[3] == "run-shell"
+                    assert "select-window -t 2" in args[4]
+                    assert "kill -WINCH 12345" in args[4]
+
+    def test_setup_ucm_return_key_not_inside_tmux(self, tmux_service):
+        """Test setting up UCM return key fails when not inside tmux."""
+        with patch.dict("os.environ", {}, clear=True):
+            rc = tmux_service.setup_ucm_return_key(2)
+            assert rc == 1
+
+    def test_setup_ucm_return_key_on_exception(self, tmux_service):
+        """Test setting up UCM return key handles exceptions."""
+        with patch.dict("os.environ", {"TMUX": "/tmp/tmux-1000/default,12345,0"}):
+            with patch("subprocess.run", side_effect=Exception("Test error")):
+                rc = tmux_service.setup_ucm_return_key(2)
+                assert rc == 1
+
 
 # vim: ts=4 sw=4 et

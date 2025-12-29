@@ -8,6 +8,7 @@ UCM provides a terminal-based interface for managing SSH connections and Docker 
 
 * **SSH View** - Manage and connect to SSH hosts
 * **Docker View** - Access running Docker containers
+* **Tmux View** - Navigate tmux windows (only visible inside tmux)
 * **Swarm View** - Docker Swarm services (if configured)
 
 Switch views using the radio buttons in the header or Tab + arrow keys.
@@ -19,6 +20,7 @@ Switch views using the radio buttons in the header or Tab + arrow keys.
 * `q` - Quit UCM
 * `?` - Show this help dialog
 * `,` - Open Settings dialog
+* `Ctrl+L` - Refresh/clear screen (useful after returning from tmux windows)
 * `Tab` - Cycle between UI elements
 * `Esc` - Close dialogs
 
@@ -53,6 +55,13 @@ Switch views using the radio buttons in the header or Tab + arrow keys.
 * `c` or `b` - Connect with bash
 * `s` - Connect with sh
 * `i` - Inspect service/container
+
+#### Tmux View
+* `Enter` - Switch to selected window
+* `c` - Switch to selected window
+* `x` - Close selected window (cannot close active window)
+* `r` - Refresh window list
+* `Double-click` - Switch to window (mouse)
 
 ### Filtering and Sorting
 
@@ -135,11 +144,11 @@ Press `,` (comma) to open the Settings dialog where you can configure:
 
 ### Terminal Integration Options
 * **None** (default) - UCM exits after each connection
-* **Tmux** - Keep UCM open, launch connections in tmux windows/panes
+* **Tmux** - Keep UCM open, launch connections in tmux windows
 * **iTerm2** (macOS) - Keep UCM open, launch connections in iTerm2 tabs
 
 ### Tmux Settings
-* Connection mode: New Window or New Pane
+* Connection mode: New Window (only window mode is supported)
 * Auto-name windows with connection info
 
 ### iTerm2 Settings
@@ -147,6 +156,53 @@ Press `,` (comma) to open the Settings dialog where you can configure:
 * Specify iTerm2 profile to use
 
 Settings are saved to `~/.ucm/config.yml` and take effect immediately.
+
+## Tmux Keyboard Shortcuts
+
+When using UCM inside tmux, you can use the Tmux View to navigate windows without memorizing tmux shortcuts. However, here are the essential tmux key sequences for reference:
+
+### Basic Navigation
+* `Ctrl+b 0-9` - Switch to window by number (0-9)
+* `Ctrl+b n` - Next window
+* `Ctrl+b p` - Previous window
+* `Ctrl+b w` - List all windows (interactive chooser)
+* `Ctrl+b l` - Switch to last window
+
+### Window Management
+* `Ctrl+b c` - Create new window
+* `Ctrl+b ,` - Rename current window
+* `Ctrl+b &` - Kill current window (prompts for confirmation)
+* `Ctrl+b f` - Find window by name
+
+### Pane Management
+* `Ctrl+b %` - Split pane vertically
+* `Ctrl+b "` - Split pane horizontally
+* `Ctrl+b o` - Switch to next pane
+* `Ctrl+b ;` - Switch to last active pane
+* `Ctrl+b x` - Kill current pane (prompts for confirmation)
+* `Ctrl+b z` - Toggle pane zoom (fullscreen)
+* `Ctrl+b {` - Move pane left
+* `Ctrl+b }` - Move pane right
+* `Ctrl+b ↑↓←→` - Resize pane in direction
+
+### Session Management
+* `Ctrl+b d` - Detach from session
+* `Ctrl+b s` - List sessions (interactive chooser)
+* `Ctrl+b $` - Rename current session
+
+### Other Useful Commands
+* `Ctrl+b ?` - Show all key bindings
+* `Ctrl+b :` - Enter tmux command mode
+* `Ctrl+b [` - Enter copy mode (scroll back buffer)
+* `Ctrl+b ]` - Paste from tmux buffer
+
+**Note**: All tmux shortcuts start with the prefix key `Ctrl+b`. Press the prefix, release, then press the command key.
+
+**Mac Users**: Use the Control key (not Command ⌘) for `Ctrl+b`. The Control key is typically in the bottom left of your keyboard.
+
+**UCM Auto-Setup**: When UCM starts inside tmux, it automatically creates a `Ctrl+b u` keybinding to return to UCM from any window. No more memorizing window numbers!
+
+**Pro Tip**: With UCM's Tmux View, you can skip most window navigation shortcuts (`Ctrl+b 0-9`, `Ctrl+b w`, etc.) and use UCM's familiar vim-style interface instead!
 
 ## Docker Integration
 
@@ -169,6 +225,7 @@ UCM tries `bash` first, then falls back to `sh` if bash isn't available.
 * Use `j`/`k` (Vim-style) instead of arrow keys
 * Filter to narrow down the list quickly
 * Use `Tab` to move between UI sections
+* Inside tmux: Use Tmux View instead of `Ctrl+b` shortcuts
 
 ### Efficient Filtering
 * Press `/` to activate filter mode, then type partial names
@@ -213,6 +270,15 @@ ucm --log-file ~/ucm.log
 ### Multiple Environments
 * Use `--config-dir` for separate configs
 * Create aliases: `alias ucm-prod='ucm --config-dir ~/.ucm-prod'`
+
+### Using UCM with Tmux
+1. Start tmux session: `tmux` or `tmux attach`
+2. Launch UCM - the Tmux View tab appears automatically
+3. UCM automatically sets up `Ctrl+b u` to return to UCM from any window
+4. Connect to SSH/Docker - opens in new tmux window
+5. Switch to Tmux View to see all windows and navigate
+6. Press `Ctrl+b u` from any window to instantly return to UCM
+7. If the screen looks corrupted after returning, press `Ctrl+L` to refresh
 
 ## Troubleshooting
 

@@ -35,7 +35,7 @@ class SettingsManager:
         "terminal": {
             "integration": "none",  # Options: "none", "tmux", "iterm2"
             "tmux": {
-                "mode": "window",  # Options: "window", "pane"
+                "mode": "window",  # Only "window" mode is supported
                 "auto_name": True,  # Auto-name windows with connection info
             },
             "iterm2": {

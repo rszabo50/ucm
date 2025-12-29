@@ -116,7 +116,7 @@ class DockerListView(ListView):
             docker_command = f"{docker_cmd} exec -it {container_id} {shell}"
             container_name = data.get("name", container_id)
 
-            logging.info(f"Launching Docker connection in tmux {mode}: {container_name}")
+            logging.debug(f"Launching Docker connection in tmux {mode}: {container_name}")
             rc = self.tmux_service.launch_docker_connection(
                 docker_command=docker_command,
                 container_name=container_name,
