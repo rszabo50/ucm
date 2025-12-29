@@ -25,14 +25,45 @@ A terminal-based connection manager for SSH and Docker with a powerful, mouse-fr
 
 ### Installation
 
+**Option 1: Install from PyPI (Recommended)**
+
 ```bash
-# Install from source
+pip install ucm
+```
+
+**Option 2: Install from Homebrew (macOS/Linux)**
+
+```bash
+# Coming soon
+brew install ucm
+```
+
+**Option 3: Install from Source**
+
+```bash
 git clone https://github.com/rszabo50/ucm.git
 cd ucm
 pip install -e .
+```
 
-# Run UCM
+**Run UCM:**
+
+```bash
 ucm
+```
+
+### Upgrading
+
+**PyPI:**
+```bash
+pip install --upgrade ucm
+```
+
+**Source:**
+```bash
+cd ucm
+git pull
+pip install -e .
 ```
 
 ### First Run
