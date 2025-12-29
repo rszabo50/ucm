@@ -280,6 +280,17 @@ ucm --log-file ~/ucm.log
 6. Press `Ctrl+b u` from any window to instantly return to UCM
 7. If the screen looks corrupted after returning, press `Ctrl+L` to refresh
 
+### Using UCM with iTerm2 (macOS)
+1. Launch UCM in iTerm2
+2. Open Settings (press `,`) and select iTerm2 integration
+3. Optionally configure your preferred iTerm2 profile
+4. Connect to SSH/Docker - opens in new iTerm2 tab
+5. UCM stays running in the original tab
+6. Use `Cmd+1`, `Cmd+2`, etc. to switch between tabs
+7. Return to UCM tab to select your next connection
+
+**Tip**: You can customize the iTerm2 profile used for connections in Settings. This allows you to use different color schemes, fonts, or other preferences for your SSH/Docker connections.
+
 ## Troubleshooting
 
 ### Configuration Errors

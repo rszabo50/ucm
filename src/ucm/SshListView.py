@@ -31,6 +31,7 @@ from ucm.constants import MAIN_PALETTE
 from ucm.Dialogs import DialogDisplay
 from ucm.Registry import Registry
 from ucm.services import SSHService, SSHServiceProtocol, TmuxService
+from ucm.services.iterm2_service import ITerm2Service
 from ucm.settings_manager import get_settings_manager
 from ucm.UserConfig import UserConfig
 from ucm.Widgets import ListView
@@ -41,6 +42,7 @@ class SshListView(ListView):
         self.conn_manager = get_connection_manager()
         self.ssh_service = ssh_service if ssh_service is not None else SSHService()
         self.tmux_service = TmuxService()
+        self.iterm2_service = ITerm2Service()
         self.settings_manager = get_settings_manager()
         self.favorites_only = False  # Toggle to show only favorites
         self.sort_by_recent = False  # Toggle to sort by recently used
@@ -195,7 +197,7 @@ class SshListView(ListView):
         # Record this connection in history
         self.conn_manager.record_connection(data)
 
-        # Check if tmux integration is enabled
+        # Check if terminal integration is enabled
         terminal_integration = self.settings_manager.get_terminal_integration()
 
         if terminal_integration == "tmux" and self.tmux_service.is_inside_tmux():
@@ -217,6 +219,25 @@ class SshListView(ListView):
 
             if rc != 0:
                 logging.error(f"Failed to launch tmux {mode} for {connection_name}")
+        elif terminal_integration == "iterm2" and self.iterm2_service.is_iterm2_available():
+            # Use iTerm2 integration - keep UCM running
+            iterm2_settings = self.settings_manager.get_iterm2_settings()
+            new_tab = iterm2_settings.get("new_tab", True)
+            profile = iterm2_settings.get("profile", "Default")
+
+            ssh_command = self.ssh_service.build_ssh_command(data)
+            connection_name = data.get("name", data.get("address", "unknown"))
+
+            logging.debug(f"Launching SSH connection in iTerm2 tab: {connection_name}")
+            rc = self.iterm2_service.launch_ssh_connection(
+                ssh_command=ssh_command,
+                connection_name=connection_name,
+                new_tab=new_tab,
+                profile=profile,
+            )
+
+            if rc != 0:
+                logging.error(f"Failed to launch iTerm2 tab for {connection_name}")
         else:
             # Traditional mode - stop UCM, connect, then restart
             main_loop = Registry().get("main_loop")

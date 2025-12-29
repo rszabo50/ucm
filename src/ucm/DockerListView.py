@@ -30,6 +30,7 @@ from ucm.constants import MAIN_PALETTE
 from ucm.Dialogs import DialogDisplay
 from ucm.Registry import Registry
 from ucm.services import DockerService, DockerServiceProtocol, TmuxService
+from ucm.services.iterm2_service import ITerm2Service
 from ucm.settings_manager import get_settings_manager
 from ucm.UserConfig import UserConfig
 from ucm.Widgets import ListView
@@ -42,6 +43,7 @@ class DockerListView(ListView):
             docker_service if docker_service is not None else DockerService(docker_cmd if docker_cmd else "docker")
         )
         self.tmux_service = TmuxService()
+        self.iterm2_service = ITerm2Service()
         self.settings_manager = get_settings_manager()
         super().__init__("Docker", filter_fields=["containerId", "name", "image"])
 
@@ -101,7 +103,7 @@ class DockerListView(ListView):
             data: Container data dictionary
             shell: Shell to use (default: 'bash')
         """
-        # Check if tmux integration is enabled
+        # Check if terminal integration is enabled
         terminal_integration = self.settings_manager.get_terminal_integration()
 
         if terminal_integration == "tmux" and self.tmux_service.is_inside_tmux():
@@ -126,6 +128,28 @@ class DockerListView(ListView):
 
             if rc != 0:
                 logging.error(f"Failed to launch tmux {mode} for {container_name}")
+        elif terminal_integration == "iterm2" and self.iterm2_service.is_iterm2_available():
+            # Use iTerm2 integration - keep UCM running
+            iterm2_settings = self.settings_manager.get_iterm2_settings()
+            new_tab = iterm2_settings.get("new_tab", True)
+            profile = iterm2_settings.get("profile", "Default")
+
+            # Build docker exec command
+            container_id = data.get("containerId", data.get("name", "unknown"))
+            docker_cmd = self.docker_service.docker_cmd
+            docker_command = f"{docker_cmd} exec -it {container_id} {shell}"
+            container_name = data.get("name", container_id)
+
+            logging.debug(f"Launching Docker connection in iTerm2 tab: {container_name}")
+            rc = self.iterm2_service.launch_docker_connection(
+                docker_command=docker_command,
+                container_name=container_name,
+                new_tab=new_tab,
+                profile=profile,
+            )
+
+            if rc != 0:
+                logging.error(f"Failed to launch iTerm2 tab for {container_name}")
         else:
             # Traditional mode - stop UCM, connect, then restart
             main_loop = Registry().get("main_loop")
