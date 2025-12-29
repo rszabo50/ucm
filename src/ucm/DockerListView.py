@@ -29,7 +29,8 @@ from urwid import RIGHT, AttrWrap, Columns, ListBox, Pile, SimpleListWalker, Tex
 from ucm.constants import MAIN_PALETTE
 from ucm.Dialogs import DialogDisplay
 from ucm.Registry import Registry
-from ucm.services import DockerService, DockerServiceProtocol
+from ucm.services import DockerService, DockerServiceProtocol, TmuxService
+from ucm.settings_manager import get_settings_manager
 from ucm.UserConfig import UserConfig
 from ucm.Widgets import ListView
 
@@ -40,6 +41,8 @@ class DockerListView(ListView):
         self.docker_service = (
             docker_service if docker_service is not None else DockerService(docker_cmd if docker_cmd else "docker")
         )
+        self.tmux_service = TmuxService()
+        self.settings_manager = get_settings_manager()
         super().__init__("Docker", filter_fields=["containerId", "name", "image"])
 
     def formatter(self, record: Dict[str, Any]) -> str:
@@ -98,22 +101,49 @@ class DockerListView(ListView):
             data: Container data dictionary
             shell: Shell to use (default: 'bash')
         """
-        main_loop = Registry().get("main_loop")
-        if main_loop:
-            try:
-                main_loop.screen.stop()
-                print(chr(27) + "[2J")
-                rc = self.docker_service.connect(data, shell)
-                if rc != 0:
-                    print(f"Container connection failed with return code: {rc}")
-                    time.sleep(5)
-            except Exception as e:
-                logging.error(f"Docker connection error: {e}")
-                print(f"Error: {e}")
-                time.sleep(3)
-            finally:
-                main_loop.screen.start(alternate_buffer=True)
-                main_loop.screen.clear()
+        # Check if tmux integration is enabled
+        terminal_integration = self.settings_manager.get_terminal_integration()
+
+        if terminal_integration == "tmux" and self.tmux_service.is_inside_tmux():
+            # Use tmux integration - keep UCM running
+            tmux_settings = self.settings_manager.get_tmux_settings()
+            mode = tmux_settings.get("mode", "window")
+            auto_name = tmux_settings.get("auto_name", True)
+
+            # Build docker exec command
+            container_id = data.get("containerId", data.get("name", "unknown"))
+            docker_cmd = self.docker_service.docker_cmd
+            docker_command = f"{docker_cmd} exec -it {container_id} {shell}"
+            container_name = data.get("name", container_id)
+
+            logging.info(f"Launching Docker connection in tmux {mode}: {container_name}")
+            rc = self.tmux_service.launch_docker_connection(
+                docker_command=docker_command,
+                container_name=container_name,
+                mode=mode,
+                auto_name=auto_name,
+            )
+
+            if rc != 0:
+                logging.error(f"Failed to launch tmux {mode} for {container_name}")
+        else:
+            # Traditional mode - stop UCM, connect, then restart
+            main_loop = Registry().get("main_loop")
+            if main_loop:
+                try:
+                    main_loop.screen.stop()
+                    print(chr(27) + "[2J")
+                    rc = self.docker_service.connect(data, shell)
+                    if rc != 0:
+                        print(f"Container connection failed with return code: {rc}")
+                        time.sleep(5)
+                except Exception as e:
+                    logging.error(f"Docker connection error: {e}")
+                    print(f"Error: {e}")
+                    time.sleep(3)
+                finally:
+                    main_loop.screen.start(alternate_buffer=True)
+                    main_loop.screen.clear()
 
     def get_filter_widgets(self) -> Columns:
         return Columns(

@@ -30,7 +30,8 @@ from ucm.connection_manager import get_connection_manager
 from ucm.constants import MAIN_PALETTE
 from ucm.Dialogs import DialogDisplay
 from ucm.Registry import Registry
-from ucm.services import SSHService, SSHServiceProtocol
+from ucm.services import SSHService, SSHServiceProtocol, TmuxService
+from ucm.settings_manager import get_settings_manager
 from ucm.UserConfig import UserConfig
 from ucm.Widgets import ListView
 
@@ -39,6 +40,8 @@ class SshListView(ListView):
     def __init__(self, ssh_service: Optional[SSHServiceProtocol] = None) -> None:
         self.conn_manager = get_connection_manager()
         self.ssh_service = ssh_service if ssh_service is not None else SSHService()
+        self.tmux_service = TmuxService()
+        self.settings_manager = get_settings_manager()
         self.favorites_only = False  # Toggle to show only favorites
         self.sort_by_recent = False  # Toggle to sort by recently used
         super().__init__("SSH", filter_fields=["category", "name", "user", "address"])
@@ -192,22 +195,46 @@ class SshListView(ListView):
         # Record this connection in history
         self.conn_manager.record_connection(data)
 
-        main_loop = Registry().get("main_loop")
-        if main_loop:
-            try:
-                main_loop.screen.stop()
-                print(chr(27) + "[2J")
-                rc = self.ssh_service.connect(data)
-                if rc != 0:
-                    print(f"Connection failed with return code: {rc}")
-                    time.sleep(2)
-            except Exception as e:
-                logging.error(f"SSH connection error: {e}")
-                print(f"Error: {e}")
-                time.sleep(3)
-            finally:
-                main_loop.screen.start(alternate_buffer=True)
-                main_loop.screen.clear()
+        # Check if tmux integration is enabled
+        terminal_integration = self.settings_manager.get_terminal_integration()
+
+        if terminal_integration == "tmux" and self.tmux_service.is_inside_tmux():
+            # Use tmux integration - keep UCM running
+            tmux_settings = self.settings_manager.get_tmux_settings()
+            mode = tmux_settings.get("mode", "window")
+            auto_name = tmux_settings.get("auto_name", True)
+
+            ssh_command = self.ssh_service.build_ssh_command(data)
+            connection_name = data.get("name", data.get("address", "unknown"))
+
+            logging.info(f"Launching SSH connection in tmux {mode}: {connection_name}")
+            rc = self.tmux_service.launch_ssh_connection(
+                ssh_command=ssh_command,
+                connection_name=connection_name,
+                mode=mode,
+                auto_name=auto_name,
+            )
+
+            if rc != 0:
+                logging.error(f"Failed to launch tmux {mode} for {connection_name}")
+        else:
+            # Traditional mode - stop UCM, connect, then restart
+            main_loop = Registry().get("main_loop")
+            if main_loop:
+                try:
+                    main_loop.screen.stop()
+                    print(chr(27) + "[2J")
+                    rc = self.ssh_service.connect(data)
+                    if rc != 0:
+                        print(f"Connection failed with return code: {rc}")
+                        time.sleep(2)
+                except Exception as e:
+                    logging.error(f"SSH connection error: {e}")
+                    print(f"Error: {e}")
+                    time.sleep(3)
+                finally:
+                    main_loop.screen.start(alternate_buffer=True)
+                    main_loop.screen.clear()
 
     def _connect_to_last_used(self) -> None:
         """Connect to the most recently used connection from history."""
