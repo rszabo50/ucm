@@ -38,6 +38,8 @@ from ucm.Widgets import ListView
 class SshListView(ListView):
     def __init__(self) -> None:
         self.conn_manager = get_connection_manager()
+        self.favorites_only = False  # Toggle to show only favorites
+        self.sort_by_recent = False  # Toggle to sort by recently used
         super().__init__("SSH", filter_fields=["category", "name", "user", "address"])
 
     def formatter(self, record: Dict[str, Any]) -> str:
@@ -58,6 +60,47 @@ class SshListView(ListView):
     def fetch_data() -> Optional[List[Dict[str, Any]]]:
         return UserConfig().get("ssh_connections")
 
+    def filter_data(self, filter_string: str) -> List[Dict[str, Any]]:
+        """Filter and sort data based on current settings.
+
+        Args:
+            filter_string: Text filter to apply
+
+        Returns:
+            Filtered and sorted list of connections
+        """
+        # Get base data
+        data = super().filter_data(filter_string)
+        if not data:
+            return []
+
+        # Filter by favorites if enabled
+        if self.favorites_only:
+            data = [conn for conn in data if self.conn_manager.is_favorite(conn)]
+
+        # Sort by recently used if enabled
+        if self.sort_by_recent:
+            # Get history to find use counts and last used times
+            history = self.conn_manager.get_history(limit=1000)
+            history_map = {
+                self.conn_manager._connection_id(h): {
+                    "last_used": h.get("last_used", ""),
+                    "use_count": h.get("use_count", 0),
+                }
+                for h in history
+            }
+
+            # Sort connections by last_used (most recent first)
+            def sort_key(conn):
+                conn_id = self.conn_manager._connection_id(conn)
+                if conn_id in history_map:
+                    return (1, history_map[conn_id]["last_used"])  # 1 = has history
+                return (0, "")  # 0 = no history, will be at the end
+
+            data = sorted(data, key=sort_key, reverse=True)
+
+        return data
+
     def double_click_callback(self) -> None:
         logging.debug(f"{self.name}] {self.selected.item_data['name']} double_click_callback")
         self.connect(self.selected.item_data)
@@ -76,6 +119,21 @@ class SshListView(ListView):
                 logging.info(f"{data.get('name', 'Connection')} {status} favorites")
                 # Refresh the list to update the star indicator
                 self.filter_and_set(self.filter_edit.edit_text if hasattr(self, "filter_edit") else "")
+        elif key == "F":
+            # Toggle favorites-only filter
+            self.favorites_only = not self.favorites_only
+            mode = "ON" if self.favorites_only else "OFF"
+            logging.info(f"Favorites-only filter: {mode}")
+            self.filter_and_set(self.filter_edit.edit_text if hasattr(self, "filter_edit") else "")
+        elif key == "r":
+            # Toggle recently used sorting
+            self.sort_by_recent = not self.sort_by_recent
+            mode = "ON" if self.sort_by_recent else "OFF"
+            logging.info(f"Recently used sorting: {mode}")
+            self.filter_and_set(self.filter_edit.edit_text if hasattr(self, "filter_edit") else "")
+        elif key == "L":
+            # Quick connect to last used connection
+            self._connect_to_last_used()
         super().keypress_callback(size, key, data)
 
     @staticmethod
@@ -97,13 +155,21 @@ class SshListView(ListView):
         pass
 
     def get_filter_widgets(self) -> Columns:
+        # Build status indicators
+        fav_indicator = " [FAV]" if self.favorites_only else ""
+        recent_indicator = " [RECENT]" if self.sort_by_recent else ""
+        status = f"{fav_indicator}{recent_indicator}"
+
         return Columns(
             [
                 super().get_filter_widgets(),
                 Columns(
                     [
                         AttrWrap(
-                            Text("| 'c' = connect, 'i' = info, 'f' = toggle favorite ★", align=RIGHT),
+                            Text(
+                                f"| 'c'=connect 'i'=info 'f'=fav★ 'F'=filter favs 'r'=recent 'L'=last{status}",
+                                align=RIGHT,
+                            ),
                             "header",
                             "header",
                         )
@@ -164,6 +230,29 @@ class SshListView(ListView):
             finally:
                 main_loop.screen.start(alternate_buffer=True)
                 main_loop.screen.clear()
+
+    def _connect_to_last_used(self) -> None:
+        """Connect to the most recently used connection from history."""
+        history = self.conn_manager.get_history(limit=1)
+        if not history:
+            logging.info("No connection history available")
+            return
+
+        last_conn = history[0]
+        # Find matching connection in current config
+        all_connections = self.fetch_data()
+        if not all_connections:
+            logging.error("No connections configured")
+            return
+
+        # Try to find the connection by name and address
+        for conn in all_connections:
+            if conn.get("name") == last_conn.get("name") and conn.get("address") == last_conn.get("address"):
+                logging.info(f"Quick connecting to last used: {conn.get('name')}")
+                self.connect(conn)
+                return
+
+        logging.warning(f"Last used connection '{last_conn.get('name')}' not found in current config")
 
     def get_header(self) -> str:
         return f"  {'#'.rjust(4)}   {'Category'.ljust(20)}   {'Hostname'.ljust(58)}   Connection"
