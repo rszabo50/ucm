@@ -37,8 +37,8 @@ from ucm.Widgets import ListView
 
 class SshListView(ListView):
     def __init__(self) -> None:
-        super().__init__("SSH", filter_fields=["category", "name", "user", "address"])
         self.conn_manager = get_connection_manager()
+        super().__init__("SSH", filter_fields=["category", "name", "user", "address"])
 
     def formatter(self, record: Dict[str, Any]) -> str:
         if "category" not in record:
