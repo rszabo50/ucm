@@ -36,6 +36,9 @@ Switch views using the radio buttons in the header or Tab + arrow keys.
 * `Enter` - Connect to selected SSH host
 * `c` - Connect to selected SSH host
 * `f` - Toggle favorite status (marked with ★)
+* `F` - Filter to show only favorites
+* `r` - Sort by recently used
+* `L` - Quick connect to last used connection
 * `i` - Show connection info
 * `Double-click` - Quick connect (mouse)
 
@@ -50,13 +53,15 @@ Switch views using the radio buttons in the header or Tab + arrow keys.
 * `s` - Connect with sh
 * `i` - Inspect service/container
 
-### Filtering
+### Filtering and Sorting
 
 * Type text in filter box to search connections
 * Filter works on: name, address, user, category (SSH)
 * Filter works on: container ID, name, image (Docker)
 * `Backspace` - Remove filter characters
 * `Ctrl+U` - Clear entire filter
+* `F` - Toggle favorites-only filter (shows [FAV] when active)
+* `r` - Toggle recently used sorting (shows [RECENT] when active)
 
 ## Mouse Controls
 

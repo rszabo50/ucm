@@ -130,6 +130,9 @@ UCM automatically tracks your SSH connection usage and allows you to mark favori
 
 **Features:**
 - ⭐ **Favorites** - Press `f` to toggle favorite status (marked with ★)
+- 🔍 **Favorites Filter** - Press `F` to show only favorite connections
+- 📅 **Recently Used Sorting** - Press `r` to sort connections by last used
+- ⚡ **Quick Connect** - Press `L` to instantly connect to your last used connection
 - 📊 **Usage Tracking** - Automatically records connection timestamps and use counts
 - 💾 **Persistence** - History and favorites saved to `~/.ucm/history.yml` and `~/.ucm/favorites.yml`
 - 📈 **Statistics** - Track most-used connections and usage patterns
@@ -137,6 +140,8 @@ UCM automatically tracks your SSH connection usage and allows you to mark favori
 **Benefits:**
 - Quickly identify frequently-used servers
 - Mark critical servers as favorites for easy identification
+- Sort and filter connections by usage patterns
+- Instant access to your last used connection
 - Track connection patterns across your infrastructure
 
 ### Configuration Validation
@@ -176,6 +181,9 @@ ucm --log-file /var/log/ucm.log
 #### Actions
 - `c` - Connect to selected host/container
 - `f` - Toggle favorite status (SSH view) - marked with ★
+- `F` - Filter to show only favorites (SSH view)
+- `r` - Sort by recently used (SSH view)
+- `L` - Quick connect to last used connection (SSH view)
 - `i` - Show info/inspect (both SSH and Docker views)
 - `q` - Quit UCM
 - `?` - Show help
