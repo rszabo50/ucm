@@ -21,7 +21,6 @@
 # Created by rszabo50 at 2022-02-01
 
 import logging
-import os
 import time
 from typing import Any, Dict, List, Optional
 
@@ -31,13 +30,15 @@ from ucm.connection_manager import get_connection_manager
 from ucm.constants import MAIN_PALETTE
 from ucm.Dialogs import DialogDisplay
 from ucm.Registry import Registry
+from ucm.services import SSHService, SSHServiceProtocol
 from ucm.UserConfig import UserConfig
 from ucm.Widgets import ListView
 
 
 class SshListView(ListView):
-    def __init__(self) -> None:
+    def __init__(self, ssh_service: Optional[SSHServiceProtocol] = None) -> None:
         self.conn_manager = get_connection_manager()
+        self.ssh_service = ssh_service if ssh_service is not None else SSHService()
         self.favorites_only = False  # Toggle to show only favorites
         self.sort_by_recent = False  # Toggle to sort by recently used
         super().__init__("SSH", filter_fields=["category", "name", "user", "address"])
@@ -178,34 +179,14 @@ class SshListView(ListView):
             ]
         )
 
-    @staticmethod
-    def build_ssh_command(data: Dict[str, Any]) -> str:
-        """Build SSH command from connection data.
-
-        Args:
-            data: Connection dictionary with keys: address, user, port, identity, options
-
-        Returns:
-            Formatted SSH command string
-        """
-        user_at_host = data["address"] if "user" not in data else f"{data['user']}@{data['address']}"
-        ident = f"-i {data['identity']}" if "identity" in data else ""
-        port = f"-p {data['port']}" if "port" in data else ""
-        opts = f"{data['options']}" if "options" in data else ""
-        return f"ssh {ident} {port} {opts} {user_at_host}"
-
     def connect(self, data: Dict[str, Any]) -> None:
         """Execute SSH connection to remote host.
 
         Args:
             data: Connection dictionary containing connection parameters
         """
-        if not data:
-            logging.error("No connection data provided")
-            return
-
-        if "address" not in data:
-            logging.error(f"Missing 'address' field in connection data: {data}")
+        if not self.ssh_service.validate_connection(data):
+            logging.error("Invalid connection data")
             return
 
         # Record this connection in history
@@ -216,10 +197,7 @@ class SshListView(ListView):
             try:
                 main_loop.screen.stop()
                 print(chr(27) + "[2J")
-                cmd = self.build_ssh_command(data)
-                print(f"Executing: {cmd}")
-                logging.info(f"SSH command: {cmd}")
-                rc = os.system(cmd)
+                rc = self.ssh_service.connect(data)
                 if rc != 0:
                     print(f"Connection failed with return code: {rc}")
                     time.sleep(2)
