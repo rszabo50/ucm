@@ -71,6 +71,7 @@ ucm
 - 📊 **Connection History** - Auto-tracked with timestamps, sort by recent with `r`
 - 🖥️ **SSH Management** - Organize hundreds of hosts with ease
 - 🐳 **Docker Integration** - SSH and containers in one place
+- 🪟 **Terminal Integration** - Keep UCM open with tmux/iTerm2, no more Ctrl+b sequences
 - ⌨️ **Keyboard-first** - Full vim navigation (j/k, /, Esc)
 - 🖱️ **Mouse Support** - Click and double-click workflows
 - ⚙️ **Config Validation** - Automatic checking with helpful errors
@@ -169,6 +170,8 @@ UCM is perfect if you:
 - ✅ Want to filter and view all connections at once
 - ✅ Prefer efficient command-line workflows
 - ✅ Work in environments without a GUI
+- ✅ Use tmux or iTerm2 and want better window management
+- ✅ Make frequent successive connections to different servers
 
 ## ⚙️ Configuration
 
@@ -296,6 +299,12 @@ ucm --log-file /var/log/ucm.log
 - Press `c` to connect to a container
 - Press `i` to inspect container details
 
+**Tmux View** - Navigate tmux windows (only visible inside tmux)
+- Shows all tmux windows with names
+- Switch windows without `Ctrl+b` sequences
+- Close windows with `x` key
+- Refresh list with `r` key
+
 **Swarm View** - Docker Swarm (if configured)
 - Manage swarm services and containers
 
@@ -392,6 +401,78 @@ UCM automatically detects running Docker containers if Docker is installed.
 - `docker ps` - List containers (used by UCM)
 - `docker exec -it <container> bash` - Connect to container (UCM executes this)
 - `docker inspect <container>` - View container details
+
+## 🪟 Terminal Integration
+
+**Keep UCM running and eliminate manual window switching!** UCM integrates with tmux and iTerm2 to launch connections in new windows/tabs while keeping the UCM interface open for your next connection.
+
+### Supported Terminals
+
+**tmux (Linux/macOS)**
+- Launch SSH/Docker connections in new tmux windows
+- Navigate tmux windows with UCM's Tmux View (no more `Ctrl+b` sequences!)
+- Auto-configured `Ctrl+b u` keybinding to return to UCM
+- Automatic screen refresh when switching back
+
+**iTerm2 (macOS)**
+- Launch connections in new iTerm2 tabs
+- UCM stays open in the original tab
+- Use `Cmd+1`, `Cmd+2`, etc. to switch between tabs
+- Configurable iTerm2 profiles for connections
+
+### Getting Started
+
+**1. Enable Terminal Integration**
+```bash
+ucm
+# Press ',' to open Settings
+# Select "Tmux" or "iTerm2" integration
+# Save settings
+```
+
+**2. Using tmux Integration**
+```bash
+# Start or attach to tmux session
+tmux
+
+# Launch UCM
+ucm
+
+# Connect to a server - opens in new tmux window
+# Press Ctrl+b u from anywhere to return to UCM
+# Or use the Tmux View tab to see all windows and navigate
+```
+
+**3. Using iTerm2 Integration (macOS)**
+```bash
+# Launch UCM in iTerm2
+ucm
+
+# Enable iTerm2 in Settings (press ',')
+# Connect to a server - opens in new tab
+# Use Cmd+1 to return to UCM tab
+# Cmd+2, Cmd+3, etc. for your connection tabs
+```
+
+### Benefits
+
+- **No more exit/restart cycles** - UCM stays open for rapid successive connections
+- **Visual window management** - Tmux View shows all your connections at once
+- **No memorization** - Navigate tmux without remembering `Ctrl+b` sequences
+- **Faster workflows** - Jump between servers without returning to command line
+- **Better multitasking** - Work in multiple servers simultaneously
+
+### Settings
+
+Press `,` (comma) in UCM to configure terminal integration:
+
+**Tmux Settings:**
+- Auto-name windows with connection info (🐧 for SSH, 🐳 for Docker)
+- Only window mode supported (each connection in separate window)
+
+**iTerm2 Settings:**
+- Specify iTerm2 profile for connections
+- Only new tab mode supported (each connection in separate tab)
 
 ## 🛠️ Development
 
