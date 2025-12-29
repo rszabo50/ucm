@@ -113,6 +113,13 @@ class TabGroupEdit(Edit, TabGroupNode):
         logging.debug(f"TabGroupEdit.keypress({size},{key}, active={self.is_active})")
 
         if key == "tab":
+            # Deactivate filter when tabbing away
+            if self.is_active:
+                if self.parent_listview and hasattr(self.parent_listview, "deactivate_filter"):
+                    self.parent_listview.deactivate_filter()
+                else:
+                    self.is_active = False
+                    logging.debug("Filter deactivated (no parent)")
             super().focus_next()
             return None
 
