@@ -55,13 +55,17 @@ Switch views using the radio buttons in the header or Tab + arrow keys.
 
 ### Filtering and Sorting
 
-* Type text in filter box to search connections
+* `/` - Activate filter mode (label shows "Filter [/]:" when active)
+* Type text to search connections when filter is active
+* `Esc` - Deactivate filter mode and return to list navigation
 * Filter works on: name, address, user, category (SSH)
 * Filter works on: container ID, name, image (Docker)
 * `Backspace` - Remove filter characters
-* `Ctrl+U` - Clear entire filter
+* `Ctrl+U` - Clear entire filter text
 * `F` - Toggle favorites-only filter (shows [FAV] when active)
 * `r` - Toggle recently used sorting (shows [RECENT] when active)
+
+**Note**: The filter requires explicit activation with `/` to prevent accidental text entry. This allows you to use keyboard shortcuts (f, r, L, etc.) without accidentally typing in the filter box.
 
 ## Mouse Controls
 
@@ -147,9 +151,10 @@ UCM tries `bash` first, then falls back to `sh` if bash isn't available.
 * Use `Tab` to move between UI sections
 
 ### Efficient Filtering
-* Type partial names: "web" finds "webserver1", "webserver2"
+* Press `/` to activate filter mode, then type partial names
+* Example: "web" finds "webserver1", "webserver2"
 * Use categories to group connections
-* Clear filter with `Ctrl+U`
+* Clear filter with `Ctrl+U` or press `Esc` to exit filter mode
 
 ### SSH Config Integration
 * UCM respects `~/.ssh/config` settings
@@ -176,8 +181,9 @@ ucm --log-file ~/ucm.log
 
 ### Quick Connect
 1. Launch UCM
-2. Type filter to find host
-3. Press Enter when filtered to one result
+2. Press `/` to activate filter
+3. Type to find host
+4. Press Enter when filtered to one result
 
 ### Container Access
 1. Switch to Docker view (click or Tab)

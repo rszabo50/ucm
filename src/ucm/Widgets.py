@@ -293,6 +293,13 @@ class ListView(IdWidget, TabGroupNode):
             if self.view is not None:
                 self.view.pile.set_focus(self.view.filter_pile_pos)
                 self.filter_columns.set_focus(1)
+        elif key == "/":
+            # Activate filter mode
+            logging.debug("/ key pressed - activating filter")
+            if self.view is not None:
+                self.activate_filter()
+                self.view.pile.set_focus(self.view.filter_pile_pos)
+                self.filter_columns.set_focus(1)
 
     def _evaluate(self, filter_string: str, record: dict):
         for key in self.filter_fields:
@@ -311,16 +318,33 @@ class ListView(IdWidget, TabGroupNode):
         self.filter_columns.set_focus(1)
 
     def get_filter_widgets(self):
-        self.filter_edit = TabGroupEdit(align=LEFT)
+        self.filter_edit = TabGroupEdit(align=LEFT, parent_listview=self)
         connect_signal(self.filter_edit, "change", self.filter_action, user_args=[])
+
+        # Store label widget so we can update it when filter is activated
+        self.filter_label = Text("Filter Text:  ", align=RIGHT)
 
         self.filter_columns = Columns(
             [
-                (15, AttrWrap(Text("Filter Text:  ", align=RIGHT), "header", "header")),
+                (15, AttrWrap(self.filter_label, "header", "header")),
                 (35, AttrWrap(self.filter_edit, "filter", "filter")),
             ]
         )
         return self.filter_columns
+
+    def activate_filter(self):
+        """Activate filter mode with visual indicator."""
+        if hasattr(self, "filter_edit") and hasattr(self.filter_edit, "is_active"):
+            self.filter_edit.is_active = True
+            self.filter_label.set_text("Filter [/]:   ")
+            logging.debug("Filter activated")
+
+    def deactivate_filter(self):
+        """Deactivate filter mode and restore normal label."""
+        if hasattr(self, "filter_edit") and hasattr(self.filter_edit, "is_active"):
+            self.filter_edit.is_active = False
+            self.filter_label.set_text("Filter Text:  ")
+            logging.debug("Filter deactivated")
 
     def filter_action(self, _edit_widget, text_input):
         # noinspection PyProtectedMember

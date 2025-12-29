@@ -97,11 +97,42 @@ class TabGroupRadioButton(RadioButton, TabGroupNode):
 
 
 class TabGroupEdit(Edit, TabGroupNode):
+    """Edit widget that only accepts input when explicitly activated.
+
+    Requires '/' key to activate for input, 'esc' to deactivate.
+    This prevents accidental text entry when using command keys.
+    """
+
+    def __init__(self, *args, parent_listview=None, **kwargs):
+        # Extract parent_listview before passing to super().__init__()
+        self.parent_listview = parent_listview
+        super().__init__(*args, **kwargs)
+        self.is_active = False
+
     def keypress(self, size, key):
-        logging.debug(f"TabGroupEdit.keypress({size},{key}")
+        logging.debug(f"TabGroupEdit.keypress({size},{key}, active={self.is_active})")
+
         if key == "tab":
             super().focus_next()
-        super().keypress(size, key)
+            return None
+
+        # Only accept text input when active
+        if self.is_active:
+            # Escape deactivates filter mode
+            if key == "esc":
+                # Call parent's deactivate_filter method for visual feedback
+                if self.parent_listview and hasattr(self.parent_listview, "deactivate_filter"):
+                    self.parent_listview.deactivate_filter()
+                else:
+                    self.is_active = False
+                    logging.debug("Filter deactivated (no parent)")
+                return None
+            # Pass through to normal Edit behavior
+            return super().keypress(size, key)
+        else:
+            # Not active - ignore all input except activation
+            # The '/' key activation is handled by the parent ListView
+            return key
 
 
 class TabGroupManager:
