@@ -228,6 +228,9 @@ ucm --help
 --config-dir DIR       Custom configuration directory (default: ~/.ucm)
 --log-level LEVEL      Set logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL
 --log-file FILE        Custom log file path (default: /tmp/ucm-{user}.log)
+--log-format FORMAT    Log output format: text, json (default: text)
+--log-max-bytes BYTES  Maximum log file size before rotation (default: 10MB)
+--log-backup-count N   Number of rotated log files to keep (default: 5)
 ```
 
 **Examples:**
@@ -244,6 +247,15 @@ ucm --config-dir ~/.config/ucm-work
 
 # Save logs to specific file
 ucm --log-file ~/logs/ucm.log
+
+# JSON logging for log aggregation tools
+ucm --log-format json
+
+# Custom log rotation settings (1MB files, keep 10 backups)
+ucm --log-max-bytes 1048576 --log-backup-count 10
+
+# Full logging example: JSON format with debug level
+ucm --log-level DEBUG --log-format json --log-file /var/log/ucm.log
 ```
 
 ## 🐳 Docker Integration

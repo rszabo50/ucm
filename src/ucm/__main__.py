@@ -20,7 +20,9 @@
 
 import argparse
 import getpass
+import json
 import logging
+import logging.handlers
 import sys
 import warnings
 from pathlib import Path
@@ -57,6 +59,39 @@ from ucm.Widgets import Clock, Footer, Header, HelpBody, View
 # Suppress panwid deprecation warnings with urwid 3.x
 # See: https://github.com/tonycpsu/panwid/issues
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="panwid")
+
+
+class JSONFormatter(logging.Formatter):
+    """JSON formatter for structured logging."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        """Format log record as JSON.
+
+        Args:
+            record: Log record to format
+
+        Returns:
+            JSON-formatted log string
+        """
+        log_data = {
+            "timestamp": self.formatTime(record, self.datefmt),
+            "level": record.levelname,
+            "logger": record.name,
+            "module": record.module,
+            "function": record.funcName,
+            "line": record.lineno,
+            "message": record.getMessage(),
+        }
+
+        # Add exception info if present
+        if record.exc_info:
+            log_data["exception"] = self.formatException(record.exc_info)
+
+        # Add extra fields if present
+        if hasattr(record, "extra_fields"):
+            log_data.update(record.extra_fields)
+
+        return json.dumps(log_data)
 
 
 class Actions:
@@ -265,15 +300,48 @@ def parse_args() -> argparse.Namespace:
         "--log-file", type=str, default=None, metavar="FILE", help="Log file path (default: /tmp/ucm-{user}.log)"
     )
 
+    parser.add_argument(
+        "--log-format",
+        type=str,
+        choices=["text", "json"],
+        default="text",
+        help="Log output format (default: text)",
+    )
+
+    parser.add_argument(
+        "--log-max-bytes",
+        type=int,
+        default=10485760,  # 10MB
+        metavar="BYTES",
+        help="Maximum log file size before rotation (default: 10MB)",
+    )
+
+    parser.add_argument(
+        "--log-backup-count",
+        type=int,
+        default=5,
+        metavar="COUNT",
+        help="Number of rotated log files to keep (default: 5)",
+    )
+
     return parser.parse_args()
 
 
-def setup_logging(log_level: str, log_file: str = None) -> logging.Logger:
-    """Configure logging with specified level and file.
+def setup_logging(
+    log_level: str,
+    log_file: str = None,
+    log_format: str = "text",
+    max_bytes: int = 10485760,
+    backup_count: int = 5,
+) -> logging.Logger:
+    """Configure logging with rotation and optional JSON formatting.
 
     Args:
         log_level: Logging level string (DEBUG, INFO, etc.)
         log_file: Optional log file path
+        log_format: Log format ('text' or 'json')
+        max_bytes: Maximum log file size before rotation (default: 10MB)
+        backup_count: Number of backup files to keep (default: 5)
 
     Returns:
         Configured logger instance
@@ -285,18 +353,36 @@ def setup_logging(log_level: str, log_file: str = None) -> logging.Logger:
     log_path = Path(log_file)
     log_path.parent.mkdir(parents=True, exist_ok=True)
 
-    logging.basicConfig(
-        filename=log_file,
-        filemode="w",
-        format="%(asctime)s,%(msecs)d %(name)s {%(pathname)s:%(lineno)d} %(levelname)s %(message)s",
-        datefmt="%H:%M:%S",
-        level=getattr(logging, log_level),
+    # Create rotating file handler
+    handler = logging.handlers.RotatingFileHandler(
+        log_file,
+        maxBytes=max_bytes,
+        backupCount=backup_count,
     )
 
+    # Set formatter based on format choice
+    if log_format == "json":
+        formatter = JSONFormatter(datefmt="%Y-%m-%dT%H:%M:%S")
+    else:
+        formatter = logging.Formatter(
+            fmt="%(asctime)s,%(msecs)d %(name)s {%(pathname)s:%(lineno)d} %(levelname)s %(message)s",
+            datefmt="%H:%M:%S",
+        )
+
+    handler.setFormatter(formatter)
+
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(getattr(logging, log_level))
+    root_logger.addHandler(handler)
+
+    # Get UCM logger
     logger = logging.getLogger("ucm")
     logger.info(f"############# {PROGRAM_NAME} v{PROGRAM_VERSION} starting")
     logger.info(f"Log level: {log_level}")
     logger.info(f"Log file: {log_file}")
+    logger.info(f"Log format: {log_format}")
+    logger.info(f"Log rotation: {max_bytes} bytes, {backup_count} backups")
 
     return logger
 
@@ -312,7 +398,13 @@ def main() -> int:
 
         # Setup logging
         global logger
-        logger = setup_logging(args.log_level, args.log_file)
+        logger = setup_logging(
+            log_level=args.log_level,
+            log_file=args.log_file,
+            log_format=args.log_format,
+            max_bytes=args.log_max_bytes,
+            backup_count=args.log_backup_count,
+        )
 
         # Override config directory if specified
         if args.config_dir:
