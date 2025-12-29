@@ -265,7 +265,8 @@ ucm --log-file /var/log/ucm.log
 │ Tab        Next UI element    │ L          Last connection    │
 │ Enter/c    Connect            │ /          Activate filter    │
 │ q          Quit               │ Esc        Deactivate filter  │
-│ ?          Help               │ i          Info/Inspect       │
+│ ?          Help               │ ,          Settings           │
+│                               │ i          Info/Inspect       │
 └───────────────────────────────┴───────────────────────────────┘
 ```
 

@@ -18,6 +18,7 @@ Switch views using the radio buttons in the header or Tab + arrow keys.
 
 * `q` - Quit UCM
 * `?` - Show this help dialog
+* `,` - Open Settings dialog
 * `Tab` - Cycle between UI elements
 * `Esc` - Close dialogs
 
@@ -127,6 +128,25 @@ UCM automatically tracks your connection usage and allows marking favorites.
 * Quickly identify your most-used connections
 * Mark important servers as favorites for easy identification
 * Track connection patterns and usage
+
+## Settings and Terminal Integration
+
+Press `,` (comma) to open the Settings dialog where you can configure:
+
+### Terminal Integration Options
+* **None** (default) - UCM exits after each connection
+* **Tmux** - Keep UCM open, launch connections in tmux windows/panes
+* **iTerm2** (macOS) - Keep UCM open, launch connections in iTerm2 tabs
+
+### Tmux Settings
+* Connection mode: New Window or New Pane
+* Auto-name windows with connection info
+
+### iTerm2 Settings
+* Open connections in new tabs
+* Specify iTerm2 profile to use
+
+Settings are saved to `~/.ucm/config.yml` and take effect immediately.
 
 ## Docker Integration
 

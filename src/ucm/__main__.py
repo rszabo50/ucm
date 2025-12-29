@@ -50,6 +50,7 @@ from ucm.constants import MAIN_PALETTE, PROGRAM_NAME, PROGRAM_VERSION, SCM_URL
 from ucm.Dialogs import DialogDisplay
 from ucm.DockerListView import DockerListView
 from ucm.Registry import Registry
+from ucm.SettingsDialog import SettingsDialog
 from ucm.SshListView import SshListView
 from ucm.SwarmListView import SwarmListView
 from ucm.TabGroup import TabGroupButton, TabGroupManager, TabGroupRadioButton
@@ -101,6 +102,8 @@ class Actions:
             Actions.popup_exit_dialog()
         if key in ["?"]:
             Actions.popup_help_dialog()
+        if key in [","]:
+            Actions.popup_settings_dialog()
 
     @staticmethod
     def action_button_cb(_button: Any = None):
@@ -108,6 +111,8 @@ class Actions:
             Actions.popup_exit_dialog()
         if _button.get_label() == "Help":
             Actions.popup_help_dialog()
+        if _button.get_label() == "Settings":
+            Actions.popup_settings_dialog()
 
     @staticmethod
     def popup_exit_dialog(_button: Any = None):
@@ -149,6 +154,13 @@ class Actions:
     @staticmethod
     def help_exit_cb(button: Any):
         pass
+
+    @staticmethod
+    def popup_settings_dialog(_button: Any = None):
+        """Show settings dialog."""
+        logger.info("Opening settings dialog")
+        settings_dialog = SettingsDialog(loop=Registry().main_loop, palette=MAIN_PALETTE)
+        settings_dialog.show()
 
 
 class Application:
@@ -219,6 +231,12 @@ class Application:
 
         action_button_list = [
             (8, AttrWrap(TabGroupButton("Help", on_press=Actions.action_button_cb), "button normal", "button select")),
+            (
+                12,
+                AttrWrap(
+                    TabGroupButton("Settings", on_press=Actions.action_button_cb), "button normal", "button select"
+                ),
+            ),
             (8, AttrWrap(TabGroupButton("Quit", on_press=Actions.action_button_cb), "button normal", "button select")),
         ]
 
