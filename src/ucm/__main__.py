@@ -259,6 +259,9 @@ class Application:
             view_key = radio_button.get_label().encode("ascii", "ignore").decode().strip().replace("-", "")
             logger.info(f"switching to view {view_key}")
             self.view_holder._w = self.views[view_key]
+            # Deactivate filter and clear filter text when switching views
+            if hasattr(self.view_holder._w.list_view, "deactivate_filter"):
+                self.view_holder._w.list_view.deactivate_filter()
             self.view_holder._w.list_view.filters_clear()
 
             self.tab_group_manager.add(

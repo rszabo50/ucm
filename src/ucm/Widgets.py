@@ -347,9 +347,42 @@ class ListView(IdWidget, TabGroupNode):
             logging.debug("Filter deactivated")
 
     def filter_action(self, _edit_widget, text_input):
-        # noinspection PyProtectedMember
-        self.filter_and_set(text_input)
+        # Only filter when active to avoid expensive rebuilds on every keystroke when inactive
+        if hasattr(self.filter_edit, "is_active") and self.filter_edit.is_active:
+            # noinspection PyProtectedMember
+            self.filter_and_set(text_input)
         # self.filter_columns.set_focus(1) ## this needs to be disabled for tab group support
+
+
+class FocusMonitoringPile(Pile):
+    """Pile that monitors focus changes to deactivate filter when focus moves away."""
+
+    def __init__(self, widget_list, list_view, filter_pile_pos):
+        super().__init__(widget_list)
+        self.list_view = list_view
+        self.filter_pile_pos = filter_pile_pos
+        self.last_focus_pos = None
+
+    def keypress(self, size, key):
+        result = super().keypress(size, key)
+        self._check_focus_change()
+        return result
+
+    def mouse_event(self, size, event, button, col, row, focus):
+        result = super().mouse_event(size, event, button, col, row, focus)
+        self._check_focus_change()
+        return result
+
+    def _check_focus_change(self):
+        current_pos = self.focus_position
+        # If focus moved away from filter position, deactivate filter
+        if (
+            self.last_focus_pos == self.filter_pile_pos
+            and current_pos != self.filter_pile_pos
+            and hasattr(self.list_view, "deactivate_filter")
+        ):
+            self.list_view.deactivate_filter()
+        self.last_focus_pos = current_pos
 
 
 class View(IdWidget):
@@ -365,15 +398,17 @@ class View(IdWidget):
         else:
             list_view.header_text_w = list_view.get_header()
 
-        self.pile = Pile(
+        self.filter_pile_pos = 3
+        self.pile = FocusMonitoringPile(
             [
                 list_view.header_text_w,
                 BoxAdapter(self.list_view, list_rows),
                 Divider("\u2500"),
                 self.list_view.get_filter_widgets(),
-            ]
+            ],
+            list_view,
+            self.filter_pile_pos,
         )
-        self.filter_pile_pos = 3
         self.list_view.view = self
         super().__init__(Filler(self.pile, "top"), widget_id=widget_id)
 
