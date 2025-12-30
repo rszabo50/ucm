@@ -77,12 +77,13 @@ class ITerm2Service:
 
         # Build AppleScript to create tab and run command
         # Note: iTerm2 AppleScript uses "write text" to send commands to sessions
+        # Use exec so the shell closes when the command exits
         applescript = f"""
         tell application "iTerm2"
             tell current window
                 create tab with profile "{profile}"
                 tell current session of current tab
-                    write text "{command}"
+                    write text "exec {command}"
         """
 
         # Add tab naming if specified
@@ -135,6 +136,7 @@ class ITerm2Service:
             return 1
 
         # Build AppleScript to split pane and run command
+        # Use exec so the pane closes when the command exits
         split_direction = "vertically" if vertical else "horizontally"
         applescript = f"""
         tell application "iTerm2"
@@ -142,7 +144,7 @@ class ITerm2Service:
                 tell current session of current tab
                     set newSession to (split {split_direction} with profile "{profile}")
                     tell newSession
-                        write text "{command}"
+                        write text "exec {command}"
         """
 
         # Add pane naming if specified
