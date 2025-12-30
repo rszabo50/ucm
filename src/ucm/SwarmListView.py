@@ -85,6 +85,7 @@ def swarm_connect(data: Any, shell: str = "bash"):
             time.sleep(5)
         Registry().main_loop.screen.start(alternate_buffer=True)
         Registry().main_loop.screen.clear()
+        Registry().main_loop.draw_screen()
 
 
 # noinspection PyStatementEffect

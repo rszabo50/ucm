@@ -110,6 +110,7 @@ class Actions:
             # Ctrl+L to refresh/clear screen (standard terminal convention)
             if Registry().get("main_loop") is not None:
                 Registry().main_loop.screen.clear()
+                Registry().main_loop.draw_screen()
 
     @staticmethod
     def action_button_cb(_button: Any = None):
@@ -310,7 +311,9 @@ class Application:
             self.tab_group_manager.add(
                 "filters_select", self.frame, "body", self.views[view_key].list_view.filter_columns
             )
+            # Force complete screen redraw when switching views
             Registry().main_loop.screen.clear()
+            Registry().main_loop.draw_screen()
 
 
 def parse_args() -> argparse.Namespace:

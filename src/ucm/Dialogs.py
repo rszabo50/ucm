@@ -141,6 +141,10 @@ class DialogDisplay(WidgetWrap):
     def button_press(self, button):
         if self.parent is not None:
             self.loop.widget = self.parent
+            # Force screen redraw to prevent display artifacts
+            if self.loop is not None:
+                self.loop.screen.clear()
+                self.loop.draw_screen()
         self.exit_cb(button)
 
     def show(self):

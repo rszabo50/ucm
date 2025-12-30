@@ -166,6 +166,7 @@ class DockerListView(ListView):
                 finally:
                     main_loop.screen.start(alternate_buffer=True)
                     main_loop.screen.clear()
+                    main_loop.draw_screen()
 
     def get_filter_widgets(self) -> Columns:
         return Columns(

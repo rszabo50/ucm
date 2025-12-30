@@ -210,6 +210,7 @@ class SettingsDialog:
         # Force screen redraw to prevent display artifacts
         if self.loop is not None:
             self.loop.screen.clear()
+            self.loop.draw_screen()
 
 
 # vim: ts=4 sw=4 et

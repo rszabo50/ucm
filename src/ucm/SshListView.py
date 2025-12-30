@@ -254,6 +254,7 @@ class SshListView(ListView):
                 finally:
                     main_loop.screen.start(alternate_buffer=True)
                     main_loop.screen.clear()
+                    main_loop.draw_screen()
 
     def _connect_to_last_used(self) -> None:
         """Connect to the most recently used connection from history."""
