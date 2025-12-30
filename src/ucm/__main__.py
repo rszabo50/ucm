@@ -343,6 +343,9 @@ class Application:
                 "filters_select", self.frame, "body", self.views[current_view_key].list_view.filter_columns
             )
 
+        # Force the main loop to recognize the updated frame
+        Registry().main_loop.widget = self.frame
+
         logger.info("Layout refreshed successfully")
 
     def view_changed(self, radio_button: RadioButton, state: bool):
