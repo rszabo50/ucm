@@ -65,8 +65,7 @@ class UserConfig(dict):
             validated_connections = SshConnectionValidator.validate_connections(raw_connections)
             self.set("ssh_connections", validated_connections)
         except ConfigValidationError as e:
-            # Print error to console and log it
-            print(f"\n❌ Configuration Error:\n{e}\n")
+            # Log error (not printed to avoid UI corruption)
             import logging
 
             logging.error(f"SSH config validation failed: {e}")

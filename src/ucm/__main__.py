@@ -422,6 +422,11 @@ def setup_logging(
     # Configure root logger
     root_logger = logging.getLogger()
     root_logger.setLevel(getattr(logging, log_level))
+
+    # Remove any existing handlers (prevents output to stdout/stderr)
+    root_logger.handlers.clear()
+
+    # Add only our file handler
     root_logger.addHandler(handler)
 
     # Get UCM logger
@@ -473,7 +478,7 @@ def main() -> int:
     except Exception as e:
         if "logger" in globals():
             logger.exception(f"Fatal error: {e}")
-        print(f"Error: {e}", file=sys.stderr)
+        # Error is logged to file, not printed to stderr
         return 1
 
 
