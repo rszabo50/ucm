@@ -106,15 +106,6 @@ class Actions:
             Actions.popup_help_dialog()
         if key in [","]:
             Actions.popup_settings_dialog()
-        if key == "f5":
-            # F5 to refresh/clear screen and recalculate layout
-            if Registry().get("main_loop") is not None:
-                # Recalculate layout with current terminal dimensions
-                app = Registry().get("application")
-                if app:
-                    app.refresh_layout()
-                Registry().main_loop.screen.clear()
-                Registry().main_loop.draw_screen()
 
     @staticmethod
     def action_button_cb(_button: Any = None):
@@ -291,7 +282,6 @@ class Application:
         self.tab_group_manager.add("action_buttons", self.frame, "footer", action_content)
 
         Registry().main_loop = MainLoop(self.frame, palette=MAIN_PALETTE, unhandled_input=Actions.show_or_exit)
-        Registry().set("application", self)
         return self
 
     def start(self):
@@ -299,54 +289,6 @@ class Application:
         self.clock.start()
         logger.debug("Starting application loop  ...")
         Registry().main_loop.run()
-
-    def refresh_layout(self):
-        """Recalculate layout dimensions and rebuild all views.
-
-        Call this after terminal resize to update the layout with new dimensions.
-        """
-        logger.debug("Refreshing layout with new terminal dimensions...")
-
-        # Get current view before rebuilding
-        current_view_key = None
-        for key, view in self.views.items():
-            if self.view_holder._w is view:
-                current_view_key = key
-                break
-
-        # Rebuild all views with new terminal dimensions
-        old_views = self.views
-        self.views = {}
-
-        # Recreate views - this will recalculate terminal dimensions
-        self.views["SSH"] = View(old_views["SSH"].list_view)
-        if "Docker" in old_views:
-            self.views["Docker"] = View(old_views["Docker"].list_view)
-        if "Tmux" in old_views:
-            self.views["Tmux"] = View(old_views["Tmux"].list_view)
-        if "Swarm" in old_views:
-            self.views["Swarm"] = View(old_views["Swarm"].list_view)
-
-        # Restore current view
-        if current_view_key and current_view_key in self.views:
-            self.view_holder._w = self.views[current_view_key]
-            # Update tab group manager
-            self.tab_group_manager.add(
-                "list",
-                self.frame,
-                "body",
-                self.views[current_view_key].list_view,
-                pile=self.views[current_view_key].pile,
-                pile_pos=1,
-            )
-            self.tab_group_manager.add(
-                "filters_select", self.frame, "body", self.views[current_view_key].list_view.filter_columns
-            )
-
-        # Force the main loop to recognize the updated frame
-        Registry().main_loop.widget = self.frame
-
-        logger.info("Layout refreshed successfully")
 
     def view_changed(self, radio_button: RadioButton, state: bool):
         if state:

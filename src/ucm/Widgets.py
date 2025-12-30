@@ -35,7 +35,6 @@ from urwid import (
     AttrMap,
     AttrSpec,
     AttrWrap,
-    BoxAdapter,
     Button,
     Columns,
     Divider,
@@ -50,7 +49,6 @@ from urwid import (
     connect_signal,
     disconnect_signal,
     emit_signal,
-    raw_display,
     register_signal,
 )
 
@@ -388,8 +386,6 @@ class FocusMonitoringPile(Pile):
 class View(IdWidget):
     def __init__(self, list_view: ListView, widget_id: str = None):
         self.list_view = list_view
-        terminal_cols, terminal_rows = raw_display.Screen().get_cols_rows()
-        list_rows = terminal_rows - 11  # header:3 + footer: 3 + border:2 + tableHeader: 1 + filter: 2 = 11
 
         if isinstance(list_view.get_header(), str):
             list_view.header_text_w = AttrMap(
@@ -401,10 +397,10 @@ class View(IdWidget):
         self.filter_pile_pos = 3
         self.pile = FocusMonitoringPile(
             [
-                list_view.header_text_w,
-                BoxAdapter(self.list_view, list_rows),
-                Divider("\u2500"),
-                self.list_view.get_filter_widgets(),
+                ("pack", list_view.header_text_w),
+                self.list_view,  # Box widget with no sizing - gets all remaining vertical space
+                ("pack", Divider("\u2500")),
+                ("pack", self.list_view.get_filter_widgets()),
             ],
             list_view,
             self.filter_pile_pos,
