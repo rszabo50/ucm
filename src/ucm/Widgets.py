@@ -400,10 +400,10 @@ class DynamicHeightBox(WidgetWrap):
             _, terminal_rows = raw_display.Screen().get_cols_rows()
             # Reserve space for header(1) + footer(3) + border(2) + tableHeader(1) + divider(1) + filter(2) = 10
             available_height = max(1, terminal_rows - 10)
-            return BoxAdapter(self.box_widget, available_height).render((maxcol, available_height), focus)
+            return BoxAdapter(self.box_widget, available_height).render((maxcol,), focus)
         else:
             # Box widget rendering
-            return BoxAdapter(self.box_widget, size[1]).render(size, focus)
+            return BoxAdapter(self.box_widget, size[1]).render((size[0],), focus)
 
     def rows(self, size, focus=False):
         """Calculate rows needed."""
