@@ -35,11 +35,9 @@ from urwid import (
     AttrMap,
     AttrSpec,
     AttrWrap,
-    BoxAdapter,
     Button,
     Columns,
     Divider,
-    Filler,
     LineBox,
     Padding,
     Pile,
@@ -50,7 +48,6 @@ from urwid import (
     connect_signal,
     disconnect_signal,
     emit_signal,
-    raw_display,
     register_signal,
 )
 
@@ -385,38 +382,6 @@ class FocusMonitoringPile(Pile):
         self.last_focus_pos = current_pos
 
 
-class DynamicHeightBox(WidgetWrap):
-    """Box widget that calculates its height dynamically based on available space."""
-
-    _sizing = frozenset(["flow"])  # Declare as flow widget to avoid urwid warnings
-
-    def __init__(self, box_widget):
-        self.box_widget = box_widget
-        super().__init__(box_widget)
-
-    def sizing(self):
-        """Declare this widget as FLOW to satisfy urwid's sizing checks."""
-        return self._sizing
-
-    def render(self, size, focus=False):
-        """Render with dynamic height calculation."""
-        if len(size) == 1:
-            # Flow widget rendering - calculate available height
-            maxcol = size[0]
-            _, terminal_rows = raw_display.Screen().get_cols_rows()
-            # Reserve space for header(1) + footer(3) + border(2) + tableHeader(1) + divider(1) + filter(2) = 10
-            available_height = max(1, terminal_rows - 10)
-            return BoxAdapter(self.box_widget, available_height).render((maxcol,), focus)
-        else:
-            # Box widget rendering
-            return BoxAdapter(self.box_widget, size[1]).render((size[0],), focus)
-
-    def rows(self, size, focus=False):
-        """Calculate rows needed."""
-        _, terminal_rows = raw_display.Screen().get_cols_rows()
-        return max(1, terminal_rows - 10)
-
-
 class View(IdWidget):
     def __init__(self, list_view: ListView, widget_id: str = None):
         self.list_view = list_view
@@ -432,7 +397,7 @@ class View(IdWidget):
         self.pile = FocusMonitoringPile(
             [
                 ("pack", list_view.header_text_w),
-                ("pack", DynamicHeightBox(self.list_view)),
+                ("weight", 1, self.list_view),  # Give all remaining space to the list
                 ("pack", Divider("\u2500")),
                 ("pack", self.list_view.get_filter_widgets()),
             ],
@@ -440,7 +405,7 @@ class View(IdWidget):
             self.filter_pile_pos,
         )
         self.list_view.view = self
-        super().__init__(Filler(self.pile, "top"), widget_id=widget_id)
+        super().__init__(self.pile, widget_id=widget_id)
 
 
 class HelpBody(IdWidget):
