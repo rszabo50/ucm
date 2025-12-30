@@ -388,9 +388,15 @@ class FocusMonitoringPile(Pile):
 class DynamicHeightBox(WidgetWrap):
     """Box widget that calculates its height dynamically based on available space."""
 
+    _sizing = frozenset(["flow"])  # Declare as flow widget to avoid urwid warnings
+
     def __init__(self, box_widget):
         self.box_widget = box_widget
         super().__init__(box_widget)
+
+    def sizing(self):
+        """Declare this widget as FLOW to satisfy urwid's sizing checks."""
+        return self._sizing
 
     def render(self, size, focus=False):
         """Render with dynamic height calculation."""

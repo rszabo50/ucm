@@ -63,6 +63,18 @@ from ucm.Widgets import Clock, Footer, Header, HelpBody, View
 # See: https://github.com/tonycpsu/panwid/issues
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="panwid")
 
+# Suppress urwid layout warnings from our DynamicHeightBox flow/box widget wrapper
+# These are expected due to our custom dynamic sizing implementation
+try:
+    from urwid.widget.pile import PileWarning
+    from urwid.widget.widget import ColumnsWarning
+
+    warnings.filterwarnings("ignore", category=PileWarning)
+    warnings.filterwarnings("ignore", category=ColumnsWarning)
+except ImportError:
+    # Older urwid versions may not have these warning classes
+    pass
+
 
 class JSONFormatter(logging.Formatter):
     """JSON formatter for structured logging."""
