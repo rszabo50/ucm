@@ -155,6 +155,9 @@ class DialogDisplay(WidgetWrap):
                 self.loop.run()
         else:
             self.loop.widget = self.view
+            # Force screen redraw to prevent display artifacts
+            self.loop.screen.clear()
+            self.loop.draw_screen()
 
 
 # vim: ts=4 sw=4 et
