@@ -76,10 +76,12 @@ Save and relaunch UCM to see your connection!
 
 ### UI Components
 
-**Header** - Shows program name, version, and view selector
+**Header** - Shows program name, version, and GitHub URL
+**Tab Bar** - View selector tabs (SSH, Docker, Tmux, Swarm)
 **Connection List** - Scrollable list of connections/containers
-**Filter Bar** - Real-time search filter
-**Footer** - Action buttons and clock
+**Filter Bar** - Real-time search filter with status indicators
+**Keyboard Mnemonics** - Context-sensitive keyboard shortcuts
+**Footer** - Action buttons (Help, Settings, Quit)
 
 ### View Modes
 
@@ -245,14 +247,17 @@ Container Inspection: web-app
 
 ## Keyboard Shortcuts Reference
 
+**Context-Sensitive Shortcuts:** UCM displays available shortcuts in the footer based on the current view and whether an item is selected. This helps you discover relevant commands without memorizing all shortcuts.
+
 ### Global Shortcuts (All Views)
 
 | Key | Action |
 |-----|--------|
 | `q` | Quit UCM |
 | `?` | Show help dialog |
+| `s` | Show settings dialog |
 | `Tab` | Cycle between UI elements |
-| `Esc` | Close dialogs |
+| `Esc` | Close dialogs / Deactivate filter |
 
 ### Navigation
 
@@ -265,23 +270,50 @@ Container Inspection: web-app
 | `Home` | Jump to first item |
 | `End` | Jump to last item |
 
-### Actions
-
-| Key | Action | View |
-|-----|--------|------|
-| `Enter` | Connect to selected item | All |
-| `c` | Connect to container | Docker |
-| `b` | Connect with bash | Docker Swarm |
-| `s` | Connect with sh | Docker Swarm |
-| `i` | Inspect container | Docker/Swarm |
-
 ### Filtering
 
 | Key | Action |
 |-----|--------|
+| `/` | Activate filter mode |
 | Type text | Filter connections in real-time |
 | `Backspace` | Remove filter characters |
 | `Ctrl+U` | Clear entire filter |
+| `Esc` or `Tab` | Deactivate filter mode |
+
+### Connection Actions
+
+| Key | Action | View | Notes |
+|-----|--------|------|-------|
+| `Enter` or `c` | Connect to selected item | All | Only shown when item selected |
+| `i` | Inspect/Info | All | Only shown when item selected |
+| `\|` | Connect in vertical split | SSH/Docker | Only shown with iTerm2 enabled |
+| `-` | Connect in horizontal split | SSH/Docker | Only shown with iTerm2 enabled |
+
+### SSH-Specific Shortcuts
+
+| Key | Action | Notes |
+|-----|--------|-------|
+| `f` | Toggle favorite status | Mark/unmark with ★ |
+| `F` | Show favorites only | Filter to favorites |
+| `r` | Sort by recent | Toggle recent-first sort |
+| `L` | Connect to last used | Quick reconnect |
+
+### Docker/Swarm Shortcuts
+
+| Key | Action | View |
+|-----|--------|------|
+| `c` | Connect with bash | Docker/Swarm |
+| `b` | Connect with bash | Swarm |
+| `S` | Connect with sh | Swarm |
+| `i` | Inspect container | Docker/Swarm |
+
+### Tmux Shortcuts
+
+| Key | Action | View |
+|-----|--------|------|
+| `c` or `Enter` | Switch to window | Tmux |
+| `x` | Close/kill window | Tmux |
+| `r` | Refresh window list | Tmux |
 
 ## Common Workflows
 

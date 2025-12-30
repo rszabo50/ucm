@@ -260,22 +260,29 @@ ucm --log-file /var/log/ucm.log
 
 ## ⌨️ Keyboard Shortcuts Quick Reference
 
+**Context-sensitive shortcuts** are displayed in the footer and change based on the current view and selection.
+
 ```
-┌─ Navigation ──────────────────┬─ Power Features ──────────────┐
+┌─ Navigation ──────────────────┬─ Power Features (SSH) ────────┐
 │ ↑/k        Move up            │ f          Toggle favorite ★  │
 │ ↓/j        Move down          │ F          Show favorites     │
 │ PgUp/PgDn  Page up/down       │ r          Sort by recent     │
 │ Tab        Next UI element    │ L          Last connection    │
 │ Enter/c    Connect            │ /          Activate filter    │
-│ q          Quit               │ Esc        Deactivate filter  │
-│ ?          Help               │ ,          Settings           │
-│ |          Vsplit (iTerm2)    │ -          Hsplit (iTerm2)    │
-│ i          Info/Inspect       │                               │
+│ i          Info/Inspect       │ Esc        Deactivate filter  │
+└───────────────────────────────┴───────────────────────────────┘
+
+┌─ Global Shortcuts ────────────┬─ iTerm2 Integration ──────────┐
+│ q          Quit               │ |          VSplit             │
+│ ?          Help               │ -          HSplit             │
+│ s          Settings           │                               │
 └───────────────────────────────┴───────────────────────────────┘
 ```
 
+**Note:** iTerm2 split shortcuts (`|` and `-`) only appear when iTerm2 integration is enabled in settings.
+
 ### Filter Search
-- **Press `/`** to activate vim-style filter (shows `[/]` indicator)
+- **Press `/`** to activate vim-style filter
 - **Type** to search across name, address, user, category
 - **Esc** or **Tab** to deactivate and return to list
 - Prevents accidental text entry when using command keys
