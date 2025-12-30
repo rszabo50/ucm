@@ -35,6 +35,7 @@ from urwid import (
     AttrMap,
     AttrSpec,
     AttrWrap,
+    BoxAdapter,
     Button,
     Columns,
     Divider,
@@ -49,6 +50,7 @@ from urwid import (
     connect_signal,
     disconnect_signal,
     emit_signal,
+    raw_display,
     register_signal,
 )
 
@@ -383,6 +385,32 @@ class FocusMonitoringPile(Pile):
         self.last_focus_pos = current_pos
 
 
+class DynamicHeightBox(WidgetWrap):
+    """Box widget that calculates its height dynamically based on available space."""
+
+    def __init__(self, box_widget):
+        self.box_widget = box_widget
+        super().__init__(box_widget)
+
+    def render(self, size, focus=False):
+        """Render with dynamic height calculation."""
+        if len(size) == 1:
+            # Flow widget rendering - calculate available height
+            maxcol = size[0]
+            _, terminal_rows = raw_display.Screen().get_cols_rows()
+            # Reserve space for header(1) + footer(3) + border(2) + tableHeader(1) + divider(1) + filter(2) = 10
+            available_height = max(1, terminal_rows - 10)
+            return BoxAdapter(self.box_widget, available_height).render((maxcol, available_height), focus)
+        else:
+            # Box widget rendering
+            return BoxAdapter(self.box_widget, size[1]).render(size, focus)
+
+    def rows(self, size, focus=False):
+        """Calculate rows needed."""
+        _, terminal_rows = raw_display.Screen().get_cols_rows()
+        return max(1, terminal_rows - 10)
+
+
 class View(IdWidget):
     def __init__(self, list_view: ListView, widget_id: str = None):
         self.list_view = list_view
@@ -398,7 +426,7 @@ class View(IdWidget):
         self.pile = FocusMonitoringPile(
             [
                 ("pack", list_view.header_text_w),
-                self.list_view,  # Box widget with no sizing - gets all remaining vertical space
+                ("pack", DynamicHeightBox(self.list_view)),
                 ("pack", Divider("\u2500")),
                 ("pack", self.list_view.get_filter_widgets()),
             ],
