@@ -28,7 +28,11 @@ import warnings
 from pathlib import Path
 from typing import Any
 
-from urwid import (
+# Disable all logging until we configure it properly
+# This prevents default lastResort handler from outputting to stderr during imports
+logging.disable(logging.CRITICAL)
+
+from urwid import (  # noqa: E402
     CENTER,
     RIGHT,
     AttrWrap,
@@ -46,18 +50,18 @@ from urwid import (
     set_encoding,
 )
 
-from ucm.constants import MAIN_PALETTE, PROGRAM_NAME, PROGRAM_VERSION, SCM_URL
-from ucm.Dialogs import DialogDisplay
-from ucm.DockerListView import DockerListView
-from ucm.Registry import Registry
-from ucm.services import TmuxService
-from ucm.SettingsDialog import SettingsDialog
-from ucm.SshListView import SshListView
-from ucm.SwarmListView import SwarmListView
-from ucm.TabGroup import TabGroupButton, TabGroupManager, TabGroupRadioButton
-from ucm.TmuxListView import TmuxListView
-from ucm.UserConfig import UserConfig
-from ucm.Widgets import Clock, Footer, Header, HelpBody, View
+from ucm.constants import MAIN_PALETTE, PROGRAM_NAME, PROGRAM_VERSION, SCM_URL  # noqa: E402
+from ucm.Dialogs import DialogDisplay  # noqa: E402
+from ucm.DockerListView import DockerListView  # noqa: E402
+from ucm.Registry import Registry  # noqa: E402
+from ucm.services import TmuxService  # noqa: E402
+from ucm.SettingsDialog import SettingsDialog  # noqa: E402
+from ucm.SshListView import SshListView  # noqa: E402
+from ucm.SwarmListView import SwarmListView  # noqa: E402
+from ucm.TabGroup import TabGroupButton, TabGroupManager, TabGroupRadioButton  # noqa: E402
+from ucm.TmuxListView import TmuxListView  # noqa: E402
+from ucm.UserConfig import UserConfig  # noqa: E402
+from ucm.Widgets import Clock, Footer, Header, HelpBody, View  # noqa: E402
 
 # Suppress panwid deprecation warnings with urwid 3.x
 # See: https://github.com/tonycpsu/panwid/issues
@@ -428,6 +432,9 @@ def setup_logging(
 
     # Add only our file handler
     root_logger.addHandler(handler)
+
+    # Re-enable logging now that handlers are configured
+    logging.disable(logging.NOTSET)
 
     # Get UCM logger
     logger = logging.getLogger("ucm")
