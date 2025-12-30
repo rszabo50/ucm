@@ -65,15 +65,10 @@ warnings.filterwarnings("ignore", category=DeprecationWarning, module="panwid")
 
 # Suppress urwid layout warnings from our DynamicHeightBox flow/box widget wrapper
 # These are expected due to our custom dynamic sizing implementation
-try:
-    from urwid.widget.pile import PileWarning
-    from urwid.widget.widget import ColumnsWarning
-
-    warnings.filterwarnings("ignore", category=PileWarning)
-    warnings.filterwarnings("ignore", category=ColumnsWarning)
-except ImportError:
-    # Older urwid versions may not have these warning classes
-    pass
+warnings.filterwarnings("ignore", message=".*Unusual widget.*sizing.*")
+warnings.filterwarnings("ignore", message=".*BOX widgets not marked.*")
+warnings.filterwarnings("ignore", module="urwid.widget.pile")
+warnings.filterwarnings("ignore", module="urwid.widget.widget")
 
 
 class JSONFormatter(logging.Formatter):
