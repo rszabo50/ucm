@@ -117,5 +117,81 @@ class TestITerm2Service:
             assert "docker exec -it container bash" in mock_create.call_args[0]
             assert "🐳 test-container" == mock_create.call_args[1]["name"]
 
+    def test_create_split_pane_vertical(self, iterm2_service):
+        """Test creating vertical split pane."""
+        with patch.object(iterm2_service, "is_iterm2_available", return_value=True):
+            with patch("subprocess.run") as mock_run:
+                mock_run.return_value = MagicMock(returncode=0)
+                rc = iterm2_service.create_split_pane("ssh user@host", name="test", vertical=True)
+                assert rc == 0
+                # Check that the AppleScript contains 'split vertically'
+                args = mock_run.call_args[0][0]
+                applescript = args[2]
+                assert "split vertically" in applescript
+
+    def test_create_split_pane_horizontal(self, iterm2_service):
+        """Test creating horizontal split pane."""
+        with patch.object(iterm2_service, "is_iterm2_available", return_value=True):
+            with patch("subprocess.run") as mock_run:
+                mock_run.return_value = MagicMock(returncode=0)
+                rc = iterm2_service.create_split_pane("ssh user@host", name="test", vertical=False)
+                assert rc == 0
+                # Check that the AppleScript contains 'split horizontally'
+                args = mock_run.call_args[0][0]
+                applescript = args[2]
+                assert "split horizontally" in applescript
+
+    def test_launch_ssh_connection_vertical_split(self, iterm2_service):
+        """Test launching SSH connection in vertical split pane."""
+        with patch.object(iterm2_service, "create_split_pane", return_value=0) as mock_split:
+            rc = iterm2_service.launch_ssh_connection(
+                ssh_command="ssh user@host",
+                connection_name="test-host",
+                profile="Default",
+                split_pane="vertical",
+            )
+            assert rc == 0
+            mock_split.assert_called_once()
+            assert mock_split.call_args[1]["vertical"] is True
+
+    def test_launch_ssh_connection_horizontal_split(self, iterm2_service):
+        """Test launching SSH connection in horizontal split pane."""
+        with patch.object(iterm2_service, "create_split_pane", return_value=0) as mock_split:
+            rc = iterm2_service.launch_ssh_connection(
+                ssh_command="ssh user@host",
+                connection_name="test-host",
+                profile="Default",
+                split_pane="horizontal",
+            )
+            assert rc == 0
+            mock_split.assert_called_once()
+            assert mock_split.call_args[1]["vertical"] is False
+
+    def test_launch_docker_connection_vertical_split(self, iterm2_service):
+        """Test launching Docker connection in vertical split pane."""
+        with patch.object(iterm2_service, "create_split_pane", return_value=0) as mock_split:
+            rc = iterm2_service.launch_docker_connection(
+                docker_command="docker exec -it container bash",
+                container_name="test-container",
+                profile="Default",
+                split_pane="vertical",
+            )
+            assert rc == 0
+            mock_split.assert_called_once()
+            assert mock_split.call_args[1]["vertical"] is True
+
+    def test_launch_docker_connection_horizontal_split(self, iterm2_service):
+        """Test launching Docker connection in horizontal split pane."""
+        with patch.object(iterm2_service, "create_split_pane", return_value=0) as mock_split:
+            rc = iterm2_service.launch_docker_connection(
+                docker_command="docker exec -it container bash",
+                container_name="test-container",
+                profile="Default",
+                split_pane="horizontal",
+            )
+            assert rc == 0
+            mock_split.assert_called_once()
+            assert mock_split.call_args[1]["vertical"] is False
+
 
 # vim: ts=4 sw=4 et

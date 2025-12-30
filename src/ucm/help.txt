@@ -37,7 +37,9 @@ Switch views using the radio buttons in the header or Tab + arrow keys.
 
 #### SSH View
 * `Enter` - Connect to selected SSH host
-* `c` - Connect to selected SSH host
+* `c` - Connect to selected SSH host (new tab in iTerm2)
+* `|` - Connect in vertical split pane (iTerm2 only)
+* `-` - Connect in horizontal split pane (iTerm2 only)
 * `f` - Toggle favorite status (marked with ★)
 * `F` - Filter to show only favorites
 * `r` - Sort by recently used
@@ -47,7 +49,9 @@ Switch views using the radio buttons in the header or Tab + arrow keys.
 
 #### Docker View
 * `Enter` - Connect to container
-* `c` - Connect to selected container
+* `c` - Connect to selected container (new tab in iTerm2)
+* `|` - Connect in vertical split pane (iTerm2 only)
+* `-` - Connect in horizontal split pane (iTerm2 only)
 * `i` - Inspect container details
 * `Double-click` - Quick connect (mouse)
 
@@ -152,7 +156,7 @@ Press `,` (comma) to open the Settings dialog where you can configure:
 * Auto-name windows with connection info
 
 ### iTerm2 Settings
-* Connection mode: New Tab (each connection in separate tab)
+* Connection modes: New Tab (`c` key) or Split Pane (`|` for vertical, `-` for horizontal)
 * Specify iTerm2 profile to use
 
 Settings are saved to `~/.ucm/config.yml` and take effect immediately.
@@ -284,8 +288,11 @@ ucm --log-file ~/ucm.log
 1. Launch UCM in iTerm2
 2. Open Settings (press `,`) and select iTerm2 integration
 3. Optionally configure your preferred iTerm2 profile
-4. Connect to SSH/Docker - opens in new iTerm2 tab
-5. UCM stays running in the original tab
+4. Connect options:
+   - Press `c` to open in new iTerm2 tab
+   - Press `|` to open in vertical split pane (side-by-side)
+   - Press `-` to open in horizontal split pane (top-bottom)
+5. UCM stays running in the original tab/pane
 6. Use `Cmd+1`, `Cmd+2`, etc. to switch between tabs
 7. Return to UCM tab to select your next connection
 

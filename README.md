@@ -269,6 +269,7 @@ ucm --log-file /var/log/ucm.log
 │ Enter/c    Connect            │ /          Activate filter    │
 │ q          Quit               │ Esc        Deactivate filter  │
 │ ?          Help               │ ,          Settings           │
+│ |          Vsplit (iTerm2)    │ -          Hsplit (iTerm2)    │
 │                               │ i          Info/Inspect       │
 └───────────────────────────────┴───────────────────────────────┘
 ```
@@ -415,8 +416,9 @@ UCM automatically detects running Docker containers if Docker is installed.
 - Automatic screen refresh when switching back
 
 **iTerm2 (macOS)**
-- Launch connections in new iTerm2 tabs
+- Launch connections in new iTerm2 tabs or split panes
 - UCM stays open in the original tab
+- Use `|` for vertical split, `-` for horizontal split, `c` for new tab
 - Use `Cmd+1`, `Cmd+2`, etc. to switch between tabs
 - Configurable iTerm2 profiles for connections
 
@@ -449,7 +451,9 @@ ucm
 ucm
 
 # Enable iTerm2 in Settings (press ',')
-# Connect to a server - opens in new tab
+# Press 'c' to open connection in new tab
+# Press '|' to open connection in vertical split pane
+# Press '-' to open connection in horizontal split pane
 # Use Cmd+1 to return to UCM tab
 # Cmd+2, Cmd+3, etc. for your connection tabs
 ```
@@ -472,7 +476,7 @@ Press `,` (comma) in UCM to configure terminal integration:
 
 **iTerm2 Settings:**
 - Specify iTerm2 profile for connections
-- Only new tab mode supported (each connection in separate tab)
+- Supports new tabs (`c` key) and split panes (`|` for vertical, `-` for horizontal)
 
 ## 🛠️ Development
 

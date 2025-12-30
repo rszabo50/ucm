@@ -92,16 +92,25 @@ class DockerListView(ListView):
         logging.debug(f"ListViewHandler[{self.name}] {size} {key} pressed")
         if key == "c":
             self._connect_to_container(data, shell="bash")
-        if key == "i":
+        elif key == "|":
+            # iTerm2 vertical split pane
+            self._connect_to_container(data, shell="bash", split_pane="vertical")
+        elif key == "-":
+            # iTerm2 horizontal split pane
+            self._connect_to_container(data, shell="bash", split_pane="horizontal")
+        elif key == "i":
             self.popup_info_dialog(data)
         super().keypress_callback(size, key, data)
 
-    def _connect_to_container(self, data: Dict[str, Any], shell: str = "bash") -> None:
+    def _connect_to_container(
+        self, data: Dict[str, Any], shell: str = "bash", split_pane: Optional[str] = None
+    ) -> None:
         """Connect to a Docker container.
 
         Args:
             data: Container data dictionary
             shell: Shell to use (default: 'bash')
+            split_pane: For iTerm2: None for new tab, "vertical" or "horizontal" for split pane
         """
         # Check if terminal integration is enabled
         terminal_integration = self.settings_manager.get_terminal_integration()
@@ -139,15 +148,17 @@ class DockerListView(ListView):
             docker_command = f"{docker_cmd} exec -it {container_id} {shell}"
             container_name = data.get("name", container_id)
 
-            logging.debug(f"Launching Docker connection in iTerm2 tab: {container_name}")
+            mode_desc = "split pane" if split_pane else "tab"
+            logging.debug(f"Launching Docker connection in iTerm2 {mode_desc}: {container_name}")
             rc = self.iterm2_service.launch_docker_connection(
                 docker_command=docker_command,
                 container_name=container_name,
                 profile=profile,
+                split_pane=split_pane,
             )
 
             if rc != 0:
-                logging.error(f"Failed to launch iTerm2 tab for {container_name}")
+                logging.error(f"Failed to launch iTerm2 {mode_desc} for {container_name}")
         else:
             # Traditional mode - stop UCM, connect, then restart
             main_loop = Registry().get("main_loop")
@@ -172,7 +183,9 @@ class DockerListView(ListView):
         return Columns(
             [
                 super().get_filter_widgets(),
-                Columns([AttrWrap(Text("| On highlighted row: 'c' = connect", align=RIGHT), "header", "header")]),
+                Columns(
+                    [AttrWrap(Text("| 'c'=connect '|'=vsplit '-'=hsplit 'i'=info", align=RIGHT), "header", "header")]
+                ),
             ]
         )
 

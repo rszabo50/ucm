@@ -115,6 +115,12 @@ class SshListView(ListView):
         logging.debug(f"ListViewHandler[{self.name}] {size} {key} pressed")
         if key == "c":
             self.connect(data)
+        elif key == "|":
+            # iTerm2 vertical split pane
+            self.connect(data, split_pane="vertical")
+        elif key == "-":
+            # iTerm2 horizontal split pane
+            self.connect(data, split_pane="horizontal")
         elif key == "i":
             SshListView.popup_info_dialog(data)
         elif key == "f":
@@ -173,7 +179,7 @@ class SshListView(ListView):
                     [
                         AttrWrap(
                             Text(
-                                f"| 'c'=connect 'i'=info 'f'=fav★ 'F'=filter favs 'r'=recent 'L'=last{status}",
+                                f"| 'c'=connect '|'=vsplit '-'=hsplit 'i'=info 'f'=fav★ 'F'=filter favs 'r'=recent 'L'=last{status}",
                                 align=RIGHT,
                             ),
                             "header",
@@ -184,11 +190,12 @@ class SshListView(ListView):
             ]
         )
 
-    def connect(self, data: Dict[str, Any]) -> None:
+    def connect(self, data: Dict[str, Any], split_pane: Optional[str] = None) -> None:
         """Execute SSH connection to remote host.
 
         Args:
             data: Connection dictionary containing connection parameters
+            split_pane: For iTerm2: None for new tab, "vertical" or "horizontal" for split pane
         """
         if not self.ssh_service.validate_connection(data):
             logging.error("Invalid connection data")
@@ -227,15 +234,17 @@ class SshListView(ListView):
             ssh_command = self.ssh_service.build_ssh_command(data)
             connection_name = data.get("name", data.get("address", "unknown"))
 
-            logging.debug(f"Launching SSH connection in iTerm2 tab: {connection_name}")
+            mode_desc = "split pane" if split_pane else "tab"
+            logging.debug(f"Launching SSH connection in iTerm2 {mode_desc}: {connection_name}")
             rc = self.iterm2_service.launch_ssh_connection(
                 ssh_command=ssh_command,
                 connection_name=connection_name,
                 profile=profile,
+                split_pane=split_pane,
             )
 
             if rc != 0:
-                logging.error(f"Failed to launch iTerm2 tab for {connection_name}")
+                logging.error(f"Failed to launch iTerm2 {mode_desc} for {connection_name}")
         else:
             # Traditional mode - stop UCM, connect, then restart
             main_loop = Registry().get("main_loop")

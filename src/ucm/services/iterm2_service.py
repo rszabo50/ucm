@@ -112,43 +112,120 @@ class ITerm2Service:
             logging.error(f"Failed to create iTerm2 tab: {e}")
             return 1
 
+    def create_split_pane(
+        self,
+        command: str,
+        name: Optional[str] = None,
+        profile: str = "Default",
+        vertical: bool = True,
+    ) -> int:
+        """Create a split pane in current iTerm2 tab and execute command.
+
+        Args:
+            command: Command to execute in the new pane
+            name: Optional pane name
+            profile: iTerm2 profile to use (default: "Default")
+            vertical: True for vertical split (side-by-side), False for horizontal
+
+        Returns:
+            Exit code (0 = success)
+        """
+        if not self.is_iterm2_available():
+            logging.error("iTerm2 is not available")
+            return 1
+
+        # Build AppleScript to split pane and run command
+        split_direction = "vertically" if vertical else "horizontally"
+        applescript = f"""
+        tell application "iTerm2"
+            tell current window
+                tell current session of current tab
+                    set newSession to (split {split_direction} with profile "{profile}")
+                    tell newSession
+                        write text "{command}"
+        """
+
+        # Add pane naming if specified
+        if name:
+            # Escape double quotes in name
+            escaped_name = name.replace('"', '\\"')
+            applescript += f'                        set name to "{escaped_name}"\n'
+
+        applescript += """
+                    end tell
+                end tell
+            end tell
+        end tell
+        """
+
+        logging.debug(f"Creating iTerm2 split pane ({split_direction}) with profile '{profile}': {command}")
+
+        try:
+            result = subprocess.run(
+                ["osascript", "-e", applescript],
+                capture_output=True,
+                check=False,
+            )
+            if result.returncode != 0:
+                logging.error(f"Failed to create iTerm2 split pane: {result.stderr.decode()}")
+            return result.returncode
+        except Exception as e:
+            logging.error(f"Failed to create iTerm2 split pane: {e}")
+            return 1
+
     def launch_ssh_connection(
         self,
         ssh_command: str,
         connection_name: str,
         profile: str = "Default",
+        split_pane: Optional[str] = None,
     ) -> int:
-        """Launch SSH connection in iTerm2 tab.
+        """Launch SSH connection in iTerm2 tab or split pane.
 
         Args:
             ssh_command: Full SSH command to execute
             connection_name: Name of the connection (for tab naming)
             profile: iTerm2 profile to use
+            split_pane: None for new tab, "vertical" for vertical split, "horizontal" for horizontal split
 
         Returns:
             Exit code (0 = success)
         """
-        tab_name = f"🐧 {connection_name}"
-        return self.create_tab(ssh_command, name=tab_name, profile=profile)
+        pane_name = f"🐧 {connection_name}"
+
+        if split_pane == "vertical":
+            return self.create_split_pane(ssh_command, name=pane_name, profile=profile, vertical=True)
+        elif split_pane == "horizontal":
+            return self.create_split_pane(ssh_command, name=pane_name, profile=profile, vertical=False)
+        else:
+            return self.create_tab(ssh_command, name=pane_name, profile=profile)
 
     def launch_docker_connection(
         self,
         docker_command: str,
         container_name: str,
         profile: str = "Default",
+        split_pane: Optional[str] = None,
     ) -> int:
-        """Launch Docker connection in iTerm2 tab.
+        """Launch Docker connection in iTerm2 tab or split pane.
 
         Args:
             docker_command: Full docker exec command to execute
             container_name: Name of the container (for tab naming)
             profile: iTerm2 profile to use
+            split_pane: None for new tab, "vertical" for vertical split, "horizontal" for horizontal split
 
         Returns:
             Exit code (0 = success)
         """
-        tab_name = f"🐳 {container_name}"
-        return self.create_tab(docker_command, name=tab_name, profile=profile)
+        pane_name = f"🐳 {container_name}"
+
+        if split_pane == "vertical":
+            return self.create_split_pane(docker_command, name=pane_name, profile=profile, vertical=True)
+        elif split_pane == "horizontal":
+            return self.create_split_pane(docker_command, name=pane_name, profile=profile, vertical=False)
+        else:
+            return self.create_tab(docker_command, name=pane_name, profile=profile)
 
 
 # vim: ts=4 sw=4 et
