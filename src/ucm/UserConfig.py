@@ -74,10 +74,14 @@ class UserConfig(dict):
     @staticmethod
     def is_swarm_host() -> bool:
         if which("docker") is not None:
-            result = subprocess.check_output(
-                ["docker", "info", "--format", "{{.Swarm.ControlAvailable}}"], stderr=subprocess.STDOUT
-            )
-            return result.splitlines()[0].decode("utf-8").strip().lower() == "true"
+            try:
+                result = subprocess.check_output(
+                    ["docker", "info", "--format", "{{.Swarm.ControlAvailable}}"], stderr=subprocess.STDOUT
+                )
+                return result.splitlines()[0].decode("utf-8").strip().lower() == "true"
+            except subprocess.CalledProcessError:
+                # Docker is available but not in swarm mode
+                return False
         else:
             return False
 

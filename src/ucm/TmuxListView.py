@@ -87,7 +87,7 @@ class TmuxListView(ListView):
         logging.debug(f"{self.name}] {self.selected.item_data.get('name', 'unknown')} double_click_callback")
         self.switch_to_window(self.selected.item_data)
 
-    def keypress_callback(self, size, key, data: Optional[Dict[str, Any]] = None) -> None:
+    def keypress_callback(self, size, key, data: Optional[Dict[str, Any]] = None):
         """Handle keypresses for tmux window actions.
 
         Args:
@@ -100,14 +100,18 @@ class TmuxListView(ListView):
         if key == "c" or key == "enter":
             # Switch to window
             self.switch_to_window(data)
+            return None
         elif key == "x":
             # Close/kill window
             self.close_window(data)
+            return None
         elif key == "r":
             # Refresh window list
             self.filter_and_set("")
+            return None
 
-        super().keypress_callback(size, key, data)
+        # Return result from parent to allow unhandled keys to bubble up
+        return super().keypress_callback(size, key, data)
 
     def switch_to_window(self, data: Dict[str, Any]) -> None:
         """Switch to the selected tmux window.

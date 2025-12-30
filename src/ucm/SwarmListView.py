@@ -164,11 +164,15 @@ class SwarmListView(ListView):
         logging.debug(f"ListViewHandler[{self.name}] {size} {key} pressed")
         if key in ["c", "b"]:
             swarm_connect(data, shell="bash")
-        elif key == "s":
+            return None
+        elif key == "S":  # Use uppercase S to avoid conflict with settings
             swarm_connect(data, shell="sh")
+            return None
         elif key == "i":
             SwarmListView.popup_info_dialog(data)
-        super().keypress_callback(size, key, data)
+            return None
+        # Return result from parent to allow unhandled keys to bubble up
+        return super().keypress_callback(size, key, data)
 
     def get_header(self):
         return f"{'#'.rjust(4)}   {'Stack'.ljust(20)}   {'Host'.ljust(60)}   {'Container'.ljust(40)}   Image"

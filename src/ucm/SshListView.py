@@ -111,18 +111,22 @@ class SshListView(ListView):
         logging.debug(f"{self.name}] {self.selected.item_data['name']} double_click_callback")
         self.connect(self.selected.item_data)
 
-    def keypress_callback(self, size, key, data: Optional[Dict[str, Any]] = None) -> None:
+    def keypress_callback(self, size, key, data: Optional[Dict[str, Any]] = None):
         logging.debug(f"ListViewHandler[{self.name}] {size} {key} pressed")
         if key == "c":
             self.connect(data)
+            return None
         elif key == "|":
             # iTerm2 vertical split pane
             self.connect(data, split_pane="vertical")
+            return None
         elif key == "-":
             # iTerm2 horizontal split pane
             self.connect(data, split_pane="horizontal")
+            return None
         elif key == "i":
             SshListView.popup_info_dialog(data)
+            return None
         elif key == "f":
             # Toggle favorite status
             if data:
@@ -131,22 +135,27 @@ class SshListView(ListView):
                 logging.info(f"{data.get('name', 'Connection')} {status} favorites")
                 # Refresh the list to update the star indicator
                 self.filter_and_set(self.filter_edit.edit_text if hasattr(self, "filter_edit") else "")
+            return None
         elif key == "F":
             # Toggle favorites-only filter
             self.favorites_only = not self.favorites_only
             mode = "ON" if self.favorites_only else "OFF"
             logging.info(f"Favorites-only filter: {mode}")
             self.filter_and_set(self.filter_edit.edit_text if hasattr(self, "filter_edit") else "")
+            return None
         elif key == "r":
             # Toggle recently used sorting
             self.sort_by_recent = not self.sort_by_recent
             mode = "ON" if self.sort_by_recent else "OFF"
             logging.info(f"Recently used sorting: {mode}")
             self.filter_and_set(self.filter_edit.edit_text if hasattr(self, "filter_edit") else "")
+            return None
         elif key == "L":
             # Quick connect to last used connection
             self._connect_to_last_used()
-        super().keypress_callback(size, key, data)
+            return None
+        # Return result from parent to allow unhandled keys to bubble up
+        return super().keypress_callback(size, key, data)
 
     @staticmethod
     def popup_info_dialog(data: Dict[str, Any]) -> None:
@@ -170,25 +179,17 @@ class SshListView(ListView):
         # Build status indicators
         fav_indicator = " [FAV]" if self.favorites_only else ""
         recent_indicator = " [RECENT]" if self.sort_by_recent else ""
-        status = f"{fav_indicator}{recent_indicator}"
+        status = f"{fav_indicator}{recent_indicator}".strip()
 
-        return Columns(
-            [
-                super().get_filter_widgets(),
-                Columns(
-                    [
-                        AttrWrap(
-                            Text(
-                                f"| 'c'=connect '|'=vsplit '-'=hsplit 'i'=info 'f'=fav★ 'F'=filter favs 'r'=recent 'L'=last{status}",
-                                align=RIGHT,
-                            ),
-                            "header",
-                            "header",
-                        )
-                    ]
-                ),
-            ]
-        )
+        if status:
+            return Columns(
+                [
+                    super().get_filter_widgets(),
+                    (len(status) + 2, AttrWrap(Text(status, align=RIGHT), "header", "header")),
+                ]
+            )
+        else:
+            return super().get_filter_widgets()
 
     def connect(self, data: Dict[str, Any], split_pane: Optional[str] = None) -> None:
         """Execute SSH connection to remote host.

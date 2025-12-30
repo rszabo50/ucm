@@ -24,7 +24,7 @@ import logging
 import time
 from typing import Any, Dict, List, Optional
 
-from urwid import RIGHT, AttrWrap, Columns, ListBox, Pile, SimpleListWalker, Text, raw_display
+from urwid import Columns, ListBox, Pile, SimpleListWalker, Text, raw_display
 
 from ucm.constants import MAIN_PALETTE
 from ucm.Dialogs import DialogDisplay
@@ -88,19 +88,24 @@ class DockerListView(ListView):
         logging.debug(f"{self.name}] {self.selected.item_data['name']} double_click_callback")
         self._connect_to_container(self.selected.item_data)
 
-    def keypress_callback(self, size, key, data: Optional[Dict[str, Any]] = None) -> None:
+    def keypress_callback(self, size, key, data: Optional[Dict[str, Any]] = None):
         logging.debug(f"ListViewHandler[{self.name}] {size} {key} pressed")
         if key == "c":
             self._connect_to_container(data, shell="bash")
+            return None
         elif key == "|":
             # iTerm2 vertical split pane
             self._connect_to_container(data, shell="bash", split_pane="vertical")
+            return None
         elif key == "-":
             # iTerm2 horizontal split pane
             self._connect_to_container(data, shell="bash", split_pane="horizontal")
+            return None
         elif key == "i":
             self.popup_info_dialog(data)
-        super().keypress_callback(size, key, data)
+            return None
+        # Return result from parent to allow unhandled keys to bubble up
+        return super().keypress_callback(size, key, data)
 
     def _connect_to_container(
         self, data: Dict[str, Any], shell: str = "bash", split_pane: Optional[str] = None
@@ -180,14 +185,7 @@ class DockerListView(ListView):
                     main_loop.draw_screen()
 
     def get_filter_widgets(self) -> Columns:
-        return Columns(
-            [
-                super().get_filter_widgets(),
-                Columns(
-                    [AttrWrap(Text("| 'c'=connect '|'=vsplit '-'=hsplit 'i'=info", align=RIGHT), "header", "header")]
-                ),
-            ]
-        )
+        return super().get_filter_widgets()
 
     def get_header(self) -> str:
         return f"{'#'.rjust(4)} {'ContainerId'.ljust(15)} {'Name'.ljust(20)} Image"

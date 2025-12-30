@@ -34,7 +34,6 @@ logging.disable(logging.CRITICAL)
 
 from urwid import (  # noqa: E402
     CENTER,
-    RIGHT,
     AttrWrap,
     Columns,
     ExitMainLoop,
@@ -43,6 +42,7 @@ from urwid import (  # noqa: E402
     LineBox,
     MainLoop,
     Padding,
+    Pile,
     RadioButton,
     Text,
     WidgetWrap,
@@ -61,7 +61,7 @@ from ucm.SwarmListView import SwarmListView  # noqa: E402
 from ucm.TabGroup import TabGroupButton, TabGroupManager, TabGroupRadioButton  # noqa: E402
 from ucm.TmuxListView import TmuxListView  # noqa: E402
 from ucm.UserConfig import UserConfig  # noqa: E402
-from ucm.Widgets import Clock, Footer, Header, HelpBody, View  # noqa: E402
+from ucm.Widgets import Footer, Header, HelpBody, KeyboardMnemonics, TabBar, View  # noqa: E402
 
 # Suppress panwid deprecation warnings with urwid 3.x
 # See: https://github.com/tonycpsu/panwid/issues
@@ -113,18 +113,22 @@ class Actions:
     def show_or_exit(key):
         if key in ["q", "Q"]:
             Actions.popup_exit_dialog()
+            return
         if key in ["?"]:
             Actions.popup_help_dialog()
-        if key in [","]:
+            return
+        if key in ["s", "S"]:
             Actions.popup_settings_dialog()
+            return
 
     @staticmethod
     def action_button_cb(_button: Any = None):
-        if _button.get_label() == "Quit":
+        label = _button.get_label()
+        if "Quit" in label:
             Actions.popup_exit_dialog()
-        if _button.get_label() == "Help":
+        if "Help" in label:
             Actions.popup_help_dialog()
-        if _button.get_label() == "Settings":
+        if "Settings" in label:
             Actions.popup_settings_dialog()
 
     @staticmethod
@@ -179,14 +183,15 @@ class Actions:
 class Application:
     def __init__(self):
         self.header = None
+        self.tab_bar = None
         self.footer = None
+        self.keyboard_mnemonics = None
         self.loop = None
         self.body = None
         self.view_holder = None
         self.views = {}
         self.filter_edit = None
         self.filter_columns = None
-        self.clock = None
         self.rb_group = []
         self.frame = None
         self.tab_group_manager = TabGroupManager()
@@ -196,18 +201,27 @@ class Application:
 
         set_encoding("UTF-8")
 
+        # Create views
         self.views["SSH"] = View(SshListView())
         if UserConfig().docker is not None:
             self.views["Docker"] = View(DockerListView())
         if TmuxService.is_inside_tmux():
             self.views["Tmux"] = View(TmuxListView())
-        self.views["Swarm"] = View(SwarmListView())
+        if UserConfig().docker is not None and UserConfig().swarm_host:
+            self.views["Swarm"] = View(SwarmListView())
         self.view_holder = WidgetWrap(self.views["SSH"])
 
         self.body = Padding(LineBox(self.view_holder), align=CENTER, left=1, right=2)
 
-        view_column_array = [
-            (7, AttrWrap(Text("View: "), "header", "header")),
+        # Create simplified header
+        self.header = Header(
+            name=f"{PROGRAM_NAME}:",
+            release=PROGRAM_VERSION,
+            url=SCM_URL,
+        )
+
+        # Build view tabs for TabBar
+        view_tabs = [
             (
                 11,
                 AttrWrap(
@@ -217,75 +231,79 @@ class Application:
         ]
 
         if UserConfig().docker is not None:
-            view_column_array.extend(
-                [
-                    (
-                        14,
-                        AttrWrap(
-                            TabGroupRadioButton(self.rb_group, "🐳-Docker", on_state_change=self.view_changed),
-                            "header",
-                            "header",
-                        ),
-                    )
-                ]
+            view_tabs.append(
+                (
+                    14,
+                    AttrWrap(
+                        TabGroupRadioButton(self.rb_group, "🐳-Docker", on_state_change=self.view_changed),
+                        "header",
+                        "header",
+                    ),
+                )
             )
 
         if TmuxService.is_inside_tmux():
-            view_column_array.extend(
-                [
-                    (
-                        13,
-                        AttrWrap(
-                            TabGroupRadioButton(self.rb_group, "📟-Tmux", on_state_change=self.view_changed),
-                            "header",
-                            "header",
-                        ),
-                    )
-                ]
+            view_tabs.append(
+                (
+                    13,
+                    AttrWrap(
+                        TabGroupRadioButton(self.rb_group, "📟-Tmux", on_state_change=self.view_changed),
+                        "header",
+                        "header",
+                    ),
+                )
             )
 
-        if UserConfig().docker is not None and UserConfig().swarm_host is not None and UserConfig().swarm_host:
-            view_column_array.extend(
-                [
-                    (
-                        14,
-                        AttrWrap(
-                            TabGroupRadioButton(self.rb_group, "🐳-Swarm", on_state_change=self.view_changed),
-                            "header",
-                            "header",
-                        ),
-                    )
-                ]
+        if UserConfig().docker is not None and UserConfig().swarm_host:
+            view_tabs.append(
+                (
+                    14,
+                    AttrWrap(
+                        TabGroupRadioButton(self.rb_group, "🐳-Swarm", on_state_change=self.view_changed),
+                        "header",
+                        "header",
+                    ),
+                )
             )
 
+        self.tab_bar = TabBar(tabs=view_tabs)
+
+        # Create action buttons with keyboard shortcuts
         action_button_list = [
-            (8, AttrWrap(TabGroupButton("Help", on_press=Actions.action_button_cb), "button normal", "button select")),
             (
                 12,
                 AttrWrap(
-                    TabGroupButton("Settings", on_press=Actions.action_button_cb), "button normal", "button select"
+                    TabGroupButton("Help (?)", on_press=Actions.action_button_cb), "button normal", "button select"
                 ),
             ),
-            (8, AttrWrap(TabGroupButton("Quit", on_press=Actions.action_button_cb), "button normal", "button select")),
+            (
+                16,
+                AttrWrap(
+                    TabGroupButton("Settings (s)", on_press=Actions.action_button_cb), "button normal", "button select"
+                ),
+            ),
+            (
+                12,
+                AttrWrap(
+                    TabGroupButton("Quit (q)", on_press=Actions.action_button_cb), "button normal", "button select"
+                ),
+            ),
         ]
-
-        view_columns = Columns(view_column_array, 1)
-
         action_content = Columns(action_button_list, 1)
 
-        self.header = Header(
-            name=f"{PROGRAM_NAME}:",
-            release=PROGRAM_VERSION,
-            left_content=view_columns,
-            right_content=Text(f"{SCM_URL}", align=RIGHT),
-        )
+        # Create keyboard mnemonics - will be updated dynamically
+        self.keyboard_mnemonics = KeyboardMnemonics(mnemonics="/ Filter")
 
-        self.clock = Clock()
-        self.footer = Footer(left_content=action_content, right_content=self.clock)
+        # Create footer with mnemonics above buttons
+        footer_content = Pile([("pack", self.keyboard_mnemonics), ("pack", action_content)])
+        self.footer = Footer(content=footer_content)
 
-        self.frame = Frame(self.body, self.header, self.footer)
+        # Create frame with header pile (header + tab_bar)
+        header_pile = Pile([("pack", self.header), ("pack", self.tab_bar)])
+        self.frame = Frame(self.body, header_pile, self.footer)
 
-        self.tab_group_manager.add("view_select", self.frame, "header", view_columns)
+        # Register tab groups
+        self.tab_group_manager.add("view_select", self.frame, "header", self.tab_bar)
         self.tab_group_manager.add(
             "list", self.frame, "body", self.views["SSH"].list_view, pile=self.views["SSH"].pile, pile_pos=1
         )
@@ -295,10 +313,50 @@ class Application:
         Registry().main_loop = MainLoop(self.frame, palette=MAIN_PALETTE, unhandled_input=Actions.show_or_exit)
         return self
 
+    def update_mnemonics(self, view_name: str = "SSH", has_selection: bool = True):
+        """Update keyboard mnemonics based on current context.
+
+        Args:
+            view_name: Current view name (SSH, Docker, Tmux, Swarm)
+            has_selection: Whether a list item is currently selected
+        """
+        # Always show filter
+        mnemonics = ["/=Filter"]
+
+        if has_selection:
+            # Universal shortcuts when item is selected
+            mnemonics.extend(["c=Connect", "i=Info"])
+
+            # iTerm2 split shortcuts if enabled
+            from ucm.services.iterm2_service import ITerm2Service
+            from ucm.settings_manager import get_settings_manager
+
+            settings = get_settings_manager()
+            terminal_integration = settings.get("terminal.integration", "none")
+            if terminal_integration == "iterm2" and ITerm2Service.is_iterm2_available():
+                mnemonics.extend(["|=VSplit", "-=HSplit"])
+
+            # SSH-specific shortcuts
+            if view_name == "SSH":
+                mnemonics.extend(["f=Fav", "F=ShowFavs", "r=Recent", "L=Last"])
+
+        self.keyboard_mnemonics.set_mnemonics("  ".join(mnemonics))
+
     def start(self):
-        logger.debug("Starting clock ...")
-        self.clock.start()
-        logger.debug("Starting application loop  ...")
+        logger.debug("Starting application loop ...")
+        # Store application instance in registry for mnemonics updates
+        Registry().app = self
+        # Set initial mnemonics for SSH view - check if there's actually a selection
+        has_selection = False
+        if "SSH" in self.views:
+            ssh_list_view = self.views["SSH"].list_view
+            if hasattr(ssh_list_view, "walker") and len(ssh_list_view.walker) > 0:
+                try:
+                    focus_widget, focus_pos = ssh_list_view.walker.get_focus()
+                    has_selection = focus_widget is not None
+                except (IndexError, TypeError):
+                    has_selection = False
+        self.update_mnemonics("SSH", has_selection)
         Registry().main_loop.run()
 
     def view_changed(self, radio_button: RadioButton, state: bool):
@@ -317,6 +375,16 @@ class Application:
             self.tab_group_manager.add(
                 "filters_select", self.frame, "body", self.views[view_key].list_view.filter_columns
             )
+            # Update mnemonics for the new view - check if there's actually a selection
+            has_selection = False
+            list_view = self.views[view_key].list_view
+            if hasattr(list_view, "walker") and len(list_view.walker) > 0:
+                try:
+                    focus_widget, focus_pos = list_view.walker.get_focus()
+                    has_selection = focus_widget is not None
+                except (IndexError, TypeError):
+                    has_selection = False
+            self.update_mnemonics(view_key, has_selection)
             # Force complete screen redraw when switching views
             Registry().main_loop.screen.clear()
             Registry().main_loop.draw_screen()

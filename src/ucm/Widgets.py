@@ -101,8 +101,7 @@ class Header(IdWidget):
         self,
         name: str = "Program Name",
         release: str = "0.0.0",
-        left_content: Any = Text("", align=CENTER),
-        right_content: Any = Text("", align=RIGHT),
+        url: str = "",
         widget_id: str = None,
     ):
         super().__init__(
@@ -111,9 +110,8 @@ class Header(IdWidget):
                     AttrMap(
                         Columns(
                             [
-                                left_content,
-                                AttrWrap(Text(f"{name} {release}", align=CENTER), "header", "header"),
-                                right_content,
+                                AttrWrap(Text(f"{name} {release}", align=LEFT), "header", "header"),
+                                AttrWrap(Text(url, align=RIGHT), "header", "header"),
                             ]
                         ),
                         "header",
@@ -127,25 +125,83 @@ class Header(IdWidget):
         )
 
 
+class TabBar(IdWidget):
+    def __init__(self, tabs: list = None, widget_id: str = None):
+        """Create a tab bar for view selection.
+
+        Args:
+            tabs: List of (width, widget) tuples for tab buttons
+            widget_id: Optional widget ID for registry
+        """
+        if tabs is None:
+            tabs = []
+
+        # Add spacing between tabs
+        tab_columns = []
+        for i, (width, tab_widget) in enumerate(tabs):
+            tab_columns.append((width, tab_widget))
+            # Add separator between tabs (but not after the last one)
+            if i < len(tabs) - 1:
+                tab_columns.append((1, Text(" ")))
+
+        super().__init__(
+            Padding(
+                AttrMap(
+                    Columns(tab_columns, dividechars=0),
+                    "header",
+                ),
+                align=CENTER,
+                left=3,
+                right=4,
+            ),
+            widget_id=widget_id,
+        )
+
+
+class KeyboardMnemonics(IdWidget):
+    def __init__(self, mnemonics: str = "", widget_id: str = None):
+        """Create a keyboard mnemonics display.
+
+        Args:
+            mnemonics: String showing keyboard shortcuts (e.g., "/ Filter  c Connect  f Favorite  q Quit")
+            widget_id: Optional widget ID for registry
+        """
+        self.text_widget = Text(mnemonics, align=CENTER)
+        super().__init__(
+            Padding(
+                AttrMap(
+                    self.text_widget,
+                    "header",
+                ),
+                align=CENTER,
+                left=3,
+                right=4,
+            ),
+            widget_id=widget_id,
+        )
+
+    def set_mnemonics(self, mnemonics: str):
+        """Update the mnemonics text."""
+        self.text_widget.set_text(mnemonics)
+
+
 class Footer(IdWidget):
     def __init__(
         self,
-        left_content: Any = Text("", align=LEFT),
-        center_content: Any = Text("", align=LEFT),
-        right_content: Any = Text("", align=RIGHT),
+        content: Any = Text("", align=CENTER),
         widget_id: str = None,
     ):
+        """Create a footer with centered content.
+
+        Args:
+            content: Widget to display (typically centered buttons)
+            widget_id: Optional widget ID for registry
+        """
         super().__init__(
             Padding(
                 LineBox(
                     AttrMap(
-                        Columns(
-                            [
-                                left_content,
-                                center_content,
-                                right_content,
-                            ]
-                        ),
+                        content,
                         "header",
                     )
                 ),
@@ -247,6 +303,11 @@ class ListView(IdWidget, TabGroupNode):
         logging.debug(f"Record selected : {list_item} {list_item.item_data}")
         self.selected = list_item
         self.selected_callback(list_item)
+        # Update mnemonics when selection changes
+        from ucm.Registry import Registry
+
+        if hasattr(Registry(), "app") and Registry().app:
+            Registry().app.update_mnemonics(self.name, list_item is not None)
 
     def double_click_callback(self):
         logging.debug(f"ListViewHandler[{self.name}] double_click_callback")
@@ -290,6 +351,7 @@ class ListView(IdWidget, TabGroupNode):
             if self.view is not None:
                 self.view.pile.set_focus(self.view.filter_pile_pos)
                 self.filter_columns.set_focus(1)
+            return None
         elif key == "/":
             # Activate filter mode
             logging.debug("/ key pressed - activating filter")
@@ -297,6 +359,9 @@ class ListView(IdWidget, TabGroupNode):
                 self.activate_filter()
                 self.view.pile.set_focus(self.view.filter_pile_pos)
                 self.filter_columns.set_focus(1)
+            return None
+        # Return key to allow it to bubble up to unhandled_input
+        return key
 
     def _evaluate(self, filter_string: str, record: dict):
         for key in self.filter_fields:
@@ -318,29 +383,27 @@ class ListView(IdWidget, TabGroupNode):
         self.filter_edit = TabGroupEdit(align=LEFT, parent_listview=self)
         connect_signal(self.filter_edit, "change", self.filter_action, user_args=[])
 
-        # Store label widget so we can update it when filter is activated
-        self.filter_label = Text("Filter Text:  ", align=RIGHT)
+        # Simple filter label without keyboard mnemonics
+        self.filter_label = Text("Filter:", align=RIGHT)
 
         self.filter_columns = Columns(
             [
-                (15, AttrWrap(self.filter_label, "header", "header")),
-                (35, AttrWrap(self.filter_edit, "filter", "filter")),
+                (8, AttrWrap(self.filter_label, "header", "header")),
+                (40, AttrWrap(self.filter_edit, "filter", "filter")),
             ]
         )
         return self.filter_columns
 
     def activate_filter(self):
-        """Activate filter mode with visual indicator."""
+        """Activate filter mode."""
         if hasattr(self, "filter_edit") and hasattr(self.filter_edit, "is_active"):
             self.filter_edit.is_active = True
-            self.filter_label.set_text("Filter [/]:   ")
             logging.debug("Filter activated")
 
     def deactivate_filter(self):
-        """Deactivate filter mode and restore normal label."""
+        """Deactivate filter mode."""
         if hasattr(self, "filter_edit") and hasattr(self.filter_edit, "is_active"):
             self.filter_edit.is_active = False
-            self.filter_label.set_text("Filter Text:  ")
             logging.debug("Filter deactivated")
 
     def filter_action(self, _edit_widget, text_input):
