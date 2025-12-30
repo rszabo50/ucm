@@ -106,8 +106,8 @@ class Actions:
             Actions.popup_help_dialog()
         if key in [","]:
             Actions.popup_settings_dialog()
-        if key == "ctrl l":
-            # Ctrl+L to refresh/clear screen and recalculate layout (standard terminal convention)
+        if key == "f5":
+            # F5 to refresh/clear screen and recalculate layout
             if Registry().get("main_loop") is not None:
                 # Recalculate layout with current terminal dimensions
                 app = Registry().get("application")

@@ -20,7 +20,7 @@ Switch views using the radio buttons in the header or Tab + arrow keys.
 * `q` - Quit UCM
 * `?` - Show this help dialog
 * `,` - Open Settings dialog
-* `Ctrl+L` - Refresh screen and recalculate layout (use after resizing terminal)
+* `F5` - Refresh screen and recalculate layout (use after resizing terminal)
 * `Tab` - Cycle between UI elements
 * `Esc` - Close dialogs
 
@@ -282,7 +282,7 @@ ucm --log-file ~/ucm.log
 4. Connect to SSH/Docker - opens in new tmux window
 5. Switch to Tmux View to see all windows and navigate
 6. Press `Ctrl+b u` from any window to instantly return to UCM
-7. Press `Ctrl+L` to refresh screen if needed (also recalculates layout after resize)
+7. Press `F5` to refresh screen if needed (also recalculates layout after resize)
 
 ### Using UCM with iTerm2 (macOS)
 1. Launch UCM in iTerm2

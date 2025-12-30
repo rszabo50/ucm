@@ -270,7 +270,7 @@ ucm --log-file /var/log/ucm.log
 │ q          Quit               │ Esc        Deactivate filter  │
 │ ?          Help               │ ,          Settings           │
 │ |          Vsplit (iTerm2)    │ -          Hsplit (iTerm2)    │
-│ Ctrl+L     Refresh layout     │ i          Info/Inspect       │
+│ F5         Refresh layout     │ i          Info/Inspect       │
 └───────────────────────────────┴───────────────────────────────┘
 ```
 
