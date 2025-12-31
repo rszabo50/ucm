@@ -65,6 +65,7 @@ ucm
 
 ## ✨ Features
 
+- ➕ **In-App Connection Management** - Add (`+`) and edit (`E`) connections directly in UCM
 - ⭐ **One-key Favorites** - Mark servers with `f`, filter with `F` (shows ★)
 - ⚡ **Quick Reconnect** - Press `L` to connect to your last server
 - 🔍 **Vim-style Search** - Press `/` to filter, prevents accidental text entry
@@ -264,12 +265,13 @@ ucm --log-file /var/log/ucm.log
 
 ```
 ┌─ Navigation ──────────────────┬─ Power Features (SSH) ────────┐
-│ ↑/k        Move up            │ f          Toggle favorite ★  │
-│ ↓/j        Move down          │ F          Show favorites     │
-│ PgUp/PgDn  Page up/down       │ r          Sort by recent     │
-│ Tab        Next UI element    │ L          Last connection    │
-│ Enter/c    Connect            │ /          Activate filter    │
-│ i          Info/Inspect       │ Esc        Deactivate filter  │
+│ ↑/k        Move up            │ +          Add connection     │
+│ ↓/j        Move down          │ E          Edit connection *  │
+│ PgUp/PgDn  Page up/down       │ f          Toggle favorite ★  │
+│ Tab        Next UI element    │ F          Show favorites     │
+│ Enter/c    Connect            │ r          Sort by recent     │
+│ i          Info/Inspect       │ L          Last connection    │
+│ /          Activate filter    │ Esc        Deactivate filter  │
 └───────────────────────────────┴───────────────────────────────┘
 
 ┌─ Global Shortcuts ────────────┬─ iTerm2 Integration ──────────┐
@@ -279,7 +281,9 @@ ucm --log-file /var/log/ucm.log
 └───────────────────────────────┴───────────────────────────────┘
 ```
 
-**Note:** iTerm2 split shortcuts (`|` and `-`) only appear when iTerm2 integration is enabled in settings.
+**Notes:**
+- iTerm2 split shortcuts (`|` and `-`) only appear when iTerm2 integration is enabled in settings
+- Edit connection (`E`) only appears when a connection is selected
 
 ### Filter Search
 - **Press `/`** to activate vim-style filter

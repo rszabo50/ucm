@@ -26,6 +26,7 @@ from typing import Any, Dict, List, Optional
 
 from urwid import RIGHT, AttrWrap, Columns, ListBox, Pile, SimpleListWalker, Text
 
+from ucm.AddConnectionDialog import AddConnectionDialog
 from ucm.connection_manager import get_connection_manager
 from ucm.constants import MAIN_PALETTE
 from ucm.Dialogs import DialogDisplay
@@ -153,6 +154,17 @@ class SshListView(ListView):
         elif key == "L":
             # Quick connect to last used connection
             self._connect_to_last_used()
+            return None
+        elif key == "+":
+            # Add new SSH connection
+            self._show_add_connection_dialog()
+            return None
+        elif key == "E":
+            # Edit SSH connection (requires selection)
+            if data:
+                self._show_edit_connection_dialog(data)
+            else:
+                logging.warning("No connection selected for editing")
             return None
         # Return result from parent to allow unhandled keys to bubble up
         return super().keypress_callback(size, key, data)
@@ -288,6 +300,30 @@ class SshListView(ListView):
                 return
 
         logging.warning(f"Last used connection '{last_conn.get('name')}' not found in current config")
+
+    def _show_add_connection_dialog(self) -> None:
+        """Show dialog to add a new SSH connection."""
+        logging.info("Opening Add Connection dialog")
+        dialog = AddConnectionDialog(loop=Registry().main_loop, palette=MAIN_PALETTE, ssh_list_view=self)
+        dialog.show()
+
+    def _show_edit_connection_dialog(self, data: Dict[str, Any]) -> None:
+        """Show dialog to edit an SSH connection.
+
+        Args:
+            data: Connection data to edit
+        """
+        if not data:
+            logging.warning("No connection selected for editing")
+            return
+
+        logging.info(f"Opening Edit Connection dialog for: {data.get('name')}")
+        from ucm.AddConnectionDialog import ConnectionDialog
+
+        dialog = ConnectionDialog(
+            loop=Registry().main_loop, palette=MAIN_PALETTE, ssh_list_view=self, mode="edit", connection_data=data
+        )
+        dialog.show()
 
     def get_header(self) -> str:
         return f"  {'#'.rjust(4)}   {'Category'.ljust(20)}   {'Hostname'.ljust(58)}   Connection"

@@ -93,6 +93,12 @@ Save and relaunch UCM to see your connection!
 
 ### Adding SSH Connections
 
+**Method 1: Using UCM Interface (Recommended)**
+
+Press `+` in the SSH view to open the Add Connection dialog. This provides a guided form with validation and automatically saves to your configuration file.
+
+**Method 2: Manual Configuration**
+
 Edit `~/.ucm/ssh_connections.yml`:
 
 ```yaml
@@ -127,6 +133,21 @@ Edit `~/.ucm/ssh_connections.yml`:
 - `identity` - Path to SSH private key
 - `options` - Additional SSH command-line options
 - `category` - Group label for filtering
+
+### Editing SSH Connections
+
+**Method 1: Using UCM Interface (Recommended)**
+
+1. Select a connection in the SSH view
+2. Press `E` to open the Edit Connection dialog
+3. Modify any fields (all fields are editable)
+4. Press **Save** to update the configuration file
+
+**Method 2: Manual Edit**
+
+Manually edit `~/.ucm/ssh_connections.yml` and reload UCM.
+
+**Note:** When editing via the UI, you can change the connection name or address. UCM tracks the original connection to ensure the correct entry is updated.
 
 ### Connecting to a Host
 
@@ -293,6 +314,8 @@ Container Inspection: web-app
 
 | Key | Action | Notes |
 |-----|--------|-------|
+| `+` | Add new connection | Opens dialog to create new SSH connection |
+| `E` | Edit connection | Edit selected connection (only when selected) |
 | `f` | Toggle favorite status | Mark/unmark with ★ |
 | `F` | Show favorites only | Filter to favorites |
 | `r` | Sort by recent | Toggle recent-first sort |
@@ -322,6 +345,33 @@ Container Inspection: web-app
 1. Launch UCM: `ucm`
 2. Type server name in filter: "prod"
 3. Press Enter when it's the only result
+
+### Adding a New SSH Connection
+
+1. Launch UCM: `ucm`
+2. Press `+` to open the Add Connection dialog
+3. Fill in the required fields:
+   - **Name** (required): A unique identifier (e.g., "webserver")
+   - **Address** (required): IP or hostname (e.g., "192.168.1.100")
+4. Fill in optional fields as needed:
+   - **User**: SSH username (default: current user)
+   - **Port**: SSH port (default: 22)
+   - **Identity**: Path to SSH key (e.g., `~/.ssh/id_rsa`)
+   - **Options**: Additional SSH options (e.g., `-X`)
+   - **Category**: Group label for filtering
+5. Press **Save** to create the connection
+6. UCM automatically connects to the new server
+
+### Editing an Existing Connection
+
+1. Launch UCM: `ucm`
+2. Select the connection you want to edit (using arrow keys or filter)
+3. Press `E` to open the Edit Connection dialog
+4. Modify any fields (all fields are editable, including name and address)
+5. Press **Save** to update the connection
+6. UCM reloads the list with your changes
+
+**Note:** When editing, you can rename connections or change any field. UCM tracks the connection by its original name and address.
 
 ### Managing Multiple Environments
 

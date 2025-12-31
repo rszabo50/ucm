@@ -338,7 +338,11 @@ class Application:
 
             # SSH-specific shortcuts
             if view_name == "SSH":
-                mnemonics.extend(["f=Fav", "F=ShowFavs", "r=Recent", "L=Last"])
+                mnemonics.extend(["+=Add", "E=Edit", "f=Fav", "F=ShowFavs", "r=Recent", "L=Last"])
+        else:
+            # No selection - still show Add for SSH view
+            if view_name == "SSH":
+                mnemonics.append("+=Add")
 
         self.keyboard_mnemonics.set_mnemonics("  ".join(mnemonics))
 
