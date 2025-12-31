@@ -274,16 +274,21 @@ ucm --log-file /var/log/ucm.log
 │ /          Activate filter    │ Esc        Deactivate filter  │
 └───────────────────────────────┴───────────────────────────────┘
 
-┌─ Global Shortcuts ────────────┬─ iTerm2 Integration ──────────┐
-│ q          Quit               │ |          VSplit             │
-│ ?          Help               │ -          HSplit             │
-│ s          Settings           │                               │
+┌─ Docker Management * ─────────┬─ iTerm2 Integration ──────────┐
+│ l          View logs          │ |          VSplit             │
+│ S          Stop container     │ -          HSplit             │
+│ s          Start container    │                               │
+│ R          Restart container  │ Global Shortcuts:             │
+│ D          Remove container   │ q          Quit               │
+│ a          Toggle show all    │ ?          Help               │
+│            (running/all)      │ s          Settings           │
 └───────────────────────────────┴───────────────────────────────┘
 ```
 
 **Notes:**
 - iTerm2 split shortcuts (`|` and `-`) only appear when iTerm2 integration is enabled in settings
-- Edit connection (`E`) only appears when a connection is selected
+- SSH: Edit connection (`E`) only appears when a connection is selected
+- Docker shortcuts (*) only appear when in Docker view
 
 ### Filter Search
 - **Press `/`** to activate vim-style filter
@@ -401,18 +406,49 @@ ucm --log-level DEBUG --log-format json --log-file /var/log/ucm.log
 
 ## 🐳 Docker Integration
 
-UCM automatically detects running Docker containers if Docker is installed.
+UCM provides comprehensive Docker container management with lifecycle operations and log viewing.
 
 ### Requirements
 
 - Docker installed and accessible
-- User has permission to run `docker ps`
+- User has permission to run Docker commands
+
+### Features
+
+**Container Management**
+- **View Logs** (`l` key): Stream container logs with configurable line count and pause/resume
+- **Lifecycle Operations**:
+  - Stop containers (`S` key)
+  - Start stopped containers (`s` key)
+  - Restart containers (`R` key)
+  - Remove containers with confirmation (`D` key)
+- **Show All Containers** (`a` key): Toggle between running containers and all containers (including stopped)
+- **Connect** (`c` or Enter): Launch interactive shell (bash/sh) in container
+- **Inspect** (`i` key): View detailed container information
+
+**Log Viewer**
+- Start with last 100 lines (configurable)
+- Pause/resume live log streaming
+- Change line count on the fly
+- Auto-scroll to newest logs when not paused
+
+**Status Indicators**
+- Running containers marked with ●
+- Stopped containers marked with ○ (when showing all)
+- `[ALL]` indicator shows when viewing all containers
 
 ### Docker Commands
 
-- `docker ps` - List containers (used by UCM)
-- `docker exec -it <container> bash` - Connect to container (UCM executes this)
+UCM uses these Docker commands:
+- `docker ps` - List running containers
+- `docker ps -a` - List all containers (including stopped)
+- `docker exec -it <container> bash` - Connect to container
+- `docker logs -f --tail N <container>` - Stream container logs
 - `docker inspect <container>` - View container details
+- `docker stop <container>` - Stop container
+- `docker start <container>` - Start container
+- `docker restart <container>` - Restart container
+- `docker rm <container>` - Remove container
 
 ## 🪟 Terminal Integration
 

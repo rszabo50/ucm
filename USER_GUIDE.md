@@ -213,7 +213,6 @@ Filter by category in the filter box: type "production" to see only production s
 
 - Docker installed and running
 - User has permission to run Docker commands
-- Containers must be running (UCM shows running containers only)
 
 ### Switching to Docker View
 
@@ -226,6 +225,15 @@ The Docker view shows:
 - Container ID (short)
 - Container Name
 - Image Name
+- Status (when showing all containers)
+
+**Default View:** Running containers only
+**Show All View:** Press `a` to toggle between running and all containers (including stopped)
+
+When showing all containers:
+- Running containers are marked with ●
+- Stopped containers are marked with ○
+- `[ALL]` indicator appears in the filter bar
 
 ### Connecting to a Container
 
@@ -240,6 +248,61 @@ UCM attempts to connect with `bash`, falling back to `sh` if bash isn't availabl
 **Method 3: Enter key**
 1. Navigate to container
 2. Press Enter
+
+### Viewing Container Logs
+
+Press `l` while a container is selected to open the log viewer:
+
+**Log Viewer Features:**
+- Starts with last 100 lines
+- Live streaming with auto-scroll
+- **Pause/Resume** button: Pause log streaming to review, then resume
+- **Line Count Control:** Change number of lines to display (updates stream)
+- **Apply** button: Restart stream with new line count
+- Scrollable display
+
+**Example Workflow:**
+1. Select a container
+2. Press `l` to view logs
+3. Review the initial 100 lines
+4. Press **Pause** to stop scrolling and review carefully
+5. Change line count to 500 and press **Apply** for more context
+6. Press **Resume** to continue live streaming
+7. Press **Close** when done
+
+### Container Lifecycle Management
+
+**Stop Container** (`S` key)
+- Stops a running container
+- 10 second timeout before force kill
+- Shows success/failure message
+- Auto-refreshes container list
+
+**Start Container** (`s` key)
+- Starts a stopped container
+- Only works when showing all containers
+- Shows success/failure message
+- Auto-refreshes container list
+
+**Restart Container** (`R` key)
+- Restarts a container (stop + start)
+- 10 second timeout before force kill
+- Shows success/failure message
+- Auto-refreshes container list
+
+**Remove Container** (`D` key)
+- Shows confirmation dialog before removing
+- Container must be stopped first
+- Cannot be undone
+- Shows success/failure message
+- Auto-refreshes container list
+
+**Example Workflow:**
+1. Press `a` to show all containers
+2. Select a stopped container (marked with ○)
+3. Press `D` to remove it
+4. Confirm removal in dialog
+5. Container is removed and list refreshes
 
 ### Inspecting Containers
 
@@ -261,10 +324,17 @@ Container Inspection: web-app
 
 ### Docker View Shortcuts
 
-- `c` - Connect to container with bash/sh
-- `i` - Inspect container (show details)
-- `Enter` - Connect to container
-- Filter box works on container ID, name, and image
+| Key | Action | Notes |
+|-----|--------|-------|
+| `c` or `Enter` | Connect to container | Opens bash/sh shell |
+| `i` | Inspect container | Show detailed info |
+| `l` | View logs | Live log viewer with pause/resume |
+| `S` | Stop container | Stops running container |
+| `s` | Start container | Starts stopped container |
+| `R` | Restart container | Stop + start |
+| `D` | Remove container | Requires confirmation |
+| `a` | Toggle show all | Running only ↔ All containers |
+| `/` | Activate filter | Filter by ID, name, image, status |
 
 ## Keyboard Shortcuts Reference
 
@@ -326,9 +396,14 @@ Container Inspection: web-app
 | Key | Action | View |
 |-----|--------|------|
 | `c` | Connect with bash | Docker/Swarm |
-| `b` | Connect with bash | Swarm |
-| `S` | Connect with sh | Swarm |
 | `i` | Inspect container | Docker/Swarm |
+| `l` | View logs | Docker |
+| `S` | Stop container / Connect with sh | Docker / Swarm |
+| `s` | Start container | Docker |
+| `R` | Restart container | Docker |
+| `D` | Remove container | Docker |
+| `a` | Toggle show all containers | Docker |
+| `b` | Connect with bash | Swarm |
 
 ### Tmux Shortcuts
 

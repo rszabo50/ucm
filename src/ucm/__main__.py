@@ -339,10 +339,16 @@ class Application:
             # SSH-specific shortcuts
             if view_name == "SSH":
                 mnemonics.extend(["+=Add", "E=Edit", "f=Fav", "F=ShowFavs", "r=Recent", "L=Last"])
+            # Docker-specific shortcuts
+            elif view_name == "Docker":
+                mnemonics.extend(["l=Logs", "S=Stop", "s=Start", "R=Restart", "D=Remove", "a=ToggleAll"])
         else:
             # No selection - still show Add for SSH view
             if view_name == "SSH":
                 mnemonics.append("+=Add")
+            # Docker toggle always available
+            elif view_name == "Docker":
+                mnemonics.append("a=ToggleAll")
 
         self.keyboard_mnemonics.set_mnemonics("  ".join(mnemonics))
 
