@@ -50,6 +50,8 @@ from ucm.Widgets import ListView
 
 
 class DockerListView(ListView):
+    AUTO_REFRESH_INTERVAL_SECONDS = 2.0
+
     def __init__(self, docker_service: Optional[DockerServiceProtocol] = None) -> None:
         docker_cmd = UserConfig().docker
         self.docker_service = (
@@ -59,6 +61,7 @@ class DockerListView(ListView):
         self.iterm2_service = ITerm2Service()
         self.settings_manager = get_settings_manager()
         self.show_all_containers = False  # Toggle state (resets each session)
+        self._refresh_alarm_handle = None
         super().__init__("Docker", filter_fields=["containerId", "name", "image", "status"])
 
     def formatter(self, record: Dict[str, Any]) -> str:
@@ -160,6 +163,69 @@ class DockerListView(ListView):
             return None
         # Return result from parent to allow unhandled keys to bubble up
         return super().keypress_callback(size, key, data)
+
+    def start_background_tasks(self) -> None:
+        """Start periodic background refresh."""
+        self._schedule_auto_refresh()
+
+    def on_view_activated(self) -> None:
+        """Refresh immediately when Docker view becomes active."""
+        self.refresh_preserve_state()
+
+    def _schedule_auto_refresh(self) -> None:
+        """Schedule the next auto-refresh tick."""
+        main_loop = Registry().get("main_loop")
+        if main_loop and self._refresh_alarm_handle is None:
+            self._refresh_alarm_handle = main_loop.set_alarm_in(
+                self.AUTO_REFRESH_INTERVAL_SECONDS, self._auto_refresh_callback
+            )
+
+    def _auto_refresh_callback(self, loop=None, user_data=None) -> None:
+        """Auto-refresh callback that runs while the app is open."""
+        self._refresh_alarm_handle = None
+        try:
+            if self._is_active_view():
+                self.refresh_preserve_state()
+        except Exception as e:
+            logging.debug(f"Docker auto-refresh skipped due to error: {e}")
+        finally:
+            self._schedule_auto_refresh()
+
+    def _is_active_view(self) -> bool:
+        """Return True when Docker view is currently displayed."""
+        app = Registry().get("app")
+        if app is None or not hasattr(app, "view_holder"):
+            return False
+        return getattr(app.view_holder, "_w", None) == self.view
+
+    def refresh_preserve_state(self) -> None:
+        """Refresh list while keeping filter and best-effort focus/selection."""
+        filter_text = self.filter_edit.edit_text if getattr(self, "filter_edit", None) is not None else ""
+        selected_container_id = None
+        focus_index = None
+
+        if self.selected is not None and hasattr(self.selected, "item_data"):
+            selected_container_id = self.selected.item_data.get("containerId")
+
+        if hasattr(self, "walker") and len(self.walker) > 0:
+            try:
+                _, focus_index = self.walker.get_focus()
+            except (IndexError, TypeError):
+                focus_index = None
+
+        self.filter_and_set(filter_text)
+
+        if not hasattr(self, "walker") or len(self.walker) == 0:
+            return
+
+        if selected_container_id:
+            for idx, item in enumerate(self.walker):
+                if item.item_data.get("containerId") == selected_container_id:
+                    self.walker.set_focus(idx)
+                    return
+
+        if focus_index is not None:
+            self.walker.set_focus(min(focus_index, len(self.walker) - 1))
 
     def _connect_to_container(
         self, data: Dict[str, Any], shell: str = "bash", split_pane: Optional[str] = None

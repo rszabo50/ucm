@@ -356,6 +356,11 @@ class Application:
         logger.debug("Starting application loop ...")
         # Store application instance in registry for mnemonics updates
         Registry().app = self
+        # Start optional background tasks for views that support them
+        for view in self.views.values():
+            list_view = getattr(view, "list_view", None)
+            if list_view and hasattr(list_view, "start_background_tasks"):
+                list_view.start_background_tasks()
         # Set initial mnemonics for SSH view - check if there's actually a selection
         has_selection = False
         if "SSH" in self.views:
@@ -388,6 +393,8 @@ class Application:
             # Update mnemonics for the new view - check if there's actually a selection
             has_selection = False
             list_view = self.views[view_key].list_view
+            if hasattr(list_view, "on_view_activated"):
+                list_view.on_view_activated()
             if hasattr(list_view, "walker") and len(list_view.walker) > 0:
                 try:
                     focus_widget, focus_pos = list_view.walker.get_focus()
