@@ -5,10 +5,11 @@ import sys
 
 sys.path.insert(0, "src")
 
+from urwid import ExitMainLoop, Filler, MainLoop, Text
+
 from ucm.constants import MAIN_PALETTE
 from ucm.settings_manager import get_settings_manager
 from ucm.SettingsDialog import SettingsDialog
-from urwid import ExitMainLoop, Filler, MainLoop, Text
 
 
 def test_settings_dialog():

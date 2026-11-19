@@ -22,15 +22,6 @@
 
 import getpass
 
-from ucm.constants import MAIN_PALETTE, PROGRAM_NAME, PROGRAM_VERSION, SCM_URL
-from ucm.Dialogs import DialogDisplay
-from ucm.DockerListView import DockerListView
-from ucm.Registry import Registry
-from ucm.SshListView import SshListView
-from ucm.SwarmListView import SwarmListView
-from ucm.TabGroup import TabGroupButton, TabGroupManager, TabGroupRadioButton
-from ucm.UserConfig import UserConfig
-from ucm.Widgets import Clock, Footer, Header, HelpBody, View
 from urwid import (
     CENTER,
     RIGHT,
@@ -48,6 +39,16 @@ from urwid import (
     set_encoding,
 )
 from urwid.display import raw as raw_display
+
+from ucm.constants import MAIN_PALETTE, PROGRAM_NAME, PROGRAM_VERSION, SCM_URL
+from ucm.Dialogs import DialogDisplay
+from ucm.DockerListView import DockerListView
+from ucm.Registry import Registry
+from ucm.SshListView import SshListView
+from ucm.SwarmListView import SwarmListView
+from ucm.TabGroup import TabGroupButton, TabGroupManager, TabGroupRadioButton
+from ucm.UserConfig import UserConfig
+from ucm.Widgets import Clock, Footer, Header, HelpBody, View
 
 
 class Actions:
