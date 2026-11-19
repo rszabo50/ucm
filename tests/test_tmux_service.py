@@ -6,6 +6,7 @@ import subprocess
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from ucm.services.tmux_service import TmuxService
 
 

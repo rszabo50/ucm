@@ -66,4 +66,3 @@ def test_auto_refresh_callback_refreshes_only_when_active(docker_list_view):
         with patch.object(docker_list_view, "_schedule_auto_refresh"):
             docker_list_view._auto_refresh_callback()
             mock_refresh.assert_not_called()
-

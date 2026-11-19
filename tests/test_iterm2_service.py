@@ -5,6 +5,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from ucm.services.iterm2_service import ITerm2Service
 
 
