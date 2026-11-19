@@ -1,34 +1,19 @@
 # Known Issues
 
-## Panwid Deprecation Warnings with urwid 3.x
+## urwid 3.x Migration
 
-**Status**: External dependency issue
-**Severity**: Low (cosmetic only)
+**Status**: Resolved in current codebase
+**Severity**: Historical
 
-### Description
-When using urwid 3.x, you may see deprecation warnings from panwid:
-```
-DeprecationWarning: listbox is moved to urwid.widget.listbox
-```
+### Summary
+Older releases depended on `panwid` for a scrolling list wrapper. That dependency imported removed private `urwid` modules and blocked `urwid` 3.x at import time.
 
-### Cause
-The `panwid` library (last updated 2021) uses deprecated import paths that changed in urwid 3.0. Panwid's current maintainer hasn't released an update compatible with urwid 3.x.
+### Resolution
+UCM now uses native `urwid.ListBox`-based wrappers in `src/ucm/Widgets.py` and no longer depends on `panwid`. The package requirement is now `urwid>=3,<4`.
 
-### Impact
-- **User experience**: No impact - everything works normally
-- **Development**: Warnings appear during testing but don't affect functionality
-
-### Workaround
-The application automatically suppresses these warnings in `src/ucm/__main__.py`:
-```python
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="panwid")
-```
-
-### Long-term Solutions
-1. **Wait for panwid update**: Monitor https://github.com/tonycpsu/panwid for urwid 3.x support
-2. **Pin urwid version**: Currently pinned to `urwid>=2.1.0,<4.0.0` for compatibility
-3. **Alternative library**: Consider migrating to pure urwid widgets if panwid becomes unmaintained
+### Verification
+- Local test suite passes on Python 3.14.3 with `urwid 3.0.5`
+- CI is configured to include Python 3.14
 
 ### Related Links
-- panwid GitHub: https://github.com/tonycpsu/panwid
-- urwid 3.0 migration guide: https://urwid.org/manual/migration3.html
+- urwid migration guide: https://urwid.org/manual/migration3.html

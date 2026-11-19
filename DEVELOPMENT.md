@@ -2,7 +2,7 @@
 
 ## Known Issues
 
-See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for a list of known issues and workarounds, including the panwid deprecation warnings with urwid 3.x.
+See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for current compatibility notes and historical migration details.
 
 ## Setup Development Environment
 

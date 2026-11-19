@@ -23,7 +23,7 @@
 import logging
 from typing import Any, Dict, List, Optional
 
-from urwid import RIGHT, AttrWrap, Columns, Text
+from urwid import RIGHT, AttrMap, Columns, Text
 
 from ucm.services import TmuxService
 from ucm.Widgets import ListView
@@ -184,7 +184,7 @@ class TmuxListView(ListView):
                 super().get_filter_widgets(),
                 Columns(
                     [
-                        AttrWrap(
+                        AttrMap(
                             Text(help_text, align=RIGHT),
                             "header",
                             "header",

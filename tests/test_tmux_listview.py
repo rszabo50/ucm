@@ -5,6 +5,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from urwid import Text
 from ucm.TmuxListView import TmuxListView
 
 
@@ -200,7 +201,7 @@ class TestTmuxListView:
 
     def test_get_filter_widgets(self, tmux_list_view):
         """Test filter widgets contain help text."""
-        with patch("ucm.Widgets.ListView.get_filter_widgets", return_value=MagicMock()):
+        with patch("ucm.Widgets.ListView.get_filter_widgets", return_value=Text("Filter")):
             widgets = tmux_list_view.get_filter_widgets()
             # Should return a Columns widget with help text
             assert widgets is not None

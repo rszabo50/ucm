@@ -26,19 +26,17 @@ import re
 import time
 from typing import Any
 
-from panwid.listbox import ScrollingListBox
-from panwid.scroll import ScrollBar
 from urwid import (
     CENTER,
     LEFT,
     RIGHT,
     AttrMap,
     AttrSpec,
-    AttrWrap,
     Button,
     Columns,
     Divider,
     LineBox,
+    ListBox,
     Padding,
     Pile,
     SimpleFocusListWalker,
@@ -53,6 +51,19 @@ from urwid import (
 
 from ucm.Registry import Registry
 from ucm.TabGroup import TabGroupEdit, TabGroupNode
+
+
+class ScrollingListBox(ListBox):
+    """Thin compatibility wrapper around urwid.ListBox.
+
+    The project previously relied on panwid's scrolling listbox. urwid 3.x
+    breaks panwid via removed private imports, while the behavior UCM uses
+    is covered by the native ListBox.
+    """
+
+    def __init__(self, body: Any, with_scrollbar: Any = None):
+        super().__init__(body)
+        self.with_scrollbar = with_scrollbar
 
 
 class IdWidget(AttrMap):
@@ -72,7 +83,7 @@ class IdWidget(AttrMap):
             setattr(Registry(), widget_id, self)
 
 
-class UCMScrollBar(ScrollBar):
+class UCMScrollBar:
     _thumb_char = ("light blue", "\u2588")
     _trough_char = ("dark blue", "\u2591")
     _thumb_indicator_top = ("white inverse", "\u234d")
@@ -110,8 +121,8 @@ class Header(IdWidget):
                     AttrMap(
                         Columns(
                             [
-                                AttrWrap(Text(f"{name} {release}", align=LEFT), "header", "header"),
-                                AttrWrap(Text(url, align=RIGHT), "header", "header"),
+                                AttrMap(Text(f"{name} {release}", align=LEFT), "header", "header"),
+                                AttrMap(Text(url, align=RIGHT), "header", "header"),
                             ]
                         ),
                         "header",
@@ -235,7 +246,7 @@ class ListItem(IdWidget):
             label = formatter(item_data)
 
         if isinstance(label, str):
-            super().__init__(WidgetWrap(AttrWrap(Text(label), unselected, selected)), widget_id=widget_id)
+            super().__init__(WidgetWrap(AttrMap(Text(label), unselected, selected)), widget_id=widget_id)
         else:
             super().__init__(label, widget_id=widget_id)
 
@@ -388,8 +399,8 @@ class ListView(IdWidget, TabGroupNode):
 
         self.filter_columns = Columns(
             [
-                (8, AttrWrap(self.filter_label, "header", "header")),
-                (40, AttrWrap(self.filter_edit, "filter", "filter")),
+                (8, AttrMap(self.filter_label, "header", "header")),
+                (40, AttrMap(self.filter_edit, "filter", "filter")),
             ]
         )
         return self.filter_columns
@@ -538,7 +549,7 @@ class HelpBody(IdWidget):
         try:
             with open(f"{os.path.dirname(__file__)}/help.txt") as f:
                 return f.readlines()
-        except:
+        except OSError:
             return []
 
 

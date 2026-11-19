@@ -25,7 +25,7 @@ import os
 from typing import Any, Dict, Optional, Tuple
 
 import yaml
-from urwid import AttrWrap, Divider, Edit, Filler, ListBox, Pile, SimpleListWalker, Text
+from urwid import AttrMap, Divider, Edit, Filler, ListBox, Pile, SimpleListWalker, Text
 
 from ucm.Dialogs import DialogDisplay
 from ucm.UserConfig import UserConfig
@@ -95,14 +95,14 @@ class ConnectionDialog:
         widgets.append(Text(("bold", "Name: *")))
         widgets.append(Text("  Hostname or identifier for this connection"))
         self.name_edit = Edit("  ", edit_text="")
-        widgets.append(AttrWrap(self.name_edit, "button normal", "button select"))
+        widgets.append(AttrMap(self.name_edit, "button normal", "button select"))
         widgets.append(Text(""))
 
         # Address field (REQUIRED)
         widgets.append(Text(("bold", "Address: *")))
         widgets.append(Text("  IP address or DNS resolvable hostname"))
         self.address_edit = Edit("  ", edit_text="")
-        widgets.append(AttrWrap(self.address_edit, "button normal", "button select"))
+        widgets.append(AttrMap(self.address_edit, "button normal", "button select"))
         widgets.append(Text(""))
 
         widgets.append(Divider("─"))
@@ -113,35 +113,35 @@ class ConnectionDialog:
         widgets.append(Text("User:"))
         widgets.append(Text("  Username to connect with"))
         self.user_edit = Edit("  ", edit_text="")
-        widgets.append(AttrWrap(self.user_edit, "button normal", "button select"))
+        widgets.append(AttrMap(self.user_edit, "button normal", "button select"))
         widgets.append(Text(""))
 
         # Port field
         widgets.append(Text("Port:"))
         widgets.append(Text("  TCP port (default: 22, range: 1-65535)"))
         self.port_edit = Edit("  ", edit_text="")
-        widgets.append(AttrWrap(self.port_edit, "button normal", "button select"))
+        widgets.append(AttrMap(self.port_edit, "button normal", "button select"))
         widgets.append(Text(""))
 
         # Identity field
         widgets.append(Text("Identity:"))
         widgets.append(Text("  Path to SSH key file (e.g., ~/.ssh/id_rsa)"))
         self.identity_edit = Edit("  ", edit_text="")
-        widgets.append(AttrWrap(self.identity_edit, "button normal", "button select"))
+        widgets.append(AttrMap(self.identity_edit, "button normal", "button select"))
         widgets.append(Text(""))
 
         # Options field
         widgets.append(Text("Options:"))
         widgets.append(Text("  Additional SSH command options"))
         self.options_edit = Edit("  ", edit_text="")
-        widgets.append(AttrWrap(self.options_edit, "button normal", "button select"))
+        widgets.append(AttrMap(self.options_edit, "button normal", "button select"))
         widgets.append(Text(""))
 
         # Category field
         widgets.append(Text("Category:"))
         widgets.append(Text("  Category identifier for filtering"))
         self.category_edit = Edit("  ", edit_text="")
-        widgets.append(AttrWrap(self.category_edit, "button normal", "button select"))
+        widgets.append(AttrMap(self.category_edit, "button normal", "button select"))
         widgets.append(Text(""))
 
         # Pre-populate fields if in edit mode

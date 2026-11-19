@@ -6,7 +6,7 @@ This guide provides detailed installation instructions for UCM (Urwid Connection
 
 - [System Requirements](#system-requirements)
 - [Installation Methods](#installation-methods)
-  - [PyPI (Recommended)](#pypi-recommended)
+  - [pipx / uv (Recommended)](#pipx--uv-recommended)
   - [Homebrew (macOS/Linux)](#homebrew-macoslinux)
   - [From Source](#from-source)
   - [Docker](#docker)
@@ -16,37 +16,53 @@ This guide provides detailed installation instructions for UCM (Urwid Connection
 
 ## System Requirements
 
-- **Python**: 3.8 or higher
+- **Python**: 3.8 or higher (tested through 3.15; urwid 5.x requires Python 3.11+, older Pythons use urwid 3.x)
+- **urwid**: 3.x or 5.x
 - **Operating System**: Linux, macOS, or Unix-like systems
 - **Terminal**: Any modern terminal emulator with UTF-8 support
 - **Optional**: Docker (for container management features)
 
 ## Installation Methods
 
-### PyPI (Recommended)
+### pipx / uv (Recommended)
 
-The easiest way to install UCM is from PyPI using pip:
+> **UCM is no longer published to PyPI.** The `ucm` package on PyPI is stuck at
+> version 0.1.2 (March 2022) because the original PyPI account could not be
+> recovered, so it can no longer be updated. That release depends on packages UCM
+> no longer uses (`panwid`, `datatables`, `dataclasses`) and is out of date and no
+> longer useful. **Do not install it** (`pip install ucm`); install from GitHub instead.
+
+Modern Linux distributions (Ubuntu 24.04+, Debian 12+, Fedora 38+) mark the system
+Python as "externally managed" ([PEP 668](https://peps.python.org/pep-0668/)), so
+`pip install` into it is refused. Use `pipx` or `uv`, which create an isolated
+environment per application:
 
 ```bash
-# Install UCM
-pip install ucm
+# pipx
+pipx install git+https://github.com/rszabo50/ucm.git
+
+# or uv
+uv tool install git+https://github.com/rszabo50/ucm.git
 
 # Verify installation
 ucm --version
-
-# Run UCM
-ucm
 ```
 
-**Upgrade to latest version:**
+**Install a specific release:**
 ```bash
-pip install --upgrade ucm
+pipx install git+https://github.com/rszabo50/ucm.git@v1.1.0
 ```
 
-**Install specific version:**
+**Upgrade:**
 ```bash
-pip install ucm==0.2.0
+pipx install --force git+https://github.com/rszabo50/ucm.git
+# or
+uv tool install --force git+https://github.com/rszabo50/ucm.git
 ```
+
+**Install from a release wheel:** download the `.whl` from the
+[GitHub Releases](https://github.com/rszabo50/ucm/releases) page, then run
+`pipx install ./ucm-<version>-py3-none-any.whl`.
 
 ### Homebrew (macOS/Linux)
 
@@ -121,50 +137,43 @@ alias ucm='docker run -it --rm -v ~/.ucm:/root/.ucm -v ~/.ssh:/root/.ssh:ro rsza
 # Update package list
 sudo apt update
 
-# Install Python 3 and pip if not already installed
-sudo apt install python3 python3-pip
+# Install Python 3 and pipx (works with PEP 668 "externally managed" system Python)
+sudo apt install python3 pipx
+pipx ensurepath
 
 # Install UCM
-pip3 install ucm
-
-# Add pip install location to PATH if needed
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
+pipx install git+https://github.com/rszabo50/ucm.git
 ```
 
 ### Fedora / RHEL / CentOS
 
 ```bash
-# Install Python 3 and pip
-sudo dnf install python3 python3-pip
+# Install Python 3 and pipx
+sudo dnf install python3 pipx
+pipx ensurepath
 
 # Install UCM
-pip3 install ucm
-
-# Add to PATH if needed
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
+pipx install git+https://github.com/rszabo50/ucm.git
 ```
 
 ### macOS
 
 ```bash
-# Python 3 usually comes with macOS
-# If not, install using Homebrew:
-brew install python3
+brew install pipx
+pipx ensurepath
 
 # Install UCM
-pip3 install ucm
+pipx install git+https://github.com/rszabo50/ucm.git
 ```
 
 ### Arch Linux
 
 ```bash
-# Install Python and pip
-sudo pacman -S python python-pip
+# Install Python and pipx
+sudo pacman -S python python-pipx
 
 # Install UCM
-pip install ucm
+pipx install git+https://github.com/rszabo50/ucm.git
 ```
 
 ## Virtual Environments
@@ -180,7 +189,7 @@ python3 -m venv ~/.venvs/ucm
 source ~/.venvs/ucm/bin/activate
 
 # Install UCM
-pip install ucm
+pip install git+https://github.com/rszabo50/ucm.git
 
 # Run UCM (while venv is activated)
 ucm
@@ -191,12 +200,11 @@ deactivate
 
 **Using pipx (isolated installation):**
 ```bash
-# Install pipx if not already installed
-pip install pipx
+# Install pipx (see https://pipx.pypa.io) if not already installed
 pipx ensurepath
 
 # Install UCM
-pipx install ucm
+pipx install git+https://github.com/rszabo50/ucm.git
 
 # UCM is now available globally
 ucm
@@ -236,35 +244,28 @@ See [USER_GUIDE.md](USER_GUIDE.md) for detailed configuration options.
 If `ucm` command is not found after installation:
 
 ```bash
-# Add pip user install directory to PATH
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
-source ~/.bashrc
+# Add the pipx/user bin directory to PATH
+pipx ensurepath
 ```
 
 ### Import errors
 
-If you see import errors related to urwid or panwid:
+If you see import errors related to `urwid`:
 
 ```bash
-# Reinstall with --force-reinstall
-pip install --force-reinstall ucm
+# Reinstall UCM and its dependencies
+pipx install --force git+https://github.com/rszabo50/ucm.git
 ```
 
-### Permission errors
+### "externally-managed-environment" error
 
-If you get permission errors during installation:
-
-```bash
-# Install for current user only (recommended)
-pip install --user ucm
-
-# Or use sudo (not recommended)
-sudo pip install ucm
-```
+Newer Linux distributions (e.g. Ubuntu 24.04+/26.04) refuse `pip install` into the
+system Python (PEP 668). Do not use `--break-system-packages`; install with `pipx`
+or `uv tool` as described above, or use a virtual environment.
 
 ### Python version errors
 
-UCM requires Python 3.8 or higher:
+UCM requires Python 3.8 or higher and is tested through Python 3.15:
 
 ```bash
 # Check your Python version
@@ -272,10 +273,10 @@ python3 --version
 
 # If too old, install a newer version
 # Ubuntu/Debian
-sudo apt install python3.11
+sudo apt install python3.14
 
 # macOS
-brew install python@3.11
+brew install python@3.15
 ```
 
 ### Docker connection issues
@@ -294,11 +295,13 @@ docker ps
 
 ## Uninstallation
 
-### PyPI installation
+### pipx / uv installation
 
 ```bash
 # Uninstall UCM
-pip uninstall ucm
+pipx uninstall ucm
+# or
+uv tool uninstall ucm
 
 # Remove configuration (optional)
 rm -rf ~/.ucm

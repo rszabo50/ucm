@@ -1,6 +1,5 @@
 # 🚀 UCM - Urwid Connection Manager
 
-[![PyPI](https://img.shields.io/pypi/v/ucm)](https://pypi.org/project/ucm/)
 [![CI](https://github.com/rszabo50/ucm/actions/workflows/ci.yml/badge.svg)](https://github.com/rszabo50/ucm/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/rszabo50/ucm/branch/main/graph/badge.svg)](https://codecov.io/gh/rszabo50/ucm)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
@@ -83,11 +82,18 @@ ucm
 
 ### Installation
 
-**Option 1: Install from PyPI (Recommended)**
+**Option 1: Install with pipx or uv (Recommended)**
 
 ```bash
-pip install ucm
+pipx install git+https://github.com/rszabo50/ucm.git
+# or
+uv tool install git+https://github.com/rszabo50/ucm.git
 ```
+
+> **UCM is no longer published to PyPI.** The `ucm` package on PyPI is stuck at
+> 0.1.2 (2022) because the original PyPI account could not be recovered. It is out
+> of date and no longer useful; do not install it. pipx/uv also work on distributions
+> whose system Python is "externally managed" (PEP 668, e.g. Ubuntu 24.04+).
 
 **Option 2: Install from Homebrew (macOS/Linux)**
 
@@ -112,9 +118,11 @@ ucm
 
 ### Upgrading
 
-**PyPI:**
+**pipx / uv:**
 ```bash
-pip install --upgrade ucm
+pipx install --force git+https://github.com/rszabo50/ucm.git
+# or
+uv tool install --force git+https://github.com/rszabo50/ucm.git
 ```
 
 **Source:**
@@ -576,7 +584,7 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 
 - Inspired by [nccm](https://github.com/flyingrhinonz/nccm) - NCurses ssh Connection Manager
 - Built with [urwid](http://urwid.org/) - Console user interface library
-- Uses [panwid](https://github.com/tonycpsu/panwid) - Additional urwid widgets
+- Built directly on native `urwid` widgets for Python 3.8–3.15 and `urwid` 3.x / 5.x compatibility
 
 ## 📞 Support
 

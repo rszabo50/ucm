@@ -1,8 +1,8 @@
 # Homebrew Formula for UCM (Urwid Connection Manager)
 #
 # Installation instructions:
-# 1. Publish UCM to PyPI first
-# 2. Update the url and sha256 below with the actual PyPI release
+# 1. Tag a release on GitHub (UCM is no longer published to PyPI)
+# 2. Update the url and sha256 below with the GitHub tag archive
 # 3. Submit to homebrew-core or create your own tap
 #
 # To create a tap:
@@ -17,11 +17,11 @@ class Ucm < Formula
 
   desc "Urwid rendered Connection Manager for SSH and Docker"
   homepage "https://github.com/rszabo50/ucm"
-  url "https://files.pythonhosted.org/packages/source/u/ucm/ucm-0.2.0.tar.gz"
-  sha256 "REPLACE_WITH_ACTUAL_SHA256_AFTER_PYPI_RELEASE"
+  url "https://github.com/rszabo50/ucm/archive/refs/tags/v1.1.0.tar.gz"
+  sha256 "REPLACE_WITH_ACTUAL_SHA256_OF_GITHUB_TAG_ARCHIVE"
   license "GPL-3.0-or-later"
 
-  depends_on "python@3.11"
+  depends_on "python@3.14"
 
   # Python dependencies
   resource "PyYAML" do
@@ -30,12 +30,7 @@ class Ucm < Formula
   end
 
   resource "urwid" do
-    url "https://files.pythonhosted.org/packages/source/u/urwid/urwid-2.1.0.tar.gz"
-    sha256 "8bf7d4d5e6c53f80c6d5c5de4b5b4e3f3f2c8da4c5e3f0f6b8f8f4f5f3f3f3f3"
-  end
-
-  resource "panwid" do
-    url "https://files.pythonhosted.org/packages/source/p/panwid/panwid-0.3.5.tar.gz"
+    url "https://files.pythonhosted.org/packages/source/u/urwid/urwid-3.0.5.tar.gz"
     sha256 "8bf7d4d5e6c53f80c6d5c5de4b5b4e3f3f2c8da4c5e3f0f6b8f8f4f5f3f3f3f3"
   end
 

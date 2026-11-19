@@ -1,7 +1,7 @@
 
 DIST_DIR = ./dist
 
-.PHONY: help install install-dev test test-cov lint format format-check type-check check-all clean run run-debug run-help setup build deploy-testpypi deploy pre-commit-install pre-commit-run pre-commit-update
+.PHONY: help install install-dev test test-cov lint format format-check type-check check-all clean run run-debug run-help setup build pre-commit-install pre-commit-run pre-commit-update
 
 help:  ## Show this help message
 	@echo 'Usage: make [target]'
@@ -62,18 +62,12 @@ run-debug:  ## Run with debug logging
 run-help:  ## Show application help
 	python3 -m ucm --help
 
-# Build and deployment targets
+# Build targets
 setup:  ## Install build tools
 	python3 -m pip install --upgrade build twine
 
 build: setup clean  ## Build distribution packages
 	python3 -m build
-
-deploy-testpypi: build  ## Deploy to TestPyPI
-	python3 -m twine upload --repository testpypi dist/*
-
-deploy: build  ## Deploy to PyPI
-	python3 -m twine upload --repository pypi dist/*
 
 clean:  ## Clean build artifacts and cache
 	rm -rf ${DIST_DIR} || true

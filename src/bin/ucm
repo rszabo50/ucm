@@ -45,9 +45,9 @@ from urwid import (
     RadioButton,
     Text,
     WidgetWrap,
-    raw_display,
     set_encoding,
 )
+from urwid.display import raw as raw_display
 
 
 class Actions:

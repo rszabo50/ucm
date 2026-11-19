@@ -23,7 +23,7 @@
 import logging
 from collections import OrderedDict
 
-from urwid import AttrWrap, Button, Edit, RadioButton, Text
+from urwid import AttrMap, Button, Edit, RadioButton, Text
 
 
 class TabGroupFocus:
@@ -150,7 +150,7 @@ class TabGroupManager:
         if hasattr(base_widget, "contents"):
             nodes = []
             for idx, item in enumerate(base_widget.contents):
-                w = item[0].original_widget if isinstance(item[0], AttrWrap) else item[0]
+                w = item[0].original_widget if isinstance(item[0], AttrMap) else item[0]
                 if hasattr(w, "set_current"):
                     w.set_current(frame, frame_position, base_widget, idx, pile=pile, pile_pos=pile_pos)
                     nodes.append(w)
@@ -171,7 +171,7 @@ class TabGroupManager:
         for idx, node in enumerate(nodes):
             try:
                 nodes[idx].next = nodes[idx + 1].current
-            except:
+            except IndexError:
                 pass
         nodes[-1].next = nodes[0].current
 

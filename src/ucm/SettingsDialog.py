@@ -24,7 +24,7 @@ import logging
 from typing import Any, List
 
 from urwid import (
-    AttrWrap,
+    AttrMap,
     CheckBox,
     Divider,
     Edit,
@@ -97,9 +97,9 @@ class SettingsDialog:
             self.integration_group, "  iTerm2 - Keep UCM open, use iTerm2 tabs", state=(current_mode == "iterm2")
         )
 
-        widgets.append(AttrWrap(none_rb, "button normal", "button select"))
-        widgets.append(AttrWrap(tmux_rb, "button normal", "button select"))
-        widgets.append(AttrWrap(iterm2_rb, "button normal", "button select"))
+        widgets.append(AttrMap(none_rb, "button normal", "button select"))
+        widgets.append(AttrMap(tmux_rb, "button normal", "button select"))
+        widgets.append(AttrMap(iterm2_rb, "button normal", "button select"))
         widgets.append(Text(""))
 
         # Tmux Settings
@@ -118,7 +118,7 @@ class SettingsDialog:
 
         # Tmux auto-name checkbox
         self.tmux_auto_name_cb = CheckBox("  Auto-name windows with connection info", state=auto_name)
-        widgets.append(AttrWrap(self.tmux_auto_name_cb, "button normal", "button select"))
+        widgets.append(AttrMap(self.tmux_auto_name_cb, "button normal", "button select"))
         widgets.append(Text(""))
 
         # iTerm2 Settings
@@ -138,7 +138,7 @@ class SettingsDialog:
         # iTerm2 profile edit
         widgets.append(Text("  iTerm2 Profile:"))
         self.iterm2_profile_edit = Edit("    ", edit_text=profile)
-        widgets.append(AttrWrap(self.iterm2_profile_edit, "button normal", "button select"))
+        widgets.append(AttrMap(self.iterm2_profile_edit, "button normal", "button select"))
         widgets.append(Text(""))
 
         # Help text

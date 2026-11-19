@@ -5,8 +5,8 @@
 
 set -e
 
-VERSION="${1:-v1.0.0}"
-RELEASE_TITLE="UCM 1.0.0 - Production-Ready Terminal Connection Manager with History, Favorites, and Enhanced UX"
+VERSION="${1:-v1.1.0}"
+RELEASE_TITLE="UCM 1.1.0 - Docker, tmux and iTerm2 Integration, Settings Screen, and urwid 5 Support"
 
 echo "Creating release: $VERSION"
 echo "Title: $RELEASE_TITLE"
@@ -77,7 +77,7 @@ echo "View at: https://github.com/rszabo50/ucm/releases/tag/$VERSION"
 echo ""
 echo "Next steps:"
 echo "  1. Verify the release looks correct on GitHub"
-echo "  2. Monitor GitHub Actions for PyPI publish"
-echo "  3. Test: pip install ucm"
+echo "  2. Monitor GitHub Actions for the release build"
+echo "  3. Test: pipx install git+https://github.com/rszabo50/ucm.git@$VERSION"
 echo "  4. Update Homebrew formula with SHA256 checksums"
 echo ""

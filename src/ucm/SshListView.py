@@ -24,7 +24,7 @@ import logging
 import time
 from typing import Any, Dict, List, Optional
 
-from urwid import RIGHT, AttrWrap, Columns, ListBox, Pile, SimpleListWalker, Text
+from urwid import RIGHT, AttrMap, Columns, ListBox, Pile, SimpleListWalker, Text
 
 from ucm.AddConnectionDialog import AddConnectionDialog
 from ucm.connection_manager import get_connection_manager
@@ -197,7 +197,7 @@ class SshListView(ListView):
             return Columns(
                 [
                     super().get_filter_widgets(),
-                    (len(status) + 2, AttrWrap(Text(status, align=RIGHT), "header", "header")),
+                    (len(status) + 2, AttrMap(Text(status, align=RIGHT), "header", "header")),
                 ]
             )
         else:

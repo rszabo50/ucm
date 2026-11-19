@@ -1,34 +1,25 @@
-# UCM 1.0.0 - Production-Ready Terminal Connection Manager
+# UCM 1.1.0 - Docker, tmux and iTerm2 Integration, Settings Screen, and urwid 5 Support
 
-**First production release!** 🎉
-
-UCM 1.0.0 brings powerful connection management features, a polished UX, and professional architecture to your terminal.
+UCM 1.1.0 adds container, tmux and iTerm2 integration, a settings screen, and support for the latest urwid and Python. **UCM is no longer published to PyPI** - install with pipx or uv from GitHub.
 
 ## 🌟 Highlights
 
-### Connection Management
-- ⭐ **Favorites** - Mark connections with `f`, filter with `F` (shows ★)
-- 📊 **History Tracking** - Automatic connection history with timestamps
-- 🔄 **Recent Sorting** - Press `r` to sort by recently used
-- ⚡ **Quick Connect** - Press `L` to reconnect to last connection
+- 🐳 **Docker container management** with container list refresh
+- 🪟 **Tmux windows view** with vim-style navigation
+- 🍎 **iTerm2 integration** with split-pane support for SSH and Docker connections
+- ⚙️ **Settings screen** and SSH connection Add/Edit dialogs
+- 🎨 **Redesigned UI layout** with context-sensitive keyboard mnemonics and `F5` layout refresh
+- 🧩 **urwid 3.x and 5.x**, Python 3.8 through 3.15 (urwid 5 requires Python 3.11+)
 
-### Enhanced UX
-- 🎯 **Vim-Style Filter** - Press `/` to activate, `Esc` to deactivate
-- 🎨 **Visual Feedback** - Clear `[/]` indicator when filter is active
-- ⚡ **Performance** - Eliminated input lag during typing
-- 🖱️ **Smart Focus** - Filter auto-deactivates on Tab/click
+## ⚠️ PyPI
 
-### Architecture & Quality
-- 🏗️ **Service Layer** - Clean separation of business logic
-- 📝 **Structured Logging** - JSON/text formats with rotation
-- ✅ **66 Tests** - Comprehensive test coverage
-- 🔄 **CI/CD** - Automated testing and releases
+The `ucm` package on PyPI is stuck at 0.1.2 (2022) because the original PyPI account could not be recovered. It is out of date and no longer useful; do not install it.
 
 ## 📦 Installation
 
 ```bash
-# PyPI
-pip install ucm
+# pipx (UCM is no longer published to PyPI; the old PyPI 0.1.2 package is obsolete)
+pipx install git+https://github.com/rszabo50/ucm.git
 
 # From source
 git clone https://github.com/rszabo50/ucm.git
@@ -36,7 +27,7 @@ cd ucm
 pip install .
 
 # Upgrade
-pip install --upgrade ucm
+pipx install --force git+https://github.com/rszabo50/ucm.git
 ```
 
 ## 🚀 Quick Start
@@ -46,7 +37,7 @@ ucm                              # First run creates config
 vi ~/.ucm/ssh_connections.yml   # Add your connections
 ucm                              # Launch UCM
 
-# Try new features:
+# Keys:
 # f  - Toggle favorite
 # F  - Filter to favorites only
 # r  - Sort by recently used
@@ -57,20 +48,21 @@ ucm                              # Launch UCM
 ## 📋 What's New
 
 ### Features
-- Connection history and favorites (#13, #14)
-- Vim-style filter activation (#17)
-- Structured logging with JSON support (#16)
-- Service layer architecture (#15)
-- CI/CD pipeline (#11)
-- PyPI packaging ready
-- Comprehensive documentation (INSTALL.md)
-- Homebrew formula template
+- Docker container management features
+- Tmux windows view (#20) and iTerm2 terminal integration with split panes
+- Settings/configuration screen (#19)
+- SSH connection Add and Edit
+- UI redesign with context-sensitive keyboard mnemonics; `F5` refreshes the layout
 
 ### Fixes
-- Fixed accidental filter activation when using command keys
-- Eliminated input lag in filter
-- Auto-deactivate filter on focus change
-- Proper line endings in all documentation
+- Terminal resize handling and screen corruption
+- Footer duplication when showing dialogs
+- Logging output appearing on screen during imports
+- Deprecated `urwid.raw_display` import replaced with `urwid.display.raw`
+
+### Packaging
+- Dependencies: `urwid>=3.0.0,<6.0.0`; `panwid` removed
+- PyPI publishing removed; install via pipx/uv from GitHub
 
 ## 🔧 Configuration
 
@@ -99,13 +91,11 @@ ucm --log-level DEBUG --log-format json
 - [USER_GUIDE.md](https://github.com/rszabo50/ucm/blob/main/USER_GUIDE.md) - Complete usage guide
 - [INSTALL.md](https://github.com/rszabo50/ucm/blob/main/INSTALL.md) - Platform-specific installation
 - [CONTRIBUTING.md](https://github.com/rszabo50/ucm/blob/main/CONTRIBUTING.md) - How to contribute
-- [PYPI_RELEASE_CHECKLIST.md](https://github.com/rszabo50/ucm/blob/main/PYPI_RELEASE_CHECKLIST.md) - Publishing workflow
 
 ## 🙏 Acknowledgments
 
 - Inspired by [nccm](https://github.com/flyingrhinonz/nccm)
 - Built with [urwid](http://urwid.org/)
-- Uses [panwid](https://github.com/tonycpsu/panwid)
 
 ## 💬 Support
 
@@ -114,6 +104,6 @@ ucm --log-level DEBUG --log-format json
 
 ---
 
-**Full Changelog**: https://github.com/rszabo50/ucm/compare/v0.1.2...v1.0.0
+**Full Changelog**: https://github.com/rszabo50/ucm/compare/v1.0.0...v1.1.0
 
 *Made with ❤️ for sysadmins and developers who live in the terminal*
