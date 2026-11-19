@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from urwid import Text
+
 from ucm.TmuxListView import TmuxListView
 
 
