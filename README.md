@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/rszabo50/ucm/actions/workflows/ci.yml/badge.svg)](https://github.com/rszabo50/ucm/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/rszabo50/ucm/branch/main/graph/badge.svg)](https://codecov.io/gh/rszabo50/ucm)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 **A powerful terminal UI for managing SSH and Docker connections** - Built for system administrators and developers who live in the terminal.
@@ -584,7 +584,7 @@ This program is distributed in the hope that it will be useful, but **WITHOUT AN
 
 - Inspired by [nccm](https://github.com/flyingrhinonz/nccm) - NCurses ssh Connection Manager
 - Built with [urwid](http://urwid.org/) - Console user interface library
-- Built directly on native `urwid` widgets for Python 3.8–3.15 and `urwid` 3.x / 5.x compatibility
+- Built directly on native `urwid` widgets for Python 3.10–3.15 and `urwid` 3.x / 5.x compatibility
 
 ## 📞 Support
 

@@ -16,7 +16,7 @@ This guide provides detailed installation instructions for UCM (Urwid Connection
 
 ## System Requirements
 
-- **Python**: 3.8 or higher (tested through 3.15; urwid 5.x requires Python 3.11+, older Pythons use urwid 3.x)
+- **Python**: 3.10 or higher (tested through 3.15; urwid 5.x requires Python 3.11+, so Python 3.10 uses urwid 3.x)
 - **urwid**: 3.x or 5.x
 - **Operating System**: Linux, macOS, or Unix-like systems
 - **Terminal**: Any modern terminal emulator with UTF-8 support
@@ -265,7 +265,7 @@ or `uv tool` as described above, or use a virtual environment.
 
 ### Python version errors
 
-UCM requires Python 3.8 or higher and is tested through Python 3.15:
+UCM requires Python 3.10 or higher and is tested through Python 3.15:
 
 ```bash
 # Check your Python version

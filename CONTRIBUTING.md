@@ -38,7 +38,7 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.10 or higher
 - Git
 - Basic understanding of terminal UI concepts
 - Familiarity with SSH and/or Docker (helpful but not required)

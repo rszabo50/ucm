@@ -647,7 +647,7 @@ which docker
 # Reinstall in editable mode
 pip install -e .
 
-# Check Python version (need 3.8+)
+# Check Python version (need 3.10+)
 python --version
 
 # Install missing dependencies

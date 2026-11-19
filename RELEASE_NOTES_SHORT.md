@@ -9,7 +9,7 @@ UCM 1.1.0 adds container, tmux and iTerm2 integration, a settings screen, and su
 - 🍎 **iTerm2 integration** with split-pane support for SSH and Docker connections
 - ⚙️ **Settings screen** and SSH connection Add/Edit dialogs
 - 🎨 **Redesigned UI layout** with context-sensitive keyboard mnemonics and `F5` layout refresh
-- 🧩 **urwid 3.x and 5.x**, Python 3.8 through 3.15 (urwid 5 requires Python 3.11+)
+- 🧩 **urwid 3.x and 5.x**, Python 3.10 through 3.15 (urwid 5 requires Python 3.11+); **Python 3.8 and 3.9 are no longer supported**
 
 ## ⚠️ PyPI
 
