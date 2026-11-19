@@ -487,7 +487,7 @@ class HelpBody(IdWidget):
 
     bullet_re = re.compile(r"^(\s*)(\*)\s*(.*)$")
 
-    palette = {
+    palette: dict[str, Any] = {
         "h": [
             None,
             AttrSpec("light green", "default"),
