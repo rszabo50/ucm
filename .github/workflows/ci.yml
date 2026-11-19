@@ -8,13 +8,22 @@ on:
 
 jobs:
   test:
-    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    name: Test Python ${{ matrix.python-version }} / urwid ${{ matrix.urwid }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13', '3.14', '3.15']
+        urwid: ['>=3.0.0,<4', '>=5,<6']
+        exclude:
+          # urwid 5.x requires Python 3.11+
+          - python-version: '3.8'
+            urwid: '>=5,<6'
+          - python-version: '3.9'
+            urwid: '>=5,<6'
+          - python-version: '3.10'
+            urwid: '>=5,<6'
 
     steps:
     - uses: actions/checkout@v4
@@ -31,9 +40,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -e ".[dev]"
+        pip install "urwid${{ matrix.urwid }}"
 
     - name: Run pre-commit hooks
-      if: matrix.python-version == '3.13' && matrix.os == 'ubuntu-latest'
+      if: matrix.python-version == '3.14' && matrix.os == 'ubuntu-latest'
       run: |
         pre-commit run --all-files
 
@@ -42,7 +52,7 @@ jobs:
         pytest tests/ -v --tb=short --cov=ucm --cov-report=xml --cov-report=term
 
     - name: Upload coverage to Codecov
-      if: matrix.python-version == '3.13' && matrix.os == 'ubuntu-latest'
+      if: matrix.python-version == '3.14' && matrix.os == 'ubuntu-latest'
       uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
@@ -62,7 +72,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: '3.14'
         cache: 'pip'
 
     - name: Install dependencies
@@ -94,7 +104,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13'
+        python-version: '3.14'
         cache: 'pip'
 
     - name: Install build dependencies

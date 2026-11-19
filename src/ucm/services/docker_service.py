@@ -4,6 +4,7 @@
 
 import logging
 import os
+import shlex
 import subprocess
 import traceback
 from typing import Any, Dict, List, Tuple
@@ -75,13 +76,14 @@ class DockerService:
             logging.error("Docker command not found")
             return 1
 
-        cmd = f"{self.docker_cmd} exec -it {container['name']} {shell}"
+        name = shlex.quote(str(container["name"]))
+        cmd = f"{shlex.quote(self.docker_cmd)} exec -it {name} {shlex.quote(shell)}"
         print(f"Executing: {cmd}")
         logging.info(f"Docker exec: {cmd}")
 
         rc = os.system(cmd)
-        if rc == 32256:  # Shell not found, try 'sh'
-            cmd = f"{self.docker_cmd} exec -it {container['name']} sh"
+        if os.WIFEXITED(rc) and os.WEXITSTATUS(rc) == 127:  # Shell not found, try 'sh'
+            cmd = f"{shlex.quote(self.docker_cmd)} exec -it {name} sh"
             logging.info(f"Retrying with sh: {cmd}")
             rc = os.system(cmd)
 

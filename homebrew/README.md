@@ -4,17 +4,16 @@ This directory contains the Homebrew formula for UCM (Urwid Connection Manager).
 
 ## Prerequisites
 
-1. UCM must be published to PyPI first
-2. You need the SHA256 checksum of the PyPI release
+1. A UCM release must be tagged on GitHub (UCM is no longer published to PyPI)
+2. You need the SHA256 checksum of the GitHub tag archive
 
 ## Getting SHA256 Checksums
 
-After publishing to PyPI, get the SHA256 for the main package and all dependencies:
+After tagging a release, get the SHA256 for the main package and the PyPI-hosted dependencies:
 
 ```bash
 # Get UCM package SHA256
-curl -sL https://pypi.org/pypi/ucm/json | \
-  jq -r '.releases["0.2.0"][] | select(.packagetype=="sdist") | .digests.sha256'
+curl -sL https://github.com/rszabo50/ucm/archive/refs/tags/v1.1.0.tar.gz | shasum -a 256
 
 # Get PyYAML SHA256
 curl -sL https://pypi.org/pypi/PyYAML/json | \
@@ -24,21 +23,13 @@ curl -sL https://pypi.org/pypi/PyYAML/json | \
 curl -sL https://pypi.org/pypi/urwid/json | \
   jq -r '.releases | to_entries | max_by(.key) | .value[] | select(.packagetype=="sdist") | .digests.sha256'
 
-# Get panwid SHA256
-curl -sL https://pypi.org/pypi/panwid/json | \
-  jq -r '.releases | to_entries | max_by(.key) | .value[] | select(.packagetype=="sdist") | .digests.sha256'
 ```
-
-Or manually:
-1. Go to https://pypi.org/project/ucm/#files
-2. Click on the `.tar.gz` file
-3. Look for "SHA256" in the file details
 
 ## Updating the Formula
 
 1. Edit `ucm.rb`
 2. Update the version number in the `url` field
-3. Replace `REPLACE_WITH_ACTUAL_SHA256_AFTER_PYPI_RELEASE` with actual SHA256
+3. Replace `REPLACE_WITH_ACTUAL_SHA256_OF_GITHUB_TAG_ARCHIVE` with actual SHA256
 4. Update all resource SHA256 values
 5. Test the formula locally (see below)
 

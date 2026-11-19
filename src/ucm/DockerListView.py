@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional
 
 from urwid import (
     RIGHT,
-    AttrWrap,
+    AttrMap,
     Button,
     Columns,
     Divider,
@@ -36,8 +36,8 @@ from urwid import (
     Pile,
     SimpleListWalker,
     Text,
-    raw_display,
 )
+from urwid.display import raw as raw_display
 
 from ucm.constants import MAIN_PALETTE
 from ucm.Dialogs import DialogDisplay
@@ -572,11 +572,11 @@ class DockerListView(ListView):
                     Columns(
                         [
                             (20, Text("Lines to show:")),
-                            (10, AttrWrap(line_count_edit, "button normal", "button select")),
+                            (10, AttrMap(line_count_edit, "button normal", "button select")),
                             (2, Text("")),
-                            (15, AttrWrap(apply_button, "button normal", "button select")),
+                            (15, AttrMap(apply_button, "button normal", "button select")),
                             (2, Text("")),
-                            (15, AttrWrap(pause_button, "button normal", "button select")),
+                            (15, AttrMap(pause_button, "button normal", "button select")),
                         ]
                     ),
                 ),
@@ -607,7 +607,7 @@ class DockerListView(ListView):
             return Columns(
                 [
                     super().get_filter_widgets(),
-                    (10, AttrWrap(Text("[ALL]", align=RIGHT), "header", "header")),
+                    (10, AttrMap(Text("[ALL]", align=RIGHT), "header", "header")),
                 ]
             )
         else:

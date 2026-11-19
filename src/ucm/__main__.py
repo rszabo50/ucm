@@ -34,7 +34,7 @@ logging.disable(logging.CRITICAL)
 
 from urwid import (  # noqa: E402
     CENTER,
-    AttrWrap,
+    AttrMap,
     Columns,
     ExitMainLoop,
     Filler,
@@ -46,9 +46,9 @@ from urwid import (  # noqa: E402
     RadioButton,
     Text,
     WidgetWrap,
-    raw_display,
     set_encoding,
 )
+from urwid.display import raw as raw_display  # noqa: E402
 
 from ucm.constants import MAIN_PALETTE, PROGRAM_NAME, PROGRAM_VERSION, SCM_URL  # noqa: E402
 from ucm.Dialogs import DialogDisplay  # noqa: E402
@@ -62,10 +62,6 @@ from ucm.TabGroup import TabGroupButton, TabGroupManager, TabGroupRadioButton  #
 from ucm.TmuxListView import TmuxListView  # noqa: E402
 from ucm.UserConfig import UserConfig  # noqa: E402
 from ucm.Widgets import Footer, Header, HelpBody, KeyboardMnemonics, TabBar, View  # noqa: E402
-
-# Suppress panwid deprecation warnings with urwid 3.x
-# See: https://github.com/tonycpsu/panwid/issues
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="panwid")
 
 # Suppress urwid layout warnings from our DynamicHeightBox flow/box widget wrapper
 # These are expected due to our custom dynamic sizing implementation
@@ -224,7 +220,7 @@ class Application:
         view_tabs = [
             (
                 11,
-                AttrWrap(
+                AttrMap(
                     TabGroupRadioButton(self.rb_group, "🐧-SSH", on_state_change=self.view_changed), "header", "header"
                 ),
             ),
@@ -234,7 +230,7 @@ class Application:
             view_tabs.append(
                 (
                     14,
-                    AttrWrap(
+                    AttrMap(
                         TabGroupRadioButton(self.rb_group, "🐳-Docker", on_state_change=self.view_changed),
                         "header",
                         "header",
@@ -246,7 +242,7 @@ class Application:
             view_tabs.append(
                 (
                     13,
-                    AttrWrap(
+                    AttrMap(
                         TabGroupRadioButton(self.rb_group, "📟-Tmux", on_state_change=self.view_changed),
                         "header",
                         "header",
@@ -258,7 +254,7 @@ class Application:
             view_tabs.append(
                 (
                     14,
-                    AttrWrap(
+                    AttrMap(
                         TabGroupRadioButton(self.rb_group, "🐳-Swarm", on_state_change=self.view_changed),
                         "header",
                         "header",
@@ -272,19 +268,19 @@ class Application:
         action_button_list = [
             (
                 12,
-                AttrWrap(
+                AttrMap(
                     TabGroupButton("Help (?)", on_press=Actions.action_button_cb), "button normal", "button select"
                 ),
             ),
             (
                 16,
-                AttrWrap(
+                AttrMap(
                     TabGroupButton("Settings (s)", on_press=Actions.action_button_cb), "button normal", "button select"
                 ),
             ),
             (
                 12,
-                AttrWrap(
+                AttrMap(
                     TabGroupButton("Quit (q)", on_press=Actions.action_button_cb), "button normal", "button select"
                 ),
             ),

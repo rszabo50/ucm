@@ -22,6 +22,7 @@
 
 import logging
 import os
+import shlex
 import socket
 import subprocess
 import time
@@ -29,7 +30,8 @@ import traceback
 from shlex import split
 from typing import Any
 
-from urwid import ListBox, Pile, SimpleListWalker, Text, raw_display
+from urwid import ListBox, Pile, SimpleListWalker, Text
+from urwid.display import raw as raw_display
 
 from ucm.constants import MAIN_PALETTE
 from ucm.Dialogs import DialogDisplay
@@ -59,18 +61,22 @@ def build_ssh_command(host: str):
     connections = list(filter(lambda k: k["name"] == host, UserConfig().ssh_connections))
     if len(connections) == 1:
         data = connections[0]
-        user_at_host = data["address"] if "user" not in data else f"{data['user']}@{data['address']}"
-        ident = f"-i {data['identity']}" if "identity" in data else ""
-        port = f"-p {data['port']}" if "port" in data else ""
+        user_at_host = shlex.quote(data["address"] if "user" not in data else f"{data['user']}@{data['address']}")
+        ident = f"-i {shlex.quote(str(data['identity']))}" if "identity" in data else ""
+        port = f"-p {shlex.quote(str(data['port']))}" if "port" in data else ""
         opts = f"{data['options']}" if "options" in data else ""
         return f"ssh -t {ident} {port} {opts} {user_at_host}"
 
 
 # noinspection PyStatementEffect
 def swarm_connect(data: Any, shell: str = "bash"):
-    command = f"docker exec -it  {data['container']} {shell}"
+    container = shlex.quote(str(data["container"]))
+    command = f"docker exec -it {container} {shlex.quote(shell)}"
+    fallback = f"docker exec -it {container} sh"
     if not host_is_local(data["host"]):
-        command = f"{build_ssh_command(data['host'])} {command}"
+        ssh = build_ssh_command(data["host"])
+        command = f"{ssh} {command}"
+        fallback = f"{ssh} {fallback}"
 
     if Registry().get("main_loop"):
         Registry().main_loop.screen.stop()
@@ -78,8 +84,8 @@ def swarm_connect(data: Any, shell: str = "bash"):
         print(command)
         logging.info(command)
         rc = os.system(command)
-        if rc == 32256:
-            rc = os.system(command.replace(" bash", " sh"))
+        if os.WIFEXITED(rc) and os.WEXITSTATUS(rc) == 127:
+            rc = os.system(fallback)
         if rc != 0:
             print(f"Return code: {rc}")
             time.sleep(5)
@@ -92,7 +98,8 @@ def swarm_connect(data: Any, shell: str = "bash"):
 def swarm_inspect(data: Any):
     command = f"{UserConfig().docker} inspect {data['container']}"
     if not host_is_local(data["host"]):
-        command = f"{build_ssh_command(data['host'])} {command}"
+        ssh = build_ssh_command(data["host"])
+        command = f"{ssh} {command}"
 
     proc = subprocess.Popen(split(command), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return [Text(x.rstrip()) for x in proc.communicate()[0].splitlines()]
